@@ -1,0 +1,754 @@
+{
+  "courses": [
+    {
+      "id": "C_r521cun8i",
+      "subject": "수학",
+      "title": "[키매쓰 0.5] 2027 연고대 스튜어트 미적분학 기초"
+    },
+    {
+      "id": "C_mskhjerb9",
+      "subject": "수학",
+      "title": "[키매쓰 1.0] 2027 연고대 미적분 일변수(+공학수학)"
+    },
+    {
+      "id": "C_evrxvf0lq",
+      "subject": "수학",
+      "title": "[Lang 1.0] 2027 선형대수학"
+    },
+    {
+      "id": "C_sbfg4ldb4",
+      "subject": "수학",
+      "title": "[키매쓰 1.0] 2027 연고대 미적분 다변수(+공학수학)"
+    },
+    {
+      "id": "C_t5021j5tl",
+      "subject": "물리",
+      "title": "[유형별 기본완성] 2027 물리학 기본이론"
+    },
+    {
+      "id": "C_m2b9ojb5f",
+      "subject": "물리",
+      "title": "[유형별 기본완성] 2027 유형별 물리 기본 260제 & 모의고사"
+    },
+    {
+      "id": "C_f14w46yvi",
+      "subject": "물리",
+      "title": "[유형별 심화완성] 2027 심화 이론"
+    },
+    {
+      "id": "C_g7hz51xsq",
+      "subject": "물리",
+      "title": "[유형별 심화완성] 2027 Young 대학물리 모의고사"
+    }
+  ],
+  "lectures": [
+    {
+      "id": "L_zbg3wg0ta",
+      "courseId": "C_r521cun8i",
+      "title": "0강 OT",
+      "status": "완료",
+      "duration": 35
+    },
+    {
+      "id": "L_1u4nz21ab",
+      "courseId": "C_r521cun8i",
+      "title": "1강 ~집합",
+      "status": "완료",
+      "duration": 55
+    },
+    {
+      "id": "L_y84d02fkh",
+      "courseId": "C_r521cun8i",
+      "title": "2강 ~부등식, 인수분해",
+      "status": "완료",
+      "duration": 45
+    },
+    {
+      "id": "L_911efspgt",
+      "courseId": "C_r521cun8i",
+      "title": "3강 Vieta 공식, 가우스",
+      "status": "완료",
+      "duration": 76
+    },
+    {
+      "id": "L_wio42x5jj",
+      "courseId": "C_r521cun8i",
+      "title": "4강 여러가지 함수들",
+      "status": "완료",
+      "duration": 44
+    },
+    {
+      "id": "L_6km0611qo",
+      "courseId": "C_r521cun8i",
+      "title": "5강 볼록함수",
+      "status": "완료",
+      "duration": 53
+    },
+    {
+      "id": "L_cqma6n2i5",
+      "courseId": "C_r521cun8i",
+      "title": "6강 지수, 로그, 삼각함수",
+      "status": "완료",
+      "duration": 70
+    },
+    {
+      "id": "L_q40er6sdw",
+      "courseId": "C_r521cun8i",
+      "title": "7강 주기, 쌍곡선 삼각함수",
+      "status": "완료",
+      "duration": 56
+    },
+    {
+      "id": "L_y3zbovioa",
+      "courseId": "C_r521cun8i",
+      "title": "8강 역삼각함수",
+      "status": "완료",
+      "duration": 46
+    },
+    {
+      "id": "L_gt2fzsimr",
+      "courseId": "C_r521cun8i",
+      "title": "9강 함수의 극한",
+      "status": "완료",
+      "duration": 64
+    },
+    {
+      "id": "L_xnwx0nlhd",
+      "courseId": "C_r521cun8i",
+      "title": "10강 극한과 연속",
+      "status": "미시작",
+      "duration": 53
+    },
+    {
+      "id": "L_gm7cevnfm",
+      "courseId": "C_r521cun8i",
+      "title": "11강 미분",
+      "status": "미시작",
+      "duration": 56
+    },
+    {
+      "id": "L_dlgool9mm",
+      "courseId": "C_r521cun8i",
+      "title": "12강 미분공식들",
+      "status": "미시작",
+      "duration": 61
+    },
+    {
+      "id": "L_v448x21xa",
+      "courseId": "C_r521cun8i",
+      "title": "13강 음함수 미분법",
+      "status": "미시작",
+      "duration": 58
+    },
+    {
+      "id": "L_kupjkqu8m",
+      "courseId": "C_r521cun8i",
+      "title": "14강 평균값 정리",
+      "status": "미시작",
+      "duration": 73
+    },
+    {
+      "id": "L_ehn319qjs",
+      "courseId": "C_r521cun8i",
+      "title": "15강 정적분",
+      "status": "미시작",
+      "duration": 73
+    },
+    {
+      "id": "L_2qsu2k9b8",
+      "courseId": "C_r521cun8i",
+      "title": "16강 부정적분 공식",
+      "status": "미시작",
+      "duration": 50
+    },
+    {
+      "id": "L_fzewjugom",
+      "courseId": "C_r521cun8i",
+      "title": "17강 부정적분 치환",
+      "status": "미시작",
+      "duration": 76
+    },
+    {
+      "id": "L_bbo0dsfej",
+      "courseId": "C_r521cun8i",
+      "title": "18강 이상적분",
+      "status": "미시작",
+      "duration": 60
+    },
+    {
+      "id": "L_yj7wns316",
+      "courseId": "C_r521cun8i",
+      "title": "19강 벡터",
+      "status": "미시작",
+      "duration": 59
+    },
+    {
+      "id": "L_ne769od5a",
+      "courseId": "C_r521cun8i",
+      "title": "20강 행렬",
+      "status": "미시작",
+      "duration": 65
+    },
+    {
+      "id": "L_mk1c1gnrw",
+      "courseId": "C_r521cun8i",
+      "title": "21강 행렬식 (종강)",
+      "status": "미시작",
+      "duration": 34
+    },
+    {
+      "id": "L_z8xz2005a",
+      "courseId": "C_mskhjerb9",
+      "title": "0강 OT",
+      "duration": 34,
+      "status": "미시작"
+    },
+    {
+      "id": "L_jdhjfq3bp",
+      "courseId": "C_mskhjerb9",
+      "title": "0강 합격 스펙",
+      "duration": 13,
+      "status": "미시작"
+    },
+    {
+      "id": "L_9e6cyobv0",
+      "courseId": "C_mskhjerb9",
+      "title": "1강 [1-1] 1강 p6 함수",
+      "duration": 56,
+      "status": "미시작"
+    },
+    {
+      "id": "L_n17tesy0h",
+      "courseId": "C_mskhjerb9",
+      "title": "2강 [1-2] 2강 p12 역삼각함수",
+      "duration": 50,
+      "status": "미시작"
+    },
+    {
+      "id": "L_t76u7u577",
+      "courseId": "C_mskhjerb9",
+      "title": "3강 [2-1] 3강 p16 쌍곡선삼각함수",
+      "duration": 76,
+      "status": "미시작"
+    },
+    {
+      "id": "L_6n5mktbtm",
+      "courseId": "C_mskhjerb9",
+      "title": "4강 [2-2] 4강 p21 ε-δ 용법",
+      "duration": 63,
+      "status": "미시작"
+    },
+    {
+      "id": "L_n44362ols",
+      "courseId": "C_mskhjerb9",
+      "title": "5강 [2-3] 5강 p25 연속함수 & 점근선",
+      "duration": 40,
+      "status": "미시작"
+    },
+    {
+      "id": "L_asr6durem",
+      "courseId": "C_mskhjerb9",
+      "title": "6강 [3-1] 6강 p29 미분",
+      "duration": 63,
+      "status": "미시작"
+    },
+    {
+      "id": "L_ru3u2xhbw",
+      "courseId": "C_mskhjerb9",
+      "title": "7강 [3-2] 7강 p50 고계도함수",
+      "duration": 53,
+      "status": "미시작"
+    },
+    {
+      "id": "L_r41g5duu2",
+      "courseId": "C_mskhjerb9",
+      "title": "8강 [3-3] 8강 p53 데카르트 엽선",
+      "duration": 41,
+      "status": "미시작"
+    },
+    {
+      "id": "L_8dbuwtakp",
+      "courseId": "C_mskhjerb9",
+      "title": "9강 [4-1] 9강 p56 역함수 미분",
+      "duration": 67,
+      "status": "미시작"
+    },
+    {
+      "id": "L_ncq7l5veu",
+      "courseId": "C_mskhjerb9",
+      "title": "10강 [4-2] 10강 p60 선형화",
+      "duration": 65,
+      "status": "미시작"
+    },
+    {
+      "id": "L_u0rntt6hu",
+      "courseId": "C_mskhjerb9",
+      "title": "11강 [4-3] 11강 p67 변곡점",
+      "duration": 30,
+      "status": "미시작"
+    },
+    {
+      "id": "L_dw1n6b0kb",
+      "courseId": "C_mskhjerb9",
+      "title": "12강 [5-1] 12강 p69 평균값 정리",
+      "duration": 67,
+      "status": "미시작"
+    },
+    {
+      "id": "L_ns0uamt5z",
+      "courseId": "C_mskhjerb9",
+      "title": "13강 [5-2] 13강 p74 로피탈 정리, 뉴턴 방법",
+      "duration": 69,
+      "status": "미시작"
+    },
+    {
+      "id": "L_co8rq54mp",
+      "courseId": "C_mskhjerb9",
+      "title": "14강 [5-3] 14강 p79 정적분",
+      "duration": 39,
+      "status": "미시작"
+    },
+    {
+      "id": "L_ih652hv43",
+      "courseId": "C_mskhjerb9",
+      "title": "15강 [6-1] 15강 p98 미적분학의 기본정리 1",
+      "duration": 69,
+      "status": "미시작"
+    },
+    {
+      "id": "L_gisjl36kw",
+      "courseId": "C_mskhjerb9",
+      "title": "16강 [6-2] 16강 p103 부정적분법",
+      "duration": 59,
+      "status": "미시작"
+    },
+    {
+      "id": "L_0pekpf5s1",
+      "courseId": "C_mskhjerb9",
+      "title": "17강 [6-3] 17강 p108 공식들",
+      "duration": 38,
+      "status": "미시작"
+    },
+    {
+      "id": "L_ytoem8ns0",
+      "courseId": "C_mskhjerb9",
+      "title": "18강 [7-1] 18강 p110 부정적분계산",
+      "duration": 68,
+      "status": "미시작"
+    },
+    {
+      "id": "L_i08hmup00",
+      "courseId": "C_mskhjerb9",
+      "title": "19강 [7-2] 19강 p113 삼각함수적분",
+      "duration": 66,
+      "status": "미시작"
+    },
+    {
+      "id": "L_a22s3xl8u",
+      "courseId": "C_mskhjerb9",
+      "title": "20강 [7-3] 20강 p117 삼각치환법",
+      "duration": 46,
+      "status": "미시작"
+    },
+    {
+      "id": "L_gdir2n0ai",
+      "courseId": "C_mskhjerb9",
+      "title": "21강 [8-1] 21강 p118 유리함수 적분",
+      "duration": 73,
+      "status": "미시작"
+    },
+    {
+      "id": "L_hf5bolcoz",
+      "courseId": "C_mskhjerb9",
+      "title": "22강 [8-2] 22강 p122 이상적분법",
+      "duration": 52,
+      "status": "미시작"
+    },
+    {
+      "id": "L_i78v3xivl",
+      "courseId": "C_mskhjerb9",
+      "title": "23강 [8-3] 23강 p124 비교판정법",
+      "duration": 47,
+      "status": "미시작"
+    },
+    {
+      "id": "L_pc9gqp9gz",
+      "courseId": "C_mskhjerb9",
+      "title": "24강 [9-1] 24강 p127 곡선의 길이",
+      "duration": 64,
+      "status": "미시작"
+    },
+    {
+      "id": "L_4w7y82s28",
+      "courseId": "C_mskhjerb9",
+      "title": "25강 [9-2] 25강 p131 회전체의 부피",
+      "duration": 70,
+      "status": "미시작"
+    },
+    {
+      "id": "L_r8phm7q9x",
+      "courseId": "C_mskhjerb9",
+      "title": "26강 [9-3] 26강 p136 사이클로이드",
+      "duration": 42,
+      "status": "미시작"
+    },
+    {
+      "id": "L_fcjyx9ort",
+      "courseId": "C_mskhjerb9",
+      "title": "27강 [10-1] 27강 p138 회전체의 겉넓이",
+      "duration": 75,
+      "status": "미시작"
+    },
+    {
+      "id": "L_0lz8waj20",
+      "courseId": "C_mskhjerb9",
+      "title": "28강 [10-2] 28강 p141 질량중심",
+      "duration": 61,
+      "status": "미시작"
+    },
+    {
+      "id": "L_bevbmv7gh",
+      "courseId": "C_mskhjerb9",
+      "title": "29강 [10-3] 29강 p145 파푸스 정리",
+      "duration": 46,
+      "status": "미시작"
+    },
+    {
+      "id": "L_oy0iz2meq",
+      "courseId": "C_mskhjerb9",
+      "title": "30강 [11-1] 30강 p170 변수분리형",
+      "duration": 72,
+      "status": "미시작"
+    },
+    {
+      "id": "L_j4ua48281",
+      "courseId": "C_mskhjerb9",
+      "title": "31강 [11-2] 31강 p176 적분 인자",
+      "duration": 61,
+      "status": "미시작"
+    },
+    {
+      "id": "L_3aja0kxwu",
+      "courseId": "C_mskhjerb9",
+      "title": "32강 [11-3] 32강 p182 라플라스 변환",
+      "duration": 49,
+      "status": "미시작"
+    },
+    {
+      "id": "L_gkspiyenp",
+      "courseId": "C_mskhjerb9",
+      "title": "33강 [12-1] 33강 p187 미방정리와 체적",
+      "duration": 71,
+      "status": "미시작"
+    },
+    {
+      "id": "L_6tjxxnfgd",
+      "courseId": "C_mskhjerb9",
+      "title": "34강 [12-2] 34강 p195 극좌표",
+      "duration": 63,
+      "status": "미시작"
+    },
+    {
+      "id": "L_2q14arg55",
+      "courseId": "C_mskhjerb9",
+      "title": "35강 [12-3] 35강 p198 극좌표 면적 (1)",
+      "duration": 38,
+      "status": "미시작"
+    },
+    {
+      "id": "L_aa50bi9o0",
+      "courseId": "C_mskhjerb9",
+      "title": "36강 [13-1] 36강 p200 극좌표 면적 (2)",
+      "duration": 59,
+      "status": "미시작"
+    },
+    {
+      "id": "L_peqbdyj17",
+      "courseId": "C_mskhjerb9",
+      "title": "37강 [13-2] 37강 p202 극좌표 길이",
+      "duration": 61,
+      "status": "미시작"
+    },
+    {
+      "id": "L_q1sbnb6h2",
+      "courseId": "C_mskhjerb9",
+      "title": "38강 [13-3] 38강 p218 수열",
+      "duration": 39,
+      "status": "미시작"
+    },
+    {
+      "id": "L_xuel4nef6",
+      "courseId": "C_mskhjerb9",
+      "title": "39강 [14-1] 39강 p223 무한급수",
+      "duration": 73,
+      "status": "미시작"
+    },
+    {
+      "id": "L_ualy98xvf",
+      "courseId": "C_mskhjerb9",
+      "title": "40강 [14-2] 40강 p227 적분판정법",
+      "duration": 69,
+      "status": "미시작"
+    },
+    {
+      "id": "L_gpvvpf9ty",
+      "courseId": "C_mskhjerb9",
+      "title": "41강 [14-3] 41강 p233 극한비교판정법",
+      "duration": 38,
+      "status": "미시작"
+    },
+    {
+      "id": "L_5zqkm552v",
+      "courseId": "C_mskhjerb9",
+      "title": "42강 [15-1] 42강 p235 ratio, root",
+      "duration": 70,
+      "status": "미시작"
+    },
+    {
+      "id": "L_oxreo1ony",
+      "courseId": "C_mskhjerb9",
+      "title": "43강 [15-2] 43강 p237~ 판정법들",
+      "duration": 59,
+      "status": "미시작"
+    },
+    {
+      "id": "L_q860closh",
+      "courseId": "C_mskhjerb9",
+      "title": "44강 [15-3] 44강 p241~ 멱급수",
+      "duration": 42,
+      "status": "미시작"
+    },
+    {
+      "id": "L_zbmnkl8pl",
+      "courseId": "C_mskhjerb9",
+      "title": "45강 [16-1] 45강 p245 멱급수 공식",
+      "duration": 71,
+      "status": "미시작"
+    },
+    {
+      "id": "L_3743pcvdy",
+      "courseId": "C_mskhjerb9",
+      "title": "46강 [16-2] 46강 p248 멱급수 문제",
+      "duration": 68,
+      "status": "미시작"
+    },
+    {
+      "id": "L_8qgesyqd2",
+      "courseId": "C_t5021j5tl",
+      "title": "ot",
+      "duration": 36,
+      "status": "미시작"
+    },
+    {
+      "id": "L_gbo2g580o",
+      "courseId": "C_t5021j5tl",
+      "title": "1-3강",
+      "duration": 173,
+      "status": "미시작"
+    },
+    {
+      "id": "L_3p1mvf5wb",
+      "courseId": "C_t5021j5tl",
+      "title": "4-6강",
+      "duration": 207,
+      "status": "미시작"
+    },
+    {
+      "id": "L_jciziipr0",
+      "courseId": "C_t5021j5tl",
+      "title": "7-9강",
+      "duration": 216,
+      "status": "미시작"
+    },
+    {
+      "id": "L_4onk2dh1w",
+      "courseId": "C_t5021j5tl",
+      "title": "10-12강",
+      "duration": 217,
+      "status": "미시작"
+    },
+    {
+      "id": "L_cwn9xmgc3",
+      "courseId": "C_t5021j5tl",
+      "title": "13-15강",
+      "duration": 206,
+      "status": "미시작"
+    },
+    {
+      "id": "L_acommhr9v",
+      "courseId": "C_t5021j5tl",
+      "title": "16-18강",
+      "duration": 211,
+      "status": "미시작"
+    },
+    {
+      "id": "L_8vcmubtec",
+      "courseId": "C_t5021j5tl",
+      "title": "19-21강",
+      "duration": 216,
+      "status": "미시작"
+    },
+    {
+      "id": "L_d7nmp5od7",
+      "courseId": "C_t5021j5tl",
+      "title": "22-24강",
+      "duration": 215,
+      "status": "미시작"
+    },
+    {
+      "id": "L_lj67lclfi",
+      "courseId": "C_t5021j5tl",
+      "title": "25-27강",
+      "duration": 218,
+      "status": "미시작"
+    },
+    {
+      "id": "L_eimg5lkrf",
+      "courseId": "C_t5021j5tl",
+      "title": "28-30강",
+      "duration": 219,
+      "status": "미시작"
+    },
+    {
+      "id": "L_3j68yhouf",
+      "courseId": "C_t5021j5tl",
+      "title": "31-33강",
+      "duration": 218,
+      "status": "미시작"
+    },
+    {
+      "id": "L_7vq0szo6t",
+      "courseId": "C_t5021j5tl",
+      "title": "34-36강",
+      "duration": 214,
+      "status": "미시작"
+    },
+    {
+      "id": "L_ts4m0omwb",
+      "courseId": "C_t5021j5tl",
+      "title": "47-49강",
+      "duration": 241,
+      "status": "미시작"
+    },
+    {
+      "id": "L_3qd7ic3uf",
+      "courseId": "C_t5021j5tl",
+      "title": "50-52강",
+      "duration": 204,
+      "status": "미시작"
+    },
+    {
+      "id": "L_7m1beo7ok",
+      "courseId": "C_t5021j5tl",
+      "title": "53-55강(종강)",
+      "duration": 209,
+      "status": "미시작"
+    }
+  ],
+  "dailyRecords": [
+    {
+      "id": "D_xn5q77tv6",
+      "date": "2026-05-04",
+      "tasks": [
+        {
+          "id": "T_odniyafgz",
+          "type": "lecture",
+          "title": "0강 OT, 1강 ~집합",
+          "time": 90,
+          "completed": true
+        }
+      ]
+    },
+    {
+      "id": "D_7npvgnl6b",
+      "date": "2026-05-05",
+      "tasks": [
+        {
+          "id": "T_cl6c2pywt",
+          "type": "lecture",
+          "title": "2강 ~부등식, 인수분해, 3강 Vieta 공식, 가우스",
+          "time": 121,
+          "completed": true
+        }
+      ]
+    },
+    {
+      "id": "D_qwpf8592d",
+      "date": "2026-05-06",
+      "tasks": [
+        {
+          "id": "T_8x2rf0sye",
+          "type": "lecture",
+          "title": "4강 여러가지 함수들, 5강 볼록함수",
+          "time": 97,
+          "completed": true
+        }
+      ]
+    },
+    {
+      "id": "D_6fj5lwmwp",
+      "date": "2026-05-07",
+      "tasks": [
+        {
+          "id": "T_6l4rgs4a2",
+          "type": "lecture",
+          "title": "6강 지수, 로그, 삼각함수, 7강 주기, 쌍곡선 삼각함수",
+          "time": 126,
+          "completed": true
+        }
+      ]
+    },
+    {
+      "id": "D_6agqc0o4z",
+      "date": "2026-06-16",
+      "tasks": []
+    },
+    {
+      "id": "D_33vky27nm",
+      "date": "2026-06-20",
+      "tasks": [
+        {
+          "id": "T_m0y007uof",
+          "type": "lecture",
+          "title": "수 7강",
+          "time": 56,
+          "completed": true,
+          "refId": "L_q40er6sdw"
+        },
+        {
+          "id": "T_4r4i8ftrx",
+          "type": "lecture",
+          "title": "수 8강",
+          "time": 46,
+          "completed": true,
+          "refId": "L_y3zbovioa"
+        },
+        {
+          "id": "T_veqj2m5a0",
+          "type": "lecture",
+          "title": "수 9강",
+          "time": 64,
+          "completed": true,
+          "refId": "L_gt2fzsimr"
+        },
+        {
+          "id": "T_2ki1hvgsm",
+          "type": "lecture",
+          "title": "수 10강",
+          "time": 53,
+          "completed": false,
+          "refId": "L_xnwx0nlhd"
+        },
+        {
+          "id": "T_z8rwy5gjv",
+          "type": "lecture",
+          "title": "수 11강",
+          "time": 56,
+          "completed": false,
+          "refId": "L_gm7cevnfm"
+        }
+      ]
+    }
+  ],
+  "memos": []
+}
