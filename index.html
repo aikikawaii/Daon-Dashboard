@@ -185,9 +185,9 @@
                         <span id="cloud-text">연결 중...</span>
                     </span>
                 </h1>
-                <p class="text-sm text-[#86868b]">자동 로컬 저장 방식 및 클라우드 실시간 동기화</p>
+                <p class="text-sm text-[#86868b]">자동 로컬 저장 방식 및 개인 클라우드 실시간 동기화</p>
             </div>
-            <div class="flex items-center space-x-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <label class="px-4 py-2 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] text-xs font-bold text-[#86868b] hover:text-white transition cursor-pointer shadow-sm">
                     데이터 복원 (JSON)
                     <input type="file" class="hidden" accept=".json" data-action="importData">
@@ -461,7 +461,8 @@
             pomoWorkInput: null,
             pomoBreakInput: null,
             dailyTotalText: null,
-            monthlyChartTitle: null
+            monthlyChartTitle: null,
+            syncIndicator: null
         };
 
         function initDOM() {
@@ -490,6 +491,7 @@
             DOM.pomoBreakInput = document.getElementById('pomo-break-input');
             DOM.dailyTotalText = document.getElementById('dailyTotalText');
             DOM.monthlyChartTitle = document.getElementById('monthly-chart-title');
+            DOM.syncIndicator = document.getElementById('sync-status-indicator');
         }
 
         const esc = (str) => {
@@ -536,6 +538,20 @@
         let dailyRecords = [];
         let memos = [];
 
+        window.showSyncIndicator = function(isLoading, isError = false) {
+            if(!DOM.syncIndicator) return;
+            DOM.syncIndicator.classList.remove('hidden');
+            if(isError) {
+                DOM.syncIndicator.innerHTML = `<span class="text-rose-500 font-bold">연결 오류</span>`;
+                return;
+            }
+            if(isLoading) {
+                DOM.syncIndicator.innerHTML = `<svg class="w-3 h-3 mr-1 text-[#86868b] sync-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> 동기화 중...`;
+            } else {
+                DOM.syncIndicator.innerHTML = `<svg class="w-3 h-3 mr-1 text-[#30d158]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> 동기화됨`;
+            }
+        };
+
         function loadLocalData() {
             courses = JSON.parse(localStorage.getItem('courses')) || defaultCourses;
             lectures = JSON.parse(localStorage.getItem('lectures')) || defaultLectures;
@@ -552,28 +568,6 @@
 
             memos = JSON.parse(localStorage.getItem('memos')) || defaultMemos;
             renderAll();
-        }
-
-        async function loadServerData() {
-            try {
-                const res = await fetch('./data.json?t=' + new Date().getTime());
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.courses && data.lectures && data.dailyRecords) {
-                        courses = data.courses;
-                        lectures = data.lectures;
-                        dailyRecords = data.dailyRecords;
-                        if(data.memos) memos = data.memos;
-                        saveData(false); 
-                        renderAll();
-                        showUndoToast('서버의 data.json 파일을 성공적으로 불러왔습니다.', null, null, false);
-                        return;
-                    }
-                }
-            } catch (err) {
-                console.log('data.json 파일을 찾을 수 없거나 불러오지 못했습니다. 로컬 데이터를 사용합니다.');
-            }
-            loadLocalData();
         }
 
         window.updateFromCloud = (data) => {
@@ -1996,13 +1990,10 @@
             `).join('');
         };
 
-
         // --- App Initialization ---
         async function initApp() {
             initDOM();
-            
-            // 깃허브 호스팅 환경 등에서 data.json 자동 파악
-            await loadServerData();
+            loadLocalData(); // 임시로 로컬 데이터 먼저 표시
         }
 
         if (document.readyState === 'loading') {
@@ -2011,6 +2002,97 @@
             initApp();
         }
 
+    </script>
+    
+    <!-- Firebase Real-time Sync Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // =========================================================================
+        // 1. Firebase 콘솔에서 발급받은 본인의 설정값으로 아래 내용을 덮어쓰세요!
+        // =========================================================================
+        const firebaseConfig = {
+            // apiKey: "API_KEY",
+            // authDomain: "PROJECT_ID.firebaseapp.com",
+            // projectId: "PROJECT_ID",
+            // storageBucket: "PROJECT_ID.appspot.com",
+            // messagingSenderId: "SENDER_ID",
+            // appId: "APP_ID"
+        };
+
+        // Firebase 설정값이 채워졌는지 확인 (빈 객체면 실행 안 함)
+        if (Object.keys(firebaseConfig).length > 0) {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            
+            // 모든 기기가 공유할 공통 문서 경로 지정 (아이패드와 노트북 연동의 핵심)
+            const appId = 'study-dashboard-app';
+            const sharedRoomId = 'my_personal_dashboard'; 
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'dashboards', sharedRoomId);
+
+            let unsub = null;
+            let isRemoteUpdate = false;
+
+            // 2. 실시간 동기화 시작 (onSnapshot)
+            function startRealtime() {
+                if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(true);
+                
+                unsub = onSnapshot(docRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.data();
+                        try {
+                            const parsed = JSON.parse(data.payload);
+                            isRemoteUpdate = true; // 화면 그릴 때 다시 업로드되는 무한루프 방지
+                            if(window.updateFromCloud) window.updateFromCloud(parsed);
+                            isRemoteUpdate = false;
+                        } catch(e) { console.error(e); }
+                    } else {
+                        // 클라우드가 비어있으면 로컬 데이터를 최초 업로드
+                        if(window.getExportData) {
+                            window.triggerCloudSave(window.getExportData());
+                        }
+                    }
+                    if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(false);
+                }, (error) => {
+                    console.error("Firestore 감시 에러:", error);
+                    if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(false, true);
+                });
+            }
+
+            // 3. 익명 로그인 및 연결 트리거
+            const initAuth = async () => {
+                try {
+                    // Firebase 보안 규칙(Rules)을 통과하기 위해 익명 로그인 사용
+                    await signInAnonymously(auth);
+                    startRealtime(); 
+                } catch(err) {
+                    console.error("Firebase Auth Error", err);
+                    if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(false, true);
+                }
+            };
+            initAuth();
+
+            // 4. 로컬에서 데이터 변경 시 호출되는 저장 함수
+            window.triggerCloudSave = async (dataObj) => {
+                // 원격에서 받은 업데이트로 인한 저장 호출은 무시
+                if(isRemoteUpdate || !auth.currentUser) return; 
+                
+                if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(true);
+                try {
+                    await setDoc(docRef, { 
+                        payload: JSON.stringify(dataObj), 
+                        updatedAt: Date.now() 
+                    });
+                    if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(false);
+                } catch(e) {
+                    console.error("Firebase Write Error:", e);
+                    if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(false, true);
+                }
+            };
+        }
     </script>
 </body>
 </html>
