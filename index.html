@@ -1988,7 +1988,7 @@
                     </div>
                 </div>
             `).join('');
-        };
+        }
 
         // --- App Initialization ---
         async function initApp() {
@@ -2010,19 +2010,16 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // =========================================================================
-        // 1. Firebase 콘솔에서 발급받은 본인의 설정값으로 아래 내용을 덮어쓰세요!
-        // =========================================================================
         const firebaseConfig = {
-            // apiKey: "API_KEY",
-            // authDomain: "PROJECT_ID.firebaseapp.com",
-            // projectId: "PROJECT_ID",
-            // storageBucket: "PROJECT_ID.appspot.com",
-            // messagingSenderId: "SENDER_ID",
-            // appId: "APP_ID"
+            apiKey: "AIzaSyBtAWUPk1RBU2ONxd7XubQ9XBjY8YYecGo",
+            authDomain: "studying-management.firebaseapp.com",
+            projectId: "studying-management",
+            storageBucket: "studying-management.firebasestorage.app",
+            messagingSenderId: "477977793317",
+            appId: "1:477977793317:web:31086a61c1fd36e77b40cc",
+            measurementId: "G-MQ0KWQQLS6"
         };
 
-        // Firebase 설정값이 채워졌는지 확인 (빈 객체면 실행 안 함)
         if (Object.keys(firebaseConfig).length > 0) {
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
@@ -2065,7 +2062,6 @@
             // 3. 익명 로그인 및 연결 트리거
             const initAuth = async () => {
                 try {
-                    // Firebase 보안 규칙(Rules)을 통과하기 위해 익명 로그인 사용
                     await signInAnonymously(auth);
                     startRealtime(); 
                 } catch(err) {
@@ -2077,7 +2073,6 @@
 
             // 4. 로컬에서 데이터 변경 시 호출되는 저장 함수
             window.triggerCloudSave = async (dataObj) => {
-                // 원격에서 받은 업데이트로 인한 저장 호출은 무시
                 if(isRemoteUpdate || !auth.currentUser) return; 
                 
                 if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(true);
