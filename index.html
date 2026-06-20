@@ -188,6 +188,10 @@
                 <p class="text-sm text-[#86868b]">자동 로컬 저장 방식 및 개인 클라우드 실시간 동기화</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
+                <button data-action="refreshPage" class="px-4 py-2 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] text-[#86868b] hover:text-white text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    새로고침
+                </button>
                 <label class="px-4 py-2 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] text-xs font-bold text-[#86868b] hover:text-white transition cursor-pointer shadow-sm">
                     데이터 복원 (JSON)
                     <input type="file" class="hidden" accept=".json" data-action="importData">
@@ -1513,6 +1517,11 @@
             const action = target.dataset.action;
 
             switch(action) {
+                case 'refreshPage': {
+                    window.location.reload();
+                    break;
+                }
+
                 case 'switchTab': {
                     const tabName = target.dataset.tab;
                     
@@ -1899,6 +1908,28 @@
             const action = target.dataset.action;
 
             switch(action) {
+                case 'updateTaskTime': {
+                    const taskId = target.dataset.id;
+                    const newTime = parseInt(target.value) || 0;
+                    const task = currentModalTasks.find(t => t.id === taskId);
+                    if(task) {
+                        task.time = newTime;
+                        // 실시간 저장을 위해 모달 데이터와 백그라운드 데이터 연동 업데이트
+                        const idx = dailyRecords.findIndex(d => d.date === currentModalDate);
+                        if(idx > -1) {
+                            dailyRecords[idx].tasks = currentModalTasks;
+                        } else {
+                            dailyRecords.push({ id: generateId('D'), date: currentModalDate, tasks: currentModalTasks });
+                        }
+                        saveData();
+                        renderModalTaskList();
+                        renderCalendar();
+                        renderCharts();
+                        renderMasterDB();
+                        renderHeatmapAndStreak();
+                    }
+                    break;
+                }
                 case 'toggleLecture': { // For actual input checkboxes
                     const idx = lectures.findIndex(l => l.id === target.dataset.id);
                     if(idx > -1) { 
@@ -1984,7 +2015,14 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-3 ml-3 flex-shrink-0">
-                        <span class="text-xs text-[#86868b] font-mono font-bold w-10 text-right">${t.time}m</span>
+                        ${t.type === 'study' ?
+                            `<div class="flex items-center space-x-1">
+                                <input type="number" data-action="updateTaskTime" data-id="${t.id}" value="${t.time}" min="0" class="w-12 bg-[rgba(0,0,0,0.5)] border border-[rgba(255,255,255,0.1)] rounded px-1 py-1 text-xs text-white font-mono font-bold text-right outline-none focus:border-[#64d2ff] transition-colors shadow-inner hover:bg-[rgba(0,0,0,0.7)]">
+                                <span class="text-xs text-[#86868b] font-mono font-bold">m</span>
+                            </div>`
+                        :
+                            `<span class="text-xs text-[#86868b] font-mono font-bold w-10 text-right">${t.time}m</span>`
+                        }
                         <button data-action="removeModalTask" data-id="${t.id}" class="text-red-400 hover:text-red-300 font-bold px-3 py-1.5 rounded-full bg-[rgba(255,59,48,0.1)] hover:bg-[rgba(255,59,48,0.2)] transition text-[11px]">삭제</button>
                     </div>
                 </div>
@@ -2031,12 +2069,14 @@
 
             let unsub = null;
             let isRemoteUpdate = false;
+            let isCloudInitialized = false; // 클라우드 데이터 첫 수신 여부
 
             // 2. 실시간 동기화 시작 (onSnapshot)
             function startRealtime() {
                 if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(true);
                 
                 unsub = onSnapshot(docRef, (snapshot) => {
+                    isCloudInitialized = true; // 최초 데이터를 받았으므로 락 해제
                     if (snapshot.exists()) {
                         const data = snapshot.data();
                         try {
@@ -2072,7 +2112,8 @@
 
             // 4. 로컬에서 데이터 변경 시 호출되는 저장 함수
             window.triggerCloudSave = async (dataObj) => {
-                if(isRemoteUpdate || !auth.currentUser) return; 
+                // 클라우드 데이터를 처음 받아오기 전에는 덮어쓰기 방지 (초기화 문제 해결 핵심)
+                if(isRemoteUpdate || !auth.currentUser || !isCloudInitialized) return; 
                 
                 if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(true);
                 try {
