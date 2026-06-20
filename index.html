@@ -1969,6 +1969,7 @@
         // 모달 전용 렌더러
         function renderModalTaskList() {
             const container = document.getElementById('modal-task-list');
+            if (!container) return;
             if (currentModalTasks.length === 0) {
                 container.innerHTML = '<div class="text-sm text-[#86868b] text-center py-8 inner-squircle border border-[rgba(255,255,255,0.05)] border-dashed font-medium">등록된 학습 항목이 없습니다.</div>';
                 return;
@@ -2006,9 +2007,9 @@
     
     <!-- Firebase Real-time Sync Logic -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBtAWUPk1RBU2ONxd7XubQ9XBjY8YYecGo",
@@ -2026,9 +2027,7 @@
             const db = getFirestore(app);
             
             // 모든 기기가 공유할 공통 문서 경로 지정 (아이패드와 노트북 연동의 핵심)
-            const appId = 'study-dashboard-app';
-            const sharedRoomId = 'my_personal_dashboard'; 
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'dashboards', sharedRoomId);
+            const docRef = doc(db, 'dashboards', 'shared_dashboard_room');
 
             let unsub = null;
             let isRemoteUpdate = false;
