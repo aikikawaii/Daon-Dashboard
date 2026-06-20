@@ -162,11 +162,6 @@
         }
         .calendar-cell:hover { background-color: rgba(44, 44, 46, 0.9); }
         .calendar-cell.today-cell { background-color: rgba(10, 132, 255, 0.08); }
-        
-        .sync-spinner {
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="p-4 md:p-6 lg:p-8">
@@ -180,19 +175,16 @@
             <div>
                 <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-1 flex items-center gap-3">
                     학습 관리 대시보드
-                    <span id="sync-status-indicator" class="text-xs font-medium px-2 py-1 rounded-md bg-[rgba(255,255,255,0.1)] text-[#86868b] flex items-center hidden">
-                        <svg class="w-3 h-3 mr-1 text-[#30d158]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> 동기화됨
-                    </span>
                 </h1>
-                <p class="text-sm text-[#86868b]">진행 상황이 클라우드에 안전하게 동기화됩니다.</p>
+                <p class="text-sm text-[#86868b]">자동 로컬 저장 방식 (data.json 수동 백업/복원 지원)</p>
             </div>
             <div class="flex items-center space-x-3">
                 <label class="px-4 py-2 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] text-xs font-bold text-[#86868b] hover:text-white transition cursor-pointer shadow-sm">
-                    데이터 복원
+                    데이터 복원 (JSON)
                     <input type="file" class="hidden" accept=".json" data-action="importData">
                 </label>
                 <button data-action="exportData" class="px-4 py-2 rounded-xl bg-[rgba(10,132,255,0.15)] border border-[rgba(10,132,255,0.2)] hover:bg-[#0a84ff] text-[#0a84ff] hover:text-white text-xs font-bold transition shadow-sm">
-                    데이터 백업
+                    data.json 다운로드
                 </button>
             </div>
         </header>
@@ -433,29 +425,8 @@
         </div>
     </div>
 
-    <!-- Firebase SDK (모듈 시스템 활용) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // =========================================================================================
-        // [중요] 개인 깃허브(GitHub Pages)에 호스팅하여 PC, 아이패드 등 여러 기기에서 동기화 하려면
-        // 아래 customConfig 에 본인의 Firebase 프로젝트 설정값(JSON)을 붙여넣으세요.
-        // 예시: const customConfig = { apiKey: "...", authDomain: "...", projectId: "..." };
-        // 기기 간 완벽한 동기화를 원하시면 Firebase Auth 연동(구글 로그인 등)을 추가로 구성하는 것을 권장합니다.
-        // =========================================================================================
-        const customConfig = null; 
-        
-        let db, auth, user, unsubSnapshot;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'my-study-dashboard';
-        
-        let firebaseConfig = customConfig;
-        if (!firebaseConfig && typeof __firebase_config !== 'undefined') {
-            try { firebaseConfig = JSON.parse(__firebase_config); } catch(e) { console.warn("Firebase config parse error"); }
-        }
-
-        // --- STREAMING_CHUNK: DOM Element Cache & Initialization ---
+    <script>
+        // --- DOM Element Cache & Initialization ---
         const DOM = {
             viewCourseGallery: null,
             todoTabsContainer: null,
@@ -481,8 +452,7 @@
             pomoWorkInput: null,
             pomoBreakInput: null,
             dailyTotalText: null,
-            monthlyChartTitle: null,
-            syncIndicator: null
+            monthlyChartTitle: null
         };
 
         function initDOM() {
@@ -511,7 +481,6 @@
             DOM.pomoBreakInput = document.getElementById('pomo-break-input');
             DOM.dailyTotalText = document.getElementById('dailyTotalText');
             DOM.monthlyChartTitle = document.getElementById('monthly-chart-title');
-            DOM.syncIndicator = document.getElementById('sync-status-indicator');
         }
 
         const esc = (str) => {
@@ -558,76 +527,6 @@
         let dailyRecords = [];
         let memos = [];
 
-        function showSyncIndicator(isLoading) {
-            if(!DOM.syncIndicator) return;
-            if(isLoading) {
-                DOM.syncIndicator.innerHTML = `<svg class="w-3 h-3 mr-1 text-[#86868b] sync-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> 동기화 중...`;
-                DOM.syncIndicator.classList.remove('hidden');
-            } else {
-                DOM.syncIndicator.innerHTML = `<svg class="w-3 h-3 mr-1 text-[#30d158]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> 클라우드 연동됨`;
-                setTimeout(() => DOM.syncIndicator.classList.add('hidden'), 2000);
-            }
-        }
-
-        // Firebase Cloud DB 초기화
-        if (firebaseConfig) {
-            const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-
-            const initAuth = async () => {
-                try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch(e) { console.error("Auth init failed", e); loadLocalData(); }
-            };
-            initAuth();
-
-            onAuthStateChanged(auth, (u) => {
-                user = u;
-                if (user) {
-                    loadCloudData();
-                } else {
-                    if (unsubSnapshot) unsubSnapshot();
-                }
-            });
-        } else {
-            // Firebase 설정이 없으면 LocalStorage로 폴백
-            loadLocalData();
-        }
-
-        function loadCloudData() {
-            if (!user) return;
-            showSyncIndicator(true);
-            const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'appData', 'state');
-            
-            unsubSnapshot = onSnapshot(docRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    const data = snapshot.data();
-                    courses = data.courses || [];
-                    lectures = data.lectures || [];
-                    dailyRecords = data.dailyRecords || [];
-                    memos = data.memos || [];
-                } else {
-                    // 최초 접속 시 기본값 세팅 및 클라우드 업로드
-                    courses = defaultCourses;
-                    lectures = defaultLectures;
-                    dailyRecords = [];
-                    memos = defaultMemos;
-                    saveData(); 
-                }
-                renderAll();
-                showSyncIndicator(false);
-            }, (error) => {
-                console.error("Cloud Data Sync Error:", error);
-                showUndoToast('클라우드 동기화 중 오류가 발생했습니다. 로컬 데이터를 불러옵니다.', null, null, false);
-                loadLocalData();
-            });
-        }
-
         function loadLocalData() {
             courses = JSON.parse(localStorage.getItem('courses')) || defaultCourses;
             lectures = JSON.parse(localStorage.getItem('lectures')) || defaultLectures;
@@ -646,23 +545,37 @@
             renderAll();
         }
 
-        async function saveData() {
-            if (firebaseConfig && user) {
-                try {
-                    showSyncIndicator(true);
-                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'appData', 'state');
-                    await setDoc(docRef, { courses, lectures, dailyRecords, memos });
-                    showSyncIndicator(false);
-                } catch(e) {
-                    console.error("Save to Cloud Error", e);
-                    showUndoToast('데이터 저장 중 오류가 발생했습니다.', null, null, false);
+        // data.json 서버 자동 패치 로직
+        async function loadServerData() {
+            try {
+                // 같은 폴더에 있는 data.json 파일을 시도해서 불러옵니다.
+                // 정적 깃허브 페이지 호스팅 특성상 캐시를 무시하기 위해 타임스탬프를 추가합니다.
+                const res = await fetch('./data.json?t=' + new Date().getTime());
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.courses && data.lectures && data.dailyRecords) {
+                        courses = data.courses;
+                        lectures = data.lectures;
+                        dailyRecords = data.dailyRecords;
+                        if(data.memos) memos = data.memos;
+                        saveData(); // 로컬 스토리지에 업데이트
+                        renderAll();
+                        showUndoToast('서버의 data.json 파일을 성공적으로 불러왔습니다.', null, null, false);
+                        return;
+                    }
                 }
-            } else {
-                localStorage.setItem('courses', JSON.stringify(courses));
-                localStorage.setItem('lectures', JSON.stringify(lectures));
-                localStorage.setItem('dailyRecords', JSON.stringify(dailyRecords));
-                localStorage.setItem('memos', JSON.stringify(memos));
+            } catch (err) {
+                // 파일이 없거나 fetch에 실패하면 조용히 넘어갑니다.
+                console.log('data.json 파일을 찾을 수 없거나 불러오지 못했습니다. 로컬 데이터를 사용합니다.');
             }
+            loadLocalData();
+        }
+
+        function saveData() {
+            localStorage.setItem('courses', JSON.stringify(courses));
+            localStorage.setItem('lectures', JSON.stringify(lectures));
+            localStorage.setItem('dailyRecords', JSON.stringify(dailyRecords));
+            localStorage.setItem('memos', JSON.stringify(memos));
         }
 
         let pendingDeletes = new Set();
@@ -701,7 +614,7 @@
             return map;
         };
 
-        // --- STREAMING_CHUNK: Core Helpers ---
+        // --- Core Helpers ---
         const getTheme = (subj) => SUBJECT_THEMES[subj] || SUBJECT_THEMES['기타'];
         const getCourseName = id => getCourses().find(c => c.id === id)?.title || '-';
         
@@ -765,7 +678,7 @@
             </div>
         `;
 
-        // --- STREAMING_CHUNK: Pomodoro Timer Logic ---
+        // --- Pomodoro Timer Logic ---
         let pomoInterval;
         let pomoTime = 25 * 60;
         let isPomoWorking = true; 
@@ -837,7 +750,7 @@
             }
         }
 
-        // --- STREAMING_CHUNK: Drag & Drop Logic (Desktop & Mobile) ---
+        // --- Drag & Drop Logic (Desktop & Mobile) ---
         
         window.handleDragStart = function(event, lectureId) {
             event.dataTransfer.setData('text/plain', lectureId);
@@ -986,7 +899,7 @@
             document.removeEventListener('touchcancel', window.processTouchEnd);
         }
 
-        // --- STREAMING_CHUNK: Heatmap & Streak Logic ---
+        // --- Heatmap & Streak Logic ---
         function calculateStreak(recordsMap) {
             let streak = 0;
             let d = new Date(); 
@@ -1040,7 +953,7 @@
             DOM.streakCounter.innerText = `🔥 ${calculateStreak(recordsMap)}일째`;
         }
 
-        // --- STREAMING_CHUNK: Quick Memo Logic ---
+        // --- Quick Memo Logic ---
         function renderMemos() {
             if(!DOM.viewMemos) return;
 
@@ -1060,7 +973,7 @@
             `).join('');
         }
 
-        // --- STREAMING_CHUNK: Chart.js Optimizations ---
+        // --- Chart.js Optimizations ---
         let chartInstances = { daily: null, weekly: null, monthly: null };
         Chart.defaults.color = '#86868b';
         Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif';
@@ -1085,7 +998,7 @@
         });
 
         function renderCharts() {
-            if (!document.getElementById('tab-dashboard').classList.contains('block')) return; // 대시보드 탭일때만 렌더링
+            if (!document.getElementById('tab-dashboard').classList.contains('block')) return; 
             const recordsMap = getRecordsMap();
             const todayRecord = recordsMap[TODAY];
             const todayStats = getDailyTaskStats(todayRecord);
@@ -1204,7 +1117,7 @@
             }
         }
 
-        // --- STREAMING_CHUNK: Toast & Modals ---
+        // --- Toast & Modals ---
         function showUndoToast(message, onUndo = null, onConfirm = null, isUndoMode = true) {
             const toastId = 'toast-' + Date.now();
             const toast = document.createElement('div');
@@ -1249,7 +1162,7 @@
         function closeModal() { DOM.modalOverlay.classList.add('hidden'); }
 
 
-        // --- STREAMING_CHUNK: Core Rendering ---
+        // --- Core Rendering ---
         function renderCourseGallery() {
             const dataCourses = getCourses();
             const lecsMap = getLecturesByCourse();
@@ -1569,7 +1482,7 @@
             renderMemos();
         }
 
-        // --- STREAMING_CHUNK: Event Delegation ---
+        // --- Event Delegation ---
         document.addEventListener('click', (e) => {
             const target = e.target.closest('[data-action]');
             if(!target) return;
@@ -1942,10 +1855,10 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `학습대시보드_백업_${getTodayStr()}.json`;
+                    a.download = `data.json`;
                     a.click();
                     URL.revokeObjectURL(url);
-                    showUndoToast('데이터 백업이 완료되었습니다.', null, null, false);
+                    showUndoToast('data.json 파일 다운로드가 완료되었습니다.', null, null, false);
                     break;
                 }
                 
@@ -2054,11 +1967,19 @@
         };
 
 
-        // --- 11. 초기 실행 ---
-        document.addEventListener('DOMContentLoaded', () => {
+        // --- App Initialization ---
+        async function initApp() {
             initDOM();
-            renderAll();
-        });
+            
+            // 깃허브 호스팅 환경 등에서 data.json 자동 파악
+            await loadServerData();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
 
     </script>
 </body>
