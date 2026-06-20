@@ -162,6 +162,11 @@
         }
         .calendar-cell:hover { background-color: rgba(44, 44, 46, 0.9); }
         .calendar-cell.today-cell { background-color: rgba(10, 132, 255, 0.08); }
+        
+        .sync-spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="p-4 md:p-6 lg:p-8">
@@ -175,8 +180,12 @@
             <div>
                 <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-1 flex items-center gap-3">
                     학습 관리 대시보드
+                    <span id="sync-status-indicator" class="text-xs font-medium px-2 py-1 rounded-md bg-[rgba(255,255,255,0.1)] text-[#86868b] flex items-center hidden transition-all duration-300">
+                        <span id="cloud-icon" class="mr-1"></span>
+                        <span id="cloud-text">연결 중...</span>
+                    </span>
                 </h1>
-                <p class="text-sm text-[#86868b]">자동 로컬 저장 방식 (data.json 수동 백업/복원 지원)</p>
+                <p class="text-sm text-[#86868b]">자동 로컬 저장 방식 및 클라우드 실시간 동기화</p>
             </div>
             <div class="flex items-center space-x-3">
                 <label class="px-4 py-2 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] text-xs font-bold text-[#86868b] hover:text-white transition cursor-pointer shadow-sm">
@@ -184,7 +193,7 @@
                     <input type="file" class="hidden" accept=".json" data-action="importData">
                 </label>
                 <button data-action="exportData" class="px-4 py-2 rounded-xl bg-[rgba(10,132,255,0.15)] border border-[rgba(10,132,255,0.2)] hover:bg-[#0a84ff] text-[#0a84ff] hover:text-white text-xs font-bold transition shadow-sm">
-                    data.json 다운로드
+                    데이터 백업
                 </button>
             </div>
         </header>
@@ -545,11 +554,8 @@
             renderAll();
         }
 
-        // data.json 서버 자동 패치 로직
         async function loadServerData() {
             try {
-                // 같은 폴더에 있는 data.json 파일을 시도해서 불러옵니다.
-                // 정적 깃허브 페이지 호스팅 특성상 캐시를 무시하기 위해 타임스탬프를 추가합니다.
                 const res = await fetch('./data.json?t=' + new Date().getTime());
                 if (res.ok) {
                     const data = await res.json();
@@ -558,24 +564,48 @@
                         lectures = data.lectures;
                         dailyRecords = data.dailyRecords;
                         if(data.memos) memos = data.memos;
-                        saveData(); // 로컬 스토리지에 업데이트
+                        saveData(false); 
                         renderAll();
                         showUndoToast('서버의 data.json 파일을 성공적으로 불러왔습니다.', null, null, false);
                         return;
                     }
                 }
             } catch (err) {
-                // 파일이 없거나 fetch에 실패하면 조용히 넘어갑니다.
                 console.log('data.json 파일을 찾을 수 없거나 불러오지 못했습니다. 로컬 데이터를 사용합니다.');
             }
             loadLocalData();
         }
 
-        function saveData() {
+        window.updateFromCloud = (data) => {
+            if(data) {
+                if(data.courses) courses = data.courses;
+                if(data.lectures) lectures = data.lectures;
+                if(data.dailyRecords) dailyRecords = data.dailyRecords;
+                if(data.memos) memos = data.memos;
+                
+                // 로컬에도 동기화 저장 (단, 무한루프 방지를 위해 triggerCloudSave는 호출 안 함)
+                localStorage.setItem('courses', JSON.stringify(courses));
+                localStorage.setItem('lectures', JSON.stringify(lectures));
+                localStorage.setItem('dailyRecords', JSON.stringify(dailyRecords));
+                localStorage.setItem('memos', JSON.stringify(memos));
+                
+                renderAll();
+            }
+        };
+
+        window.getExportData = () => {
+            return { courses, lectures, dailyRecords, memos };
+        };
+
+        function saveData(syncToCloud = true) {
             localStorage.setItem('courses', JSON.stringify(courses));
             localStorage.setItem('lectures', JSON.stringify(lectures));
             localStorage.setItem('dailyRecords', JSON.stringify(dailyRecords));
             localStorage.setItem('memos', JSON.stringify(memos));
+
+            if (syncToCloud && typeof window.triggerCloudSave === 'function') {
+                window.triggerCloudSave({ courses, lectures, dailyRecords, memos });
+            }
         }
 
         let pendingDeletes = new Set();
