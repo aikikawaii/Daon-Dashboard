@@ -316,7 +316,7 @@
                         </div>
                     </div>
                     
-                    <div class="w-full overflow-x-auto hide-scrollbar flex-1 flex flex-col justify-end">
+                    <div class="w-full overflow-x-auto hide-scrollbar flex-1 flex flex-col justify-end" id="heatmap-scroll-wrapper">
                         <div id="heatmap-container" class="grid grid-rows-7 grid-flow-col gap-1 sm:gap-1.5 w-max pb-1"></div>
                     </div>
                     
@@ -470,6 +470,11 @@
         };
 
         function initDOM() {
+            for (const key in DOM) {
+                const elementId = key.replace(/([A-Z])/g, "-$1").toLowerCase().replace(/^-/, '');
+                DOM[key] = document.getElementById(elementId) || document.getElementById(key);
+            }
+            // 수동 맵핑 필요한 예외 처리
             DOM.viewCourseGallery = document.getElementById('view-course-gallery');
             DOM.todoTabsContainer = document.getElementById('todo-tabs-container');
             DOM.viewTodoLectures = document.getElementById('view-todo-lectures');
@@ -780,8 +785,9 @@
 
         // --- Drag & Drop Logic (Desktop & Mobile) ---
         
-        window.handleDragStart = function(event, lectureId) {
-            event.dataTransfer.setData('text/plain', lectureId);
+        window.handleDragStart = function(event, type, sourceId, taskId) {
+            const payload = JSON.stringify({ type, sourceId, taskId });
+            event.dataTransfer.setData('text/plain', payload);
             event.dataTransfer.effectAllowed = 'copyMove';
             setTimeout(() => event.target.style.opacity = "0.5", 0);
         }
@@ -794,51 +800,84 @@
         }
         window.handleDragLeave = function(event) { event.currentTarget.classList.remove('drag-over'); }
         
-        window.processDrop = function(lectureId, dateStr) {
-            const lecture = getLectures().find(l => l.id === lectureId);
-            if (lecture) {
-                let record = dailyRecords.find(d => d.date === dateStr);
-                const shortName = getShortLectureName(lecture);
-                const newTask = {
-                    id: generateId('T'), type: 'lecture', title: shortName, time: lecture.duration || 0, completed: false, refId: lecture.id
-                };
-                if (!record) {
-                    record = { id: generateId('D'), date: dateStr, tasks: [newTask] };
-                    dailyRecords.push(record);
-                } else {
-                    record.tasks.push(newTask);
+        window.processDrop = function(payloadJson, targetDateStr) {
+            try {
+                const payload = JSON.parse(payloadJson);
+                let updated = false;
+
+                if (payload.type === 'todo') {
+                    const lecture = getLectures().find(l => l.id === payload.sourceId);
+                    if (lecture) {
+                        let record = dailyRecords.find(d => d.date === targetDateStr);
+                        const shortName = getShortLectureName(lecture);
+                        const newTask = {
+                            id: generateId('T'), type: 'lecture', title: shortName, time: lecture.duration || 0, completed: false, refId: lecture.id
+                        };
+                        if (!record) {
+                            record = { id: generateId('D'), date: targetDateStr, tasks: [newTask] };
+                            dailyRecords.push(record);
+                        } else {
+                            record.tasks.push(newTask);
+                        }
+                        updated = true;
+                    }
+                } else if (payload.type === 'calendar') {
+                    const sourceRecord = dailyRecords.find(d => d.id === payload.sourceId);
+                    if (sourceRecord && sourceRecord.date !== targetDateStr) {
+                        const taskIdx = sourceRecord.tasks.findIndex(t => t.id === payload.taskId);
+                        if (taskIdx > -1) {
+                            const taskToMove = sourceRecord.tasks.splice(taskIdx, 1)[0];
+                            let targetRecord = dailyRecords.find(d => d.date === targetDateStr);
+                            if (!targetRecord) {
+                                targetRecord = { id: generateId('D'), date: targetDateStr, tasks: [taskToMove] };
+                                dailyRecords.push(targetRecord);
+                            } else {
+                                targetRecord.tasks.push(taskToMove);
+                            }
+                            updated = true;
+                        }
+                    }
                 }
-                saveData();
-                setTimeout(() => {
-                    const el = document.querySelector(`[data-date="${dateStr}"]`);
-                    if(el) el.click();
-                }, 50); 
+
+                if (updated) {
+                    saveData();
+                    renderCalendar();
+                    renderCharts();
+                    renderMasterDB();
+                    renderHeatmapAndStreak();
+                }
+            } catch(e) {
+                console.error("Drop process error", e);
             }
         };
 
         window.handleDrop = function(event, dateStr) {
             event.preventDefault();
             event.currentTarget.classList.remove('drag-over');
-            const lectureId = event.dataTransfer.getData('text/plain');
-            window.processDrop(lectureId, dateStr);
+            const payload = event.dataTransfer.getData('text/plain');
+            window.processDrop(payload, dateStr);
         }
 
         let touchTimer = null;
         let touchStartX = 0;
         let touchStartY = 0;
         let activeTouchGhost = null;
-        let activeTouchId = null;
+        let activeTouchPayload = null;
         let lastTouchTarget = null;
         let currentDragTarget = null;
+        let isDragging = false; 
 
-        window.handleTouchStartList = function(event, lectureId) {
+        window.handleTouchStartList = function(event, type, sourceId, taskId) {
             const touch = event.touches[0];
             touchStartX = touch.clientX;
             touchStartY = touch.clientY;
             currentDragTarget = event.currentTarget;
+            isDragging = false;
             
             touchTimer = setTimeout(() => {
-                activeTouchId = lectureId;
+                isDragging = true;
+                activeTouchPayload = JSON.stringify({ type, sourceId, taskId });
+                
                 activeTouchGhost = currentDragTarget.cloneNode(true);
                 activeTouchGhost.style.position = 'fixed';
                 activeTouchGhost.style.left = touch.clientX + 'px';
@@ -905,13 +944,13 @@
                 dropTarget.classList.remove('drag-over');
                 const dateStr = dropTarget.dataset.date;
                 if (dateStr) {
-                    window.processDrop(activeTouchId, dateStr);
+                    window.processDrop(activeTouchPayload, dateStr);
                 }
             }
 
             activeTouchGhost.remove();
             activeTouchGhost = null;
-            activeTouchId = null;
+            activeTouchPayload = null;
             
             if (lastTouchTarget) {
                 lastTouchTarget.classList.remove('drag-over');
@@ -925,6 +964,10 @@
             document.removeEventListener('touchmove', window.processTouchMove);
             document.removeEventListener('touchend', window.processTouchEnd);
             document.removeEventListener('touchcancel', window.processTouchEnd);
+            
+            setTimeout(() => {
+                isDragging = false;
+            }, 50);
         }
 
         // --- Heatmap & Streak Logic ---
@@ -979,6 +1022,13 @@
             }
             DOM.heatmapContainer.innerHTML = html;
             DOM.streakCounter.innerText = `🔥 ${calculateStreak(recordsMap)}일째`;
+            
+            // 최신 날짜가 보이도록 스크롤 이동
+            requestAnimationFrame(() => {
+                if(DOM.heatmapContainer && DOM.heatmapContainer.parentElement) {
+                    DOM.heatmapContainer.parentElement.scrollLeft = DOM.heatmapContainer.parentElement.scrollWidth;
+                }
+            });
         }
 
         // --- Quick Memo Logic ---
@@ -1250,9 +1300,9 @@
                     const cName = getCourseName(l.courseId);
                     return `
                     <li draggable="true" 
-                        ondragstart="handleDragStart(event, '${l.id}')" 
+                        ondragstart="handleDragStart(event, 'todo', '${l.id}')" 
                         ondragend="handleDragEnd(event)"
-                        ontouchstart="handleTouchStartList(event, '${l.id}')"
+                        ontouchstart="handleTouchStartList(event, 'todo', '${l.id}')"
                         ontouchmove="handleTouchMoveList(event)"
                         ontouchend="handleTouchEndList(event)"
                         ontouchcancel="handleTouchEndList(event)"
@@ -1309,8 +1359,16 @@
                         const dotColor = task.type === 'lecture' ? '#bf5af2' : '#64d2ff';
                         
                         cellContent += `
-                            <div class="${bgStyle} ${textStyle} rounded-md px-1.5 py-1 mb-1 text-[10px] sm:text-[11px] font-semibold hover:bg-[rgba(255,255,255,0.15)] transition-colors flex justify-between items-center shadow-sm w-full min-w-0" 
-                                 data-action="toggleTask" data-rec-id="${record.id}" data-task-id="${task.id}" title="${esc(task.title)}">
+                            <div class="${bgStyle} ${textStyle} rounded-md px-1.5 py-1 mb-1 text-[10px] sm:text-[11px] font-semibold hover:bg-[rgba(255,255,255,0.15)] transition-colors flex justify-between items-center shadow-sm w-full min-w-0 draggable-item" 
+                                 data-action="toggleTask" data-rec-id="${record.id}" data-task-id="${task.id}" title="${esc(task.title)}"
+                                 draggable="true"
+                                 ondragstart="handleDragStart(event, 'calendar', '${record.id}', '${task.id}')"
+                                 ondragend="handleDragEnd(event)"
+                                 ontouchstart="handleTouchStartList(event, 'calendar', '${record.id}', '${task.id}')"
+                                 ontouchmove="handleTouchMoveList(event)"
+                                 ontouchend="handleTouchEndList(event)"
+                                 ontouchcancel="handleTouchEndList(event)"
+                                 style="-webkit-touch-callout: none; -webkit-user-select: none; user-select: none;">
                                  <span class="truncate flex-1 min-w-0 pointer-events-none">${esc(task.title)}</span>
                                  <div class="w-1.5 h-1.5 rounded-full flex-shrink-0 ml-1.5 transition-all ${isCompleted ? 'bg-[#555]' : ''} pointer-events-none" style="${!isCompleted ? `background-color: ${dotColor}; box-shadow: 0 0 6px ${dotColor};` : ''}"></div>
                             </div>
@@ -1543,6 +1601,12 @@
 
                     if (tabName === 'dashboard') {
                         renderCharts();
+                        // 탭 전환 시 히트맵 스크롤 보정
+                        requestAnimationFrame(() => {
+                            if(DOM.heatmapContainer && DOM.heatmapContainer.parentElement) {
+                                DOM.heatmapContainer.parentElement.scrollLeft = DOM.heatmapContainer.parentElement.scrollWidth;
+                            }
+                        });
                     }
                     break;
                 }
@@ -1832,6 +1896,10 @@
                 }
                 
                 case 'toggleTask': { // from Calendar
+                    if (isDragging) {
+                        isDragging = false;
+                        return; // 드래그 중이었다면 토글 클릭을 무시합니다.
+                    }
                     const recId = target.dataset.recId;
                     const taskId = target.dataset.taskId;
                     const record = dailyRecords.find(d => d.id === recId);
@@ -1870,15 +1938,6 @@
                 case 'closeToast': {
                     const tId = target.dataset.toastId;
                     if(toastTimers[tId]) { clearTimeout(toastTimers[tId].timer); toastTimers[tId].removeToast(); }
-                    break;
-                }
-                
-                case 'toggleLecture': { // For the circular check div in Todo lists
-                    const idx = lectures.findIndex(l => l.id === target.dataset.id);
-                    if(idx > -1) { 
-                        lectures[idx].status = lectures[idx].status === '완료' ? '미시작' : '완료'; 
-                        saveData(); renderCourseGallery(); renderTodoLectures(); renderCurriculumManager(); renderMasterDB();
-                    }
                     break;
                 }
                 
@@ -1968,11 +2027,6 @@
                 case 'toggleModalTask': {
                     const task = currentModalTasks.find(t => t.id === target.dataset.id);
                     if(task) { task.completed = !task.completed; renderModalTaskList(); }
-                    break;
-                }
-                case 'toggleMemo': {
-                    const memo = memos.find(m => m.id === target.dataset.id);
-                    if(memo) { memo.completed = !memo.completed; saveData(); renderMemos(); }
                     break;
                 }
                 case 'importData': {
