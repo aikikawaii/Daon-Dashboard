@@ -188,6 +188,10 @@
                 <p class="text-sm text-[#86868b]">자동 로컬 저장 방식 및 개인 클라우드 실시간 동기화</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
+                <a href="https://www.kimyoung.co.kr/offmegaky.asp" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-gradient-to-r from-[#e11d48] to-[#f43f5e] hover:from-[#be123c] hover:to-[#e11d48] text-white text-xs font-bold transition shadow-[0_4px_14px_rgba(225,29,72,0.4)] flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    김영편입 바로가기
+                </a>
                 <button data-action="refreshPage" class="px-4 py-2 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] text-[#86868b] hover:text-white text-xs font-bold transition shadow-sm flex items-center gap-1.5">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     새로고침
@@ -212,6 +216,9 @@
         <!-- 탭 1: 대시보드 (메인 화면) -->
         <div id="tab-dashboard" class="tab-content space-y-6 block pb-12">
             
+            <!-- D-DAY 섹션 -->
+            <div class="flex items-center gap-3 overflow-x-auto hide-scrollbar pb-2 pt-1" id="view-ddays"></div>
+
             <!-- 1. 남은 강의 & 학습 캘린더 (최상단) -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 <!-- 남은 강의 -->
@@ -453,6 +460,7 @@
             heatmapContainer: null,
             streakCounter: null,
             viewMemos: null,
+            viewDdays: null,
             toastContainer: null,
             modalOverlay: null,
             modalTitle: null,
@@ -487,6 +495,7 @@
             DOM.heatmapContainer = document.getElementById('heatmap-container');
             DOM.streakCounter = document.getElementById('streak-counter');
             DOM.viewMemos = document.getElementById('view-memos');
+            DOM.viewDdays = document.getElementById('view-ddays');
             DOM.toastContainer = document.getElementById('toast-container');
             DOM.modalOverlay = document.getElementById('modal-overlay');
             DOM.modalTitle = document.getElementById('modal-title');
@@ -540,12 +549,16 @@
             { id: generateId('M'), text: '기출문제집 주문하기', completed: false },
             { id: generateId('M'), text: '물리 공식 노트 정리', completed: true }
         ];
+        const defaultDdays = [
+            { id: generateId('DD'), title: '편입시험', targetDate: '2026-12-20' }
+        ];
 
         // 데이터 상태 변수
         let courses = [];
         let lectures = [];
         let dailyRecords = [];
         let memos = [];
+        let ddays = [];
 
         window.showSyncIndicator = function(isLoading, isError = false) {
             if(!DOM.syncIndicator) return;
@@ -576,6 +589,7 @@
             });
 
             memos = JSON.parse(localStorage.getItem('memos')) || defaultMemos;
+            ddays = JSON.parse(localStorage.getItem('ddays')) || defaultDdays;
             renderAll();
         }
 
@@ -585,19 +599,21 @@
                 if(data.lectures) lectures = data.lectures;
                 if(data.dailyRecords) dailyRecords = data.dailyRecords;
                 if(data.memos) memos = data.memos;
+                if(data.ddays) ddays = data.ddays;
                 
                 // 로컬에도 동기화 저장 (단, 무한루프 방지를 위해 triggerCloudSave는 호출 안 함)
                 localStorage.setItem('courses', JSON.stringify(courses));
                 localStorage.setItem('lectures', JSON.stringify(lectures));
                 localStorage.setItem('dailyRecords', JSON.stringify(dailyRecords));
                 localStorage.setItem('memos', JSON.stringify(memos));
+                localStorage.setItem('ddays', JSON.stringify(ddays));
                 
                 renderAll();
             }
         };
 
         window.getExportData = () => {
-            return { courses, lectures, dailyRecords, memos };
+            return { courses, lectures, dailyRecords, memos, ddays };
         };
 
         function saveData(syncToCloud = true) {
@@ -605,9 +621,10 @@
             localStorage.setItem('lectures', JSON.stringify(lectures));
             localStorage.setItem('dailyRecords', JSON.stringify(dailyRecords));
             localStorage.setItem('memos', JSON.stringify(memos));
+            localStorage.setItem('ddays', JSON.stringify(ddays));
 
             if (syncToCloud && typeof window.triggerCloudSave === 'function') {
-                window.triggerCloudSave({ courses, lectures, dailyRecords, memos });
+                window.triggerCloudSave({ courses, lectures, dailyRecords, memos, ddays });
             }
         }
 
@@ -796,11 +813,18 @@
             event.preventDefault(); 
             event.dataTransfer.dropEffect = 'copy';
             const target = event.currentTarget;
-            if (!target.classList.contains('drag-over')) target.classList.add('drag-over');
+            if (target.classList.contains('calendar-cell')) {
+                if (!target.classList.contains('drag-over')) target.classList.add('drag-over');
+            }
         }
-        window.handleDragLeave = function(event) { event.currentTarget.classList.remove('drag-over'); }
+        window.handleDragLeave = function(event) { 
+            const target = event.currentTarget;
+            if (target.classList.contains('calendar-cell')) {
+                target.classList.remove('drag-over'); 
+            }
+        }
         
-        window.processDrop = function(payloadJson, targetDateStr) {
+        window.processDrop = function(payloadJson, targetDateStr, targetTaskId = null) {
             try {
                 const payload = JSON.parse(payloadJson);
                 let updated = false;
@@ -814,8 +838,13 @@
                             id: generateId('T'), type: 'lecture', title: shortName, time: lecture.duration || 0, completed: false, refId: lecture.id
                         };
                         if (!record) {
-                            record = { id: generateId('D'), date: targetDateStr, tasks: [newTask] };
+                            record = { id: generateId('D'), date: targetDateStr, tasks: [] };
                             dailyRecords.push(record);
+                        }
+                        
+                        if (targetTaskId) {
+                            const targetIdx = record.tasks.findIndex(t => t.id === targetTaskId);
+                            record.tasks.splice(targetIdx !== -1 ? targetIdx : record.tasks.length, 0, newTask);
                         } else {
                             record.tasks.push(newTask);
                         }
@@ -823,18 +852,37 @@
                     }
                 } else if (payload.type === 'calendar') {
                     const sourceRecord = dailyRecords.find(d => d.id === payload.sourceId);
-                    if (sourceRecord && sourceRecord.date !== targetDateStr) {
+                    if (sourceRecord) {
                         const taskIdx = sourceRecord.tasks.findIndex(t => t.id === payload.taskId);
                         if (taskIdx > -1) {
-                            const taskToMove = sourceRecord.tasks.splice(taskIdx, 1)[0];
-                            let targetRecord = dailyRecords.find(d => d.date === targetDateStr);
-                            if (!targetRecord) {
-                                targetRecord = { id: generateId('D'), date: targetDateStr, tasks: [taskToMove] };
-                                dailyRecords.push(targetRecord);
-                            } else {
-                                targetRecord.tasks.push(taskToMove);
+                            if (sourceRecord.date !== targetDateStr) {
+                                // 다른 날짜로 이동
+                                const taskToMove = sourceRecord.tasks.splice(taskIdx, 1)[0];
+                                let targetRecord = dailyRecords.find(d => d.date === targetDateStr);
+                                if (!targetRecord) {
+                                    targetRecord = { id: generateId('D'), date: targetDateStr, tasks: [] };
+                                    dailyRecords.push(targetRecord);
+                                }
+                                
+                                if (targetTaskId) {
+                                    const targetIdx = targetRecord.tasks.findIndex(t => t.id === targetTaskId);
+                                    targetRecord.tasks.splice(targetIdx !== -1 ? targetIdx : targetRecord.tasks.length, 0, taskToMove);
+                                } else {
+                                    targetRecord.tasks.push(taskToMove);
+                                }
+                                updated = true;
+                            } else if (sourceRecord.date === targetDateStr && targetTaskId && payload.taskId !== targetTaskId) {
+                                // 동일 날짜 내 순서 변경
+                                const taskToMove = sourceRecord.tasks.splice(taskIdx, 1)[0];
+                                const adjustedTargetIdx = sourceRecord.tasks.findIndex(t => t.id === targetTaskId);
+                                
+                                if (adjustedTargetIdx > -1) {
+                                    sourceRecord.tasks.splice(adjustedTargetIdx, 0, taskToMove);
+                                } else {
+                                    sourceRecord.tasks.push(taskToMove);
+                                }
+                                updated = true;
                             }
-                            updated = true;
                         }
                     }
                 }
@@ -853,9 +901,15 @@
 
         window.handleDrop = function(event, dateStr) {
             event.preventDefault();
-            event.currentTarget.classList.remove('drag-over');
+            const cell = event.currentTarget.closest('.calendar-cell');
+            if(cell) cell.classList.remove('drag-over');
+            
             const payload = event.dataTransfer.getData('text/plain');
-            window.processDrop(payload, dateStr);
+            
+            const targetItem = event.target.closest('.draggable-item');
+            const targetTaskId = targetItem ? targetItem.dataset.taskId : null;
+            
+            window.processDrop(payload, dateStr, targetTaskId);
         }
 
         let touchTimer = null;
@@ -939,12 +993,14 @@
             const touch = event.changedTouches[0];
             const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
             const dropTarget = elemBelow ? elemBelow.closest('.calendar-cell') : null;
+            const targetItem = elemBelow ? elemBelow.closest('.draggable-item') : null;
+            const targetTaskId = targetItem ? targetItem.dataset.taskId : null;
 
             if (dropTarget) {
                 dropTarget.classList.remove('drag-over');
                 const dateStr = dropTarget.dataset.date;
                 if (dateStr) {
-                    window.processDrop(activeTouchPayload, dateStr);
+                    window.processDrop(activeTouchPayload, dateStr, targetTaskId);
                 }
             }
 
@@ -1049,6 +1105,57 @@
                     <button data-action="deleteMemo" data-id="${m.id}" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition text-[10px] font-bold px-2 py-1 bg-[rgba(255,59,48,0.1)] rounded-lg flex-shrink-0 ml-2">삭제</button>
                 </li>
             `).join('');
+        }
+
+        // --- D-DAY Logic ---
+        function calculateDday(targetDateStr) {
+            const today = new Date(TODAY);
+            const target = new Date(targetDateStr);
+            const diffTime = target.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'D-DAY';
+            return diffDays > 0 ? `D-${diffDays}` : `D+${Math.abs(diffDays)}`;
+        }
+
+        function renderDdays() {
+            if(!DOM.viewDdays) return;
+            
+            const addBtnHtml = `
+                <button data-action="openDdayModal" class="flex items-center justify-center min-w-[80px] h-full px-4 py-2.5 rounded-2xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.1)] hover:border-white transition-all text-[#86868b] hover:text-white flex-shrink-0 group shadow-sm">
+                    <span class="text-xl font-bold leading-none mb-0.5 group-hover:scale-110 transition-transform">+</span>
+                </button>
+            `;
+
+            if(ddays.length === 0) {
+                DOM.viewDdays.innerHTML = addBtnHtml;
+                return;
+            }
+
+            const ddayHtml = ddays.map(d => {
+                const isPast = calculateDday(d.targetDate).startsWith('D+');
+                const isDday = calculateDday(d.targetDate) === 'D-DAY';
+                const ddayText = calculateDday(d.targetDate);
+                
+                let themeClass = "bg-[rgba(100,210,255,0.1)] text-[#64d2ff] border-[rgba(100,210,255,0.2)]";
+                if(isDday || ddayText.includes('D-') && parseInt(ddayText.replace('D-','')) <= 7) {
+                    themeClass = "bg-gradient-to-r from-[rgba(255,55,95,0.15)] to-[rgba(255,55,95,0.05)] text-[#ff375f] border-[rgba(255,55,95,0.3)] shadow-[0_0_10px_rgba(255,55,95,0.1)]";
+                } else if(isPast) {
+                    themeClass = "bg-[rgba(142,142,147,0.1)] text-[#8e8e93] border-[rgba(142,142,147,0.2)]";
+                }
+
+                return `
+                    <div class="relative flex items-center px-4 py-2.5 rounded-2xl border transition-all flex-shrink-0 group ${themeClass} backdrop-blur-md">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-medium text-white/70 mb-0.5 tracking-wide truncate max-w-[100px]" title="${esc(d.title)}">${esc(d.title)}</span>
+                            <span class="text-lg font-extrabold tracking-tight leading-none">${ddayText}</span>
+                        </div>
+                        <button data-action="deleteDday" data-id="${d.id}" class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#1c1c1e] text-[#86868b] hover:text-red-400 border border-[rgba(255,255,255,0.1)] rounded-full flex items-center justify-center text-[10px] font-bold opacity-0 group-hover:opacity-100 transition shadow-md z-10 hidden md:flex">✕</button>
+                    </div>
+                `;
+            }).join('');
+
+            DOM.viewDdays.innerHTML = addBtnHtml + ddayHtml;
         }
 
         // --- Chart.js Optimizations ---
@@ -1566,6 +1673,7 @@
             renderCharts();
             renderHeatmapAndStreak();
             renderMemos();
+            renderDdays();
         }
 
         // --- Event Delegation ---
@@ -1654,6 +1762,36 @@
                     break;
                 }
                 
+                case 'openDdayModal': {
+                    const html = `
+                        <div>
+                            <label class="block text-sm text-[#86868b] font-semibold mb-2">디데이 이름</label>
+                            <input type="text" id="input-dday-title" class="input-dark mb-5" placeholder="예: 편입시험, 모의고사 등">
+                            
+                            <label class="block text-sm text-[#86868b] font-semibold mb-2">목표 날짜</label>
+                            <input type="date" id="input-dday-date" class="input-dark mb-2" value="${TODAY}">
+                        </div>
+                    `;
+                    openModal('디데이 추가', html, () => {
+                        const title = document.getElementById('input-dday-title').value.trim() || '목표일';
+                        const dateVal = document.getElementById('input-dday-date').value;
+                        if(dateVal) {
+                            ddays.push({ id: generateId('DD'), title, targetDate: dateVal });
+                            // 날짜순 정렬
+                            ddays.sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate));
+                            saveData();
+                            renderDdays();
+                        }
+                    });
+                    break;
+                }
+
+                case 'deleteDday': {
+                    ddays = ddays.filter(d => d.id !== target.dataset.id);
+                    saveData(); renderDdays();
+                    break;
+                }
+
                 case 'changeMonth': {
                     currentCalendarDate.setMonth(currentCalendarDate.getMonth() + parseInt(target.dataset.val));
                     renderCalendar();
@@ -1942,7 +2080,7 @@
                 }
                 
                 case 'exportData': {
-                    const data = { courses, lectures, dailyRecords, memos };
+                    const data = { courses, lectures, dailyRecords, memos, ddays };
                     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -2039,6 +2177,7 @@
                             if (data.courses && data.lectures && data.dailyRecords) {
                                 courses = data.courses; lectures = data.lectures; dailyRecords = data.dailyRecords;
                                 if(data.memos) memos = data.memos;
+                                if(data.ddays) ddays = data.ddays;
                                 saveData(); renderAll();
                                 showUndoToast('데이터가 성공적으로 복원되었습니다.', null, null, false);
                             } else { alert('올바른 백업 파일 형식이 아닙니다.'); }
