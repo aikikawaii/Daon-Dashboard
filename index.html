@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>학습 관리 대시보드</title>
+    <title>Daon's Dashboard</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -25,6 +25,7 @@
             letter-spacing: -0.01em;
             position: relative;
             overflow-x: hidden;
+            color-scheme: dark;
         }
 
         .ambient-glow-1 {
@@ -39,15 +40,15 @@
         }
 
         .card-squircle {
-            border-radius: 28px;
-            background-color: rgba(28, 28, 30, 0.4);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            border-radius: 32px;
+            background-color: rgba(28, 28, 30, 0.45);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
         }
         .inner-squircle {
-            border-radius: 18px;
+            border-radius: 20px;
             background-color: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -88,6 +89,9 @@
             transition: all 0.3s ease;
             box-sizing: border-box;
             font-size: 0.9rem;
+        }
+        .input-dark[type="date"] {
+            color-scheme: dark;
         }
         .input-dark:focus { 
             border-color: rgba(255, 255, 255, 0.3); 
@@ -178,17 +182,21 @@
         
         <header class="flex flex-col sm:flex-row justify-between items-start sm:items-end pb-5 gap-4">
             <div>
-                <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-1 flex items-center gap-3">
-                    학습 관리 대시보드
+                <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tighter mb-1 flex items-center gap-3">
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#ffffff] via-[#e5e5ea] to-[#8e8e93] drop-shadow-sm">Daon's Dashboard</span>
                     <span id="sync-status-indicator" class="text-xs font-medium px-2 py-1 rounded-md bg-[rgba(255,255,255,0.1)] text-[#86868b] flex items-center hidden transition-all duration-300">
                         <span id="cloud-icon" class="mr-1"></span>
                         <span id="cloud-text">연결 중...</span>
                     </span>
                 </h1>
-                <p class="text-sm text-[#86868b]">자동 로컬 저장 방식 및 개인 클라우드 실시간 동기화</p>
+                <p class="text-sm text-[#86868b] mt-1 font-medium tracking-wide">자동 로컬 저장 방식 및 개인 클라우드 실시간 동기화</p>
             </div>
-            <div class="flex flex-wrap items-center gap-3">
-                <a href="https://www.kimyoung.co.kr/offmegaky.asp" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-gradient-to-r from-[#e11d48] to-[#f43f5e] hover:from-[#be123c] hover:to-[#e11d48] text-white text-xs font-bold transition shadow-[0_4px_14px_rgba(225,29,72,0.4)] flex items-center gap-1.5">
+            <div class="flex flex-wrap items-center gap-2.5">
+                <a href="https://cafe.naver.com/kcidorcen" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-gradient-to-b from-[#03c75a] to-[#02b350] hover:from-[#02b350] hover:to-[#029a45] text-white text-xs font-bold transition shadow-[0_4px_14px_rgba(3,199,90,0.3)] flex items-center gap-1.5 border border-[#02b350]">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    독편사 바로가기
+                </a>
+                <a href="https://www.kimyoung.co.kr/offmegaky.asp" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-gradient-to-b from-[#e11d48] to-[#f43f5e] hover:from-[#be123c] hover:to-[#e11d48] text-white text-xs font-bold transition shadow-[0_4px_14px_rgba(225,29,72,0.4)] flex items-center gap-1.5 border border-[#e11d48]">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                     김영편입 바로가기
                 </a>
@@ -1765,11 +1773,12 @@
                 case 'openDdayModal': {
                     const html = `
                         <div>
-                            <label class="block text-sm text-[#86868b] font-semibold mb-2">디데이 이름</label>
-                            <input type="text" id="input-dday-title" class="input-dark mb-5" placeholder="예: 편입시험, 모의고사 등">
+                            <label class="block text-sm text-[#86868b] font-semibold mb-2 tracking-wide">디데이 이름</label>
+                            <input type="text" id="input-dday-title" class="input-dark mb-6 !py-3 !text-lg font-bold placeholder:font-normal placeholder:text-gray-500" placeholder="예: 편입시험, 모의고사 등">
                             
-                            <label class="block text-sm text-[#86868b] font-semibold mb-2">목표 날짜</label>
-                            <input type="date" id="input-dday-date" class="input-dark mb-2" value="${TODAY}">
+                            <label class="block text-sm text-[#86868b] font-semibold mb-2 tracking-wide">목표 날짜</label>
+                            <input type="date" id="input-dday-date" class="input-dark mb-2 !py-3 !text-lg font-bold w-full cursor-pointer hover:bg-[rgba(255,255,255,0.05)] transition-colors" value="${TODAY}">
+                            <p class="text-[11px] text-[#86868b] mt-2 font-medium">위 영역을 탭하여 캘린더에서 날짜를 선택하세요.</p>
                         </div>
                     `;
                     openModal('디데이 추가', html, () => {
