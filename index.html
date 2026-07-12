@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daon's Dashboard</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -28,16 +26,8 @@
             color-scheme: dark;
         }
 
-        .ambient-glow-1 {
-            position: fixed; top: -15%; left: -10%; width: 600px; height: 600px;
-            background: radial-gradient(circle, rgba(191,90,242,0.15) 0%, rgba(0,0,0,0) 70%);
-            z-index: -1; pointer-events: none;
-        }
-        .ambient-glow-2 {
-            position: fixed; bottom: -20%; right: -10%; width: 700px; height: 700px;
-            background: radial-gradient(circle, rgba(100,210,255,0.1) 0%, rgba(0,0,0,0) 70%);
-            z-index: -1; pointer-events: none;
-        }
+        .ambient-glow-1 { position: fixed; top: -15%; left: -10%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(191,90,242,0.15) 0%, rgba(0,0,0,0) 70%); z-index: -1; pointer-events: none; }
+        .ambient-glow-2 { position: fixed; bottom: -20%; right: -10%; width: 700px; height: 700px; background: radial-gradient(circle, rgba(100,210,255,0.1) 0%, rgba(0,0,0,0) 70%); z-index: -1; pointer-events: none; }
 
         .card-squircle {
             border-radius: 32px;
@@ -52,111 +42,45 @@
             background-color: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
-        .db-table {
-            border-collapse: separate;
-            border-spacing: 0;
-            width: 100%;
-        }
-        .db-table th, .db-table td {
-            padding: 1rem 1.25rem;
-            text-align: left;
-            vertical-align: middle;
-            white-space: nowrap;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .db-table th {
-            font-weight: 600;
-            color: #86868b;
-            font-size: 0.8125rem;
-            background-color: rgba(0, 0, 0, 0.2);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
+
+        .db-table { border-collapse: separate; border-spacing: 0; width: 100%; }
+        .db-table th, .db-table td { padding: 1rem 1.25rem; text-align: left; vertical-align: middle; white-space: nowrap; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .db-table th { font-weight: 600; color: #86868b; font-size: 0.8125rem; background-color: rgba(0, 0, 0, 0.2); text-transform: uppercase; letter-spacing: 0.05em; }
         .db-table th:first-child { border-top-left-radius: 18px; }
         .db-table th:last-child { border-top-right-radius: 18px; }
         .db-table tr:hover td { background-color: rgba(255, 255, 255, 0.04); }
         .db-table tr:last-child td { border-bottom: none; }
 
         .input-dark {
-            background-color: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
-            padding: 0.75rem 1rem;
-            border-radius: 14px;
-            width: 100%;
-            outline: none;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-            font-size: 0.9rem;
+            background-color: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;
+            padding: 0.75rem 1rem; border-radius: 14px; width: 100%; outline: none; transition: all 0.3s ease; box-sizing: border-box; font-size: 0.9rem;
         }
         .input-dark[type="date"] { color-scheme: dark; }
-        .input-dark:focus { 
-            border-color: rgba(255, 255, 255, 0.3); 
-            background-color: rgba(0, 0, 0, 0.5);
-            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
-        }
+        .input-dark:focus { border-color: rgba(255, 255, 255, 0.3); background-color: rgba(0, 0, 0, 0.5); box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05); }
 
         .custom-checkbox {
-            appearance: none;
-            width: 1.35rem;
-            height: 1.35rem;
-            background-color: rgba(255, 255, 255, 0.05);
-            border: 1.5px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            cursor: pointer;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            flex-shrink: 0;
+            appearance: none; width: 1.35rem; height: 1.35rem; background-color: rgba(255, 255, 255, 0.05); border: 1.5px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink: 0;
         }
-        .custom-checkbox:checked {
-            background-color: #f5f5f7;
-            border-color: #f5f5f7;
-            box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
-        }
-        .custom-checkbox:checked::after {
-            content: ''; width: 6px; height: 11px; border: solid #000; border-width: 0 2px 2px 0; transform: rotate(45deg) translateY(-1px);
-        }
+        .custom-checkbox:checked { background-color: #f5f5f7; border-color: #f5f5f7; box-shadow: 0 0 12px rgba(255, 255, 255, 0.4); }
+        .custom-checkbox:checked::after { content: ''; width: 6px; height: 11px; border: solid #000; border-width: 0 2px 2px 0; transform: rotate(45deg) translateY(-1px); }
 
         .truncate-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
         .toast-enter-active { transform: translateY(0); opacity: 1; transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1); }
         .toast-exit-active { transform: translateY(20px); opacity: 0; transition: all 300ms ease-in; }
 
-        .accordion-grid {
-            display: grid;
-            transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-        }
-        .accordion-grid.closed { grid-template-rows: 0fr; opacity: 0.3; pointer-events: none; }
+        .accordion-grid { display: grid; transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease; }
+        .accordion-grid.closed { grid-template-rows: 0fr; opacity: 0; pointer-events: none; }
         .accordion-grid.open { grid-template-rows: 1fr; opacity: 1; pointer-events: auto; }
         .accordion-inner { overflow: hidden; }
 
-        .drag-over {
-            background-color: rgba(255, 255, 255, 0.1) !important;
-            border-color: rgba(255, 255, 255, 0.5) !important;
-        }
+        .drag-over { background-color: rgba(255, 255, 255, 0.1) !important; border-color: rgba(255, 255, 255, 0.5) !important; }
         .draggable-item { cursor: grab; touch-action: pan-y; }
         .draggable-item:active { cursor: grabbing; transform: scale(0.98); }
 
-        .calendar-wrapper {
-            background-color: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            overflow: hidden;
-            display: grid;
-            grid-template-columns: repeat(7, minmax(0, 1fr));
-            gap: 1px;
-        }
-        .calendar-cell {
-            background-color: rgba(28, 28, 30, 0.8);
-            min-height: 110px;
-            padding: 0.35rem;
-            display: flex;
-            flex-direction: column;
-            transition: background-color 0.2s ease;
-            min-width: 0;
-        }
+        .calendar-wrapper { background-color: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; overflow: hidden; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; }
+        .calendar-cell { background-color: rgba(28, 28, 30, 0.8); min-height: 110px; padding: 0.35rem; display: flex; flex-direction: column; transition: background-color 0.2s ease; min-width: 0; }
         .calendar-cell:hover { background-color: rgba(44, 44, 46, 0.9); }
         .calendar-cell.today-cell { background-color: rgba(10, 132, 255, 0.08); }
         
@@ -184,20 +108,16 @@
             </div>
             <div class="flex flex-wrap items-center gap-2.5">
                 <a href="https://cafe.naver.com/kcidorcen" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-gradient-to-b from-[#03c75a] to-[#02b350] hover:from-[#02b350] hover:to-[#029a45] text-white text-xs font-bold transition shadow-[0_4px_14px_rgba(3,199,90,0.3)] flex items-center gap-1.5 border border-[#02b350]">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                    독편사 바로가기
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg> 독편사 바로가기
                 </a>
                 <a href="https://www.kimyoung.co.kr/offmegaky.asp" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-gradient-to-b from-[#e11d48] to-[#f43f5e] hover:from-[#be123c] hover:to-[#e11d48] text-white text-xs font-bold transition shadow-[0_4px_14px_rgba(225,29,72,0.4)] flex items-center gap-1.5 border border-[#e11d48]">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                    김영편입 바로가기
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg> 김영편입 바로가기
                 </a>
                 <button data-action="refreshPage" class="px-4 py-2 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] text-[#86868b] hover:text-white text-xs font-bold transition shadow-sm flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    새로고침
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> 새로고침
                 </button>
                 <label class="px-4 py-2 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] text-xs font-bold text-[#86868b] hover:text-white transition cursor-pointer shadow-sm">
-                    데이터 복원 (JSON)
-                    <input type="file" class="hidden" accept=".json" data-action="importData">
+                    데이터 복원 (JSON) <input type="file" class="hidden" accept=".json" data-action="importData">
                 </label>
                 <button data-action="exportData" class="px-4 py-2 rounded-xl bg-[rgba(10,132,255,0.15)] border border-[rgba(10,132,255,0.2)] hover:bg-[#0a84ff] text-[#0a84ff] hover:text-white text-xs font-bold transition shadow-sm">
                     데이터 백업
@@ -205,32 +125,29 @@
             </div>
         </header>
 
-        <!-- 탭 네비게이션 -->
         <div class="flex space-x-2 pb-2 border-b border-[rgba(255,255,255,0.08)] overflow-x-auto hide-scrollbar">
             <button data-action="switchTab" data-tab="dashboard" class="tab-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all bg-[rgba(255,255,255,0.1)] text-white shadow-sm flex-shrink-0">Dashboard</button>
             <button data-action="switchTab" data-tab="curriculum" class="tab-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all text-[#86868b] hover:bg-[rgba(255,255,255,0.05)] hover:text-white flex-shrink-0">Curriculum</button>
             <button data-action="switchTab" data-tab="database" class="tab-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all text-[#86868b] hover:bg-[rgba(255,255,255,0.05)] hover:text-white flex-shrink-0">Master DB</button>
         </div>
 
-        <!-- 탭 1: 대시보드 (메인 화면) -->
         <div id="tab-dashboard" class="tab-content space-y-6 block pb-12">
             
-            <!-- D-DAY 섹션 -->
+            <!-- D-DAY -->
             <div class="flex items-center gap-3 overflow-x-auto hide-scrollbar pb-2 pt-1" id="view-ddays"></div>
 
-            <!-- 1. 남은 강의 & 학습 캘린더 (최상단) -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                <!-- 남은 강의 -->
-                <div class="card-squircle p-5 lg:p-7 col-span-1 shadow-sm flex flex-col h-[400px] lg:h-auto lg:max-h-[600px]">
+                <!-- Todo Lectures (Drag Source) -->
+                <div class="card-squircle p-5 lg:p-7 col-span-1 shadow-sm flex flex-col h-[500px] lg:h-auto lg:max-h-[650px]">
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-bold text-white tracking-tight">남은 강의</h2>
                         <span class="text-[10px] font-bold text-[#86868b] bg-[rgba(255,255,255,0.05)] px-2.5 py-1 rounded-full border border-[rgba(255,255,255,0.05)]">Drag & Drop</span>
                     </div>
                     <div id="todo-tabs-container" class="mb-4"></div>
-                    <ul id="view-todo-lectures" class="overflow-y-auto pr-1 flex-1 min-h-0"></ul>
+                    <ul id="view-todo-lectures" class="overflow-y-auto pr-2 flex-1 space-y-3 min-h-0 hide-scrollbar"></ul>
                 </div>
 
-                <!-- 학습 캘린더 -->
+                <!-- Study Calendar (Drop Target) -->
                 <div class="card-squircle p-5 lg:p-7 col-span-1 lg:col-span-2 shadow-sm flex flex-col">
                     <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
                         <h2 class="text-xl font-bold text-white tracking-tight">학습 캘린더</h2>
@@ -247,7 +164,6 @@
                 </div>
             </div>
 
-            <!-- 2. Charts (중단) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div class="card-squircle p-6 shadow-sm flex flex-col items-center">
                     <h3 class="text-xs font-bold text-[#86868b] mb-2 w-full text-left uppercase tracking-widest">Today's Focus</h3>
@@ -255,36 +171,30 @@
                         <canvas id="chartDaily"></canvas>
                         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                             <span id="dailyTotalText" class="text-2xl font-bold text-white mt-4 tracking-tight">0m</span>
+                            <div id="dailySplitText" class="flex items-center space-x-1 text-[10px] font-bold mt-1"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="card-squircle p-6 shadow-sm flex flex-col">
                     <h3 class="text-xs font-bold text-[#86868b] mb-4 uppercase tracking-widest">Weekly Trends</h3>
-                    <div class="w-full flex-1 min-h-[160px]">
-                        <canvas id="chartWeekly"></canvas>
-                    </div>
+                    <div class="w-full flex-1 min-h-[160px]"><canvas id="chartWeekly"></canvas></div>
                 </div>
 
                 <div class="card-squircle p-6 shadow-sm flex flex-col">
                     <h3 class="text-xs font-bold text-[#86868b] mb-4 uppercase tracking-widest" id="monthly-chart-title">Monthly Progress</h3>
-                    <div class="w-full flex-1 min-h-[160px]">
-                        <canvas id="chartMonthly"></canvas>
-                    </div>
+                    <div class="w-full flex-1 min-h-[160px]"><canvas id="chartMonthly"></canvas></div>
                 </div>
             </div>
 
-            <!-- 3. Pomo, Memo, Streak (하단) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <!-- Pomodoro Timer -->
+                <!-- Pomodoro -->
                 <div class="card-squircle p-6 shadow-sm flex flex-col items-center justify-between">
                     <div class="w-full flex justify-between items-center mb-2">
                         <h2 class="text-lg font-bold text-white tracking-tight">뽀모도로 타이머</h2>
                         <span id="pomo-status" class="text-[10px] font-bold px-2.5 py-1 bg-[rgba(10,132,255,0.15)] text-[#0a84ff] border border-[rgba(10,132,255,0.2)] rounded-full">대기 중</span>
                     </div>
-                    
                     <div id="pomo-display" class="text-6xl font-mono font-extrabold text-white tracking-tight my-4 drop-shadow-[0_0_15px_rgba(10,132,255,0.3)] transition-colors duration-300">25:00</div>
-                    
                     <div class="flex space-x-4 mb-5 w-full justify-center">
                         <div class="flex flex-col items-center">
                             <label class="text-[10px] text-[#86868b] uppercase font-bold mb-1.5 tracking-wider">Work (m)</label>
@@ -295,7 +205,6 @@
                             <input type="number" id="pomo-break-input" value="5" min="1" class="input-dark text-center w-[70px] !py-1.5 !text-sm">
                         </div>
                     </div>
-                    
                     <div class="flex space-x-3 w-full">
                         <button id="pomo-btn-start" data-action="startPomo" class="flex-1 bg-[#0a84ff] hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition shadow-[0_0_15px_rgba(10,132,255,0.3)]">시작</button>
                         <button id="pomo-btn-pause" data-action="pausePomo" class="flex-1 bg-[#ff9f0a] hover:bg-orange-500 text-white font-bold py-2.5 rounded-xl transition shadow-[0_0_15px_rgba(255,159,10,0.3)] hidden">일시정지</button>
@@ -303,7 +212,7 @@
                     </div>
                 </div>
 
-                <!-- Quick Memo -->
+                <!-- Memo -->
                 <div class="card-squircle p-6 shadow-sm flex flex-col h-[300px] md:h-auto">
                     <h2 class="text-lg font-bold text-white tracking-tight mb-4">퀵 메모 & 체크리스트</h2>
                     <div class="flex space-x-2 mb-4">
@@ -313,7 +222,7 @@
                     <ul id="view-memos" class="overflow-y-auto pr-2 space-y-2 hide-scrollbar flex-1"></ul>
                 </div>
 
-                <!-- Streak & Heatmap -->
+                <!-- Streak Heatmap -->
                 <div class="card-squircle p-6 shadow-sm flex flex-col justify-between h-[300px] md:h-auto">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-bold text-white tracking-tight">연속 학습 기록</h2>
@@ -321,11 +230,9 @@
                             <span id="streak-counter" class="text-sm font-bold text-[#30d158] tracking-tight">🔥 0일째</span>
                         </div>
                     </div>
-                    
                     <div class="w-full overflow-x-auto hide-scrollbar flex-1 flex flex-col justify-end" id="heatmap-scroll-wrapper">
                         <div id="heatmap-container" class="grid grid-rows-7 grid-flow-col gap-1 sm:gap-1.5 w-max pb-1"></div>
                     </div>
-                    
                     <div class="flex justify-end items-center space-x-2 mt-4 text-[10px] text-[#86868b] font-medium tracking-wide">
                         <span>Less</span>
                         <div class="w-2.5 h-2.5 rounded-[2px] bg-[#1c1c1e] border border-[rgba(255,255,255,0.05)]"></div>
@@ -337,23 +244,19 @@
                 </div>
             </div>
             
-            <!-- 4. Course Gallery (최하단) -->
             <div class="card-squircle p-6 lg:p-8 shadow-sm">
                 <h2 class="text-xl font-bold mb-6 text-white tracking-tight">과목별 진도 현황</h2>
                 <div id="view-course-gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"></div>
             </div>
         </div>
 
-        <!-- 탭 2: Curriculum Manager -->
         <div id="tab-curriculum" class="tab-content hidden pb-24">
             <section class="space-y-6 pt-4">
                 <div class="flex flex-wrap justify-between items-end gap-2 border-b border-[rgba(255,255,255,0.08)] pb-4">
                     <h2 class="text-3xl font-bold text-white tracking-tight">Curriculum Manager</h2>
                     <p class="text-sm text-[#86868b]">과목과 강좌를 체계적으로 관리하세요.</p>
                 </div>
-                
                 <div id="curriculum-manager" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
-                
                 <div class="pt-6 flex justify-center">
                     <button data-action="openCourseModal" class="px-6 py-3.5 rounded-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] text-white font-bold transition flex items-center space-x-2 backdrop-blur-md shadow-lg">
                         <span class="text-xl leading-none mb-0.5">+</span>
@@ -363,13 +266,10 @@
             </section>
         </div>
 
-        <!-- 탭 3: Master Databases -->
         <div id="tab-database" class="tab-content hidden pb-24">
             <section class="space-y-8 pt-4">
                 <h2 class="text-3xl font-bold text-white tracking-tight mb-8">Master Databases</h2>
-
                 <div class="space-y-10">
-                    <!-- Courses Table -->
                     <div>
                         <div class="flex justify-between items-center cursor-pointer mb-4 group px-2" data-action="toggleMasterDbSection" data-section="courses">
                             <h3 class="text-sm font-bold text-[#86868b] uppercase tracking-widest group-hover:text-white transition">Courses</h3>
@@ -386,8 +286,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Lectures Table -->
                     <div>
                         <div class="flex justify-between items-center cursor-pointer mb-4 group px-2" data-action="toggleMasterDbSection" data-section="lectures">
                             <h3 class="text-sm font-bold text-[#86868b] uppercase tracking-widest group-hover:text-white transition">Lectures</h3>
@@ -399,8 +297,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Daily Records Table -->
                     <div>
                         <div class="flex justify-between items-center cursor-pointer mb-4 group px-2" data-action="toggleMasterDbSection" data-section="daily">
                             <h3 class="text-sm font-bold text-[#86868b] uppercase tracking-widest group-hover:text-white transition">Daily Records</h3>
@@ -412,12 +308,8 @@
                                     <table class="db-table">
                                         <thead>
                                             <tr>
-                                                <th class="w-24 text-center">날짜</th>
-                                                <th>목표</th>
-                                                <th class="w-20 text-right">인강</th>
-                                                <th class="w-24 text-right">자습</th>
-                                                <th class="w-28 text-right text-gray-200">총합</th>
-                                                <th class="w-20 text-center">달성</th>
+                                                <th class="w-24 text-center">날짜</th><th>목표</th><th class="w-20 text-right">인강</th>
+                                                <th class="w-24 text-right">자습</th><th class="w-28 text-right text-gray-200">총합</th><th class="w-20 text-center">달성</th>
                                             </tr>
                                         </thead>
                                         <tbody id="db-daily"></tbody>
@@ -437,7 +329,7 @@
         <div class="bg-[rgba(28,28,30,0.8)] border border-[rgba(255,255,255,0.1)] rounded-[32px] p-6 sm:p-8 w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <h2 id="modal-title" class="text-2xl font-bold mb-6 pb-4 border-b border-[rgba(255,255,255,0.1)] text-white tracking-tight">Title</h2>
             <div id="modal-body" class="space-y-5 sm:space-y-6"></div>
-            <div class="mt-8 flex justify-end space-x-3 pt-4 border-t border-[rgba(255,255,255,0.05)]">
+            <div class="mt-8 flex justify-end space-x-3 pt-4">
                 <button data-action="closeModal" class="px-5 py-2.5 rounded-full bg-[rgba(255,255,255,0.05)] text-gray-300 hover:text-white hover:bg-[rgba(255,255,255,0.1)] transition font-semibold">취소</button>
                 <button id="modal-save-btn" class="px-6 py-2.5 rounded-full bg-white text-black font-bold hover:bg-gray-200 transition shadow-[0_0_15px_rgba(255,255,255,0.2)]">저장</button>
             </div>
@@ -445,101 +337,122 @@
     </div>
 
     <script>
-        // --- DOM Element Cache & Initialization ---
-        const DOM = {};
+        const DOM = {
+            viewCourseGallery: null, todoTabsContainer: null, viewTodoLectures: null, calendarMonthLabel: null, viewCalendar: null,
+            curriculumManager: null, dbCourses: null, dbLecturesContainer: null, dbDaily: null, heatmapContainer: null,
+            streakCounter: null, viewMemos: null, viewDdays: null, toastContainer: null, modalOverlay: null, modalTitle: null,
+            modalBody: null, modalSaveBtn: null, pomoDisplay: null, pomoStatus: null, pomoBtnStart: null, pomoBtnPause: null,
+            pomoWorkInput: null, pomoBreakInput: null, dailyTotalText: null, monthlyChartTitle: null, syncIndicator: null
+        };
+
         function initDOM() {
-            const ids = [
-                'view-course-gallery', 'todo-tabs-container', 'view-todo-lectures', 'calendar-month-label',
-                'view-calendar', 'curriculum-manager', 'db-courses', 'db-lectures-container', 'db-daily',
-                'heatmap-container', 'streak-counter', 'view-memos', 'view-ddays', 'toast-container',
-                'modal-overlay', 'modal-title', 'modal-body', 'modal-save-btn', 'pomo-display',
-                'pomo-status', 'pomo-btn-start', 'pomo-btn-pause', 'pomo-work-input', 'pomo-break-input',
-                'dailyTotalText', 'monthly-chart-title', 'sync-status-indicator'
-            ];
-            ids.forEach(id => {
-                const key = id.replace(/-([a-z])/g, g => g[1].toUpperCase());
-                DOM[key] = document.getElementById(id);
-            });
+            for (const key in DOM) {
+                const elementId = key.replace(/([A-Z])/g, "-$1").toLowerCase().replace(/^-/, '');
+                DOM[key] = document.getElementById(elementId) || document.getElementById(key);
+            }
+            DOM.viewCourseGallery = document.getElementById('view-course-gallery');
+            DOM.todoTabsContainer = document.getElementById('todo-tabs-container');
+            DOM.viewTodoLectures = document.getElementById('view-todo-lectures');
+            DOM.calendarMonthLabel = document.getElementById('calendar-month-label');
+            DOM.viewCalendar = document.getElementById('view-calendar');
+            DOM.curriculumManager = document.getElementById('curriculum-manager');
+            DOM.dbCourses = document.getElementById('db-courses');
+            DOM.dbLecturesContainer = document.getElementById('db-lectures-container');
+            DOM.dbDaily = document.getElementById('db-daily');
+            DOM.heatmapContainer = document.getElementById('heatmap-container');
+            DOM.streakCounter = document.getElementById('streak-counter');
+            DOM.viewMemos = document.getElementById('view-memos');
+            DOM.viewDdays = document.getElementById('view-ddays');
+            DOM.toastContainer = document.getElementById('toast-container');
+            DOM.modalOverlay = document.getElementById('modal-overlay');
+            DOM.modalTitle = document.getElementById('modal-title');
+            DOM.modalBody = document.getElementById('modal-body');
+            DOM.modalSaveBtn = document.getElementById('modal-save-btn');
+            DOM.pomoDisplay = document.getElementById('pomo-display');
+            DOM.pomoStatus = document.getElementById('pomo-status');
+            DOM.pomoBtnStart = document.getElementById('pomo-btn-start');
+            DOM.pomoBtnPause = document.getElementById('pomo-btn-pause');
+            DOM.pomoWorkInput = document.getElementById('pomo-work-input');
+            DOM.pomoBreakInput = document.getElementById('pomo-break-input');
+            DOM.dailyTotalText = document.getElementById('dailyTotalText');
+            DOM.monthlyChartTitle = document.getElementById('monthly-chart-title');
+            DOM.syncIndicator = document.getElementById('sync-status-indicator');
         }
 
         const esc = (str) => {
             if (!str) return '';
-            return String(str).replace(/[&<>"']/g, match => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-            }[match]));
+            return String(str).replace(/[&<>"']/g, match => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[match]));
         };
         const generateId = (prefix) => prefix + '_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID().split('-')[0] : Math.random().toString(36).substring(2, 10));
 
-        const getTodayStr = () => {
-            const d = new Date();
-            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        };
+        const getTodayStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
         const TODAY = getTodayStr();
         let currentCalendarDate = new Date(); 
 
         const SUBJECT_THEMES = {
-            '수학': { text: '#bf5af2', dot: '#bf5af2' },
-            '물리': { text: '#64d2ff', dot: '#64d2ff' },
-            '영어': { text: '#ffd60a', dot: '#ffd60a' },
-            '화학': { text: '#ff375f', dot: '#ff375f' },
-            '기타': { text: '#8e8e93', dot: '#8e8e93' }
+            '수학': { bg: 'rgba(191, 90, 242, 0.15)', text: '#bf5af2', border: 'rgba(191, 90, 242, 0.25)', dot: '#bf5af2' },
+            '물리': { bg: 'rgba(100, 210, 255, 0.15)', text: '#64d2ff', border: 'rgba(100, 210, 255, 0.25)', dot: '#64d2ff' },
+            '영어': { bg: 'rgba(255, 214, 10, 0.15)', text: '#ffd60a', border: 'rgba(255, 214, 10, 0.25)', dot: '#ffd60a' },
+            '화학': { bg: 'rgba(255, 55, 95, 0.15)', text: '#ff375f', border: 'rgba(255, 55, 95, 0.25)', dot: '#ff375f' },
+            '기타': { bg: 'rgba(142, 142, 147, 0.15)', text: '#8e8e93', border: 'rgba(142, 142, 147, 0.25)', dot: '#8e8e93' }
         };
         const subjects = Object.keys(SUBJECT_THEMES);
-        
-        // Course 고유 식별 색상 풀
+
         const COURSE_COLORS = [
             '#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#00C7BE',
-            '#32ADE6', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55'
+            '#32ADE6', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55',
+            '#FF6B22', '#F1C40F', '#A2D729', '#1ABC9C', '#2ECC71',
+            '#3498DB', '#9B59B6', '#8E44AD', '#E67E22', '#E74C3C'
         ];
-        function getRandomColor() {
-            return COURSE_COLORS[Math.floor(Math.random() * COURSE_COLORS.length)];
+
+        function getStringColor(str) {
+            if (!str) return COURSE_COLORS[0];
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+            hash = Math.abs(hash);
+            return COURSE_COLORS[hash % COURSE_COLORS.length];
         }
 
         const defaultCourses = [
-            { id: 'C1', subject: '수학', title: '미적분학 완벽 마스터', color: '#AF52DE' },
-            { id: 'C2', subject: '물리', title: '일반물리학 1 (역학)', color: '#007AFF' },
-            { id: 'C3', subject: '수학', title: '선형대수학 기초', color: '#FF9500' }
+            { id: 'C1', subject: '수학', title: '미적분학 완벽 마스터', color: getStringColor('미적분학 완벽 마스터') },
+            { id: 'C2', subject: '물리', title: '일반물리학 1 (역학)', color: getStringColor('일반물리학 1 (역학)') }
         ];
         const defaultLectures = [
             { id: 'L1', title: '1강. 함수의 극한과 연속', courseId: 'C1', status: '완료', duration: 50 },
             { id: 'L2', title: '2강. 로피탈 정리', courseId: 'C1', status: '미시작', duration: 60 },
             { id: 'L3', title: '1강. 벡터와 운동학 기초', courseId: 'C2', status: '미시작', duration: 45 },
-            { id: 'L4', title: '1강. 행렬과 벡터공간', courseId: 'C3', status: '미시작', duration: 55 },
         ];
-        const defaultMemos = [
-            { id: generateId('M'), text: '기출문제집 주문하기', completed: false },
-            { id: generateId('M'), text: '물리 공식 노트 정리', completed: true }
-        ];
-        const defaultDdays = [
-            { id: generateId('DD'), title: '편입시험', targetDate: '2026-12-20' }
-        ];
+        const defaultMemos = [ { id: generateId('M'), text: '기출문제집 주문하기', completed: false } ];
+        const defaultDdays = [ { id: generateId('DD'), title: '편입시험', targetDate: '2026-12-20' } ];
 
-        // 데이터 상태 변수
-        let courses = [];
-        let lectures = [];
-        let dailyRecords = [];
-        let memos = [];
-        let ddays = [];
+        let courses = [], lectures = [], dailyRecords = [], memos = [], ddays = [];
+        let pendingDeletes = new Set();
+        let toastTimers = {};
+        let closedDbCourses = new Set(); 
+        let masterDbFoldState = { courses: false, lectures: false, daily: false };
+        let currentModalDate = null;
+        let currentModalTasks = []; 
+        let currentSubjectTab = null; 
+        let openTodoCourses = new Set(); 
+        let courseViewCounts = {};
 
         window.showSyncIndicator = function(isLoading, isError = false) {
-            if(!DOM.syncStatusIndicator) return;
-            DOM.syncStatusIndicator.classList.remove('hidden');
+            if(!DOM.syncIndicator) return;
+            DOM.syncIndicator.classList.remove('hidden');
             if(isError) {
-                DOM.syncStatusIndicator.innerHTML = `<span class="text-rose-500 font-bold">연결 오류</span>`;
+                DOM.syncIndicator.innerHTML = `<span class="text-rose-500 font-bold">연결 오류</span>`;
                 return;
             }
             if(isLoading) {
-                DOM.syncStatusIndicator.innerHTML = `<svg class="w-3 h-3 mr-1 text-[#86868b] sync-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> 동기화 중...`;
+                DOM.syncIndicator.innerHTML = `<svg class="w-3 h-3 mr-1 text-[#86868b] sync-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> 동기화 중...`;
             } else {
-                DOM.syncStatusIndicator.innerHTML = `<svg class="w-3 h-3 mr-1 text-[#30d158]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> 동기화됨`;
+                DOM.syncIndicator.innerHTML = `<svg class="w-3 h-3 mr-1 text-[#30d158]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> 동기화됨`;
             }
         };
 
         function loadLocalData() {
             const rawCourses = JSON.parse(localStorage.getItem('courses')) || defaultCourses;
-            // 과거 데이터 하위 호환: color가 없는 경우 부여
-            courses = rawCourses.map(c => ({ ...c, color: c.color || getRandomColor() }));
-            
+            courses = rawCourses.map(c => ({ ...c, color: c.color || getStringColor(c.title) }));
             lectures = JSON.parse(localStorage.getItem('lectures')) || defaultLectures;
             
             let rawDailyRecords = JSON.parse(localStorage.getItem('dailyRecords')) || [];
@@ -554,12 +467,20 @@
 
             memos = JSON.parse(localStorage.getItem('memos')) || defaultMemos;
             ddays = JSON.parse(localStorage.getItem('ddays')) || defaultDdays;
+            
+            const activeSubjects = [...new Set(courses.map(c => c.subject))];
+            if (activeSubjects.length > 0 && !currentSubjectTab) {
+                currentSubjectTab = activeSubjects[0];
+                const firstCourse = courses.find(c => c.subject === currentSubjectTab);
+                if (firstCourse) openTodoCourses.add(firstCourse.id);
+            }
+            
             renderAll();
         }
 
         window.updateFromCloud = (data) => {
             if(data) {
-                if(data.courses) courses = data.courses.map(c => ({ ...c, color: c.color || getRandomColor() }));
+                if(data.courses) courses = data.courses.map(c => ({ ...c, color: c.color || getStringColor(c.title) }));
                 if(data.lectures) lectures = data.lectures;
                 if(data.dailyRecords) dailyRecords = data.dailyRecords;
                 if(data.memos) memos = data.memos;
@@ -570,14 +491,11 @@
                 localStorage.setItem('dailyRecords', JSON.stringify(dailyRecords));
                 localStorage.setItem('memos', JSON.stringify(memos));
                 localStorage.setItem('ddays', JSON.stringify(ddays));
-                
                 renderAll();
             }
         };
 
-        window.getExportData = () => {
-            return { courses, lectures, dailyRecords, memos, ddays };
-        };
+        window.getExportData = () => ({ courses, lectures, dailyRecords, memos, ddays });
 
         function saveData(syncToCloud = true) {
             localStorage.setItem('courses', JSON.stringify(courses));
@@ -591,19 +509,6 @@
             }
         }
 
-        let pendingDeletes = new Set();
-        let toastTimers = {};
-        
-        let closedDbCourses = new Set(); 
-        let masterDbFoldState = { courses: false, lectures: false, daily: false }; 
-        
-        let currentModalDate = null;
-        let currentModalTasks = []; 
-        let currentSubjectTab = null; 
-        let openTodoCourses = new Set(); // 남은 강의 강좌별 아코디언 상태
-
-        let courseViewCounts = {};
-
         const getCourses = () => courses.filter(c => !pendingDeletes.has(c.id));
         const getLectures = () => lectures.filter(l => !pendingDeletes.has(l.id) && !pendingDeletes.has(l.courseId));
         const getDailyRecords = () => [...dailyRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -612,9 +517,8 @@
             const map = {};
             const lecs = getLectures();
             for (let i = 0; i < lecs.length; i++) {
-                const l = lecs[i];
-                if(!map[l.courseId]) map[l.courseId] = [];
-                map[l.courseId].push(l);
+                if(!map[lecs[i].courseId]) map[lecs[i].courseId] = [];
+                map[lecs[i].courseId].push(lecs[i]);
             }
             return map;
         };
@@ -622,24 +526,18 @@
         const getRecordsMap = () => {
             const map = {};
             const records = getDailyRecords();
-            for (let i = 0; i < records.length; i++) {
-                map[records[i].date] = records[i];
-            }
+            for (let i = 0; i < records.length; i++) map[records[i].date] = records[i];
             return map;
         };
 
-        // --- Core Helpers ---
         const getTheme = (subj) => SUBJECT_THEMES[subj] || SUBJECT_THEMES['기타'];
         const getCourseName = id => getCourses().find(c => c.id === id)?.title || '-';
-        const getCourseColor = id => getCourses().find(c => c.id === id)?.color || '#bf5af2';
         
         function getCourseProgress(lecsMap, courseId) {
             const courseLecs = lecsMap[courseId] || [];
             if (courseLecs.length === 0) return 0;
             let completed = 0;
-            for (let i = 0; i < courseLecs.length; i++) {
-                if (courseLecs[i].status === '완료') completed++;
-            }
+            for (let i = 0; i < courseLecs.length; i++) if (courseLecs[i].status === '완료') completed++;
             return Math.round((completed / courseLecs.length) * 100);
         }
 
@@ -653,8 +551,11 @@
         }
 
         function getShortLectureName(lecture) {
+            const course = getCourses().find(c => c.id === lecture.courseId);
+            const subjChar = course && course.subject ? course.subject.charAt(0) : '';
             const match = lecture.title.match(/(\d+강)/);
-            return match ? match[1] : lecture.title.split(/[\s.]+/)[0];
+            const lecPart = match ? match[1] : lecture.title.split(/[\s.]+/)[0];
+            return subjChar ? `${subjChar} ${lecPart}` : lecPart;
         }
 
         function getDailyTaskStats(record) {
@@ -663,9 +564,8 @@
             let allCompleted = true;
             let goalsArr = [];
             
-            if (record.tasks.length === 0) {
-                allCompleted = false;
-            } else {
+            if (record.tasks.length === 0) allCompleted = false;
+            else {
                 for (let i = 0; i < record.tasks.length; i++) {
                     const t = record.tasks[i];
                     goalsArr.push(t.title);
@@ -703,7 +603,6 @@
         function updatePomoDisplay() {
             if(!DOM.pomoDisplay || !DOM.pomoStatus) return;
             DOM.pomoDisplay.innerText = formatPomoTime(pomoTime);
-            
             if(isPomoWorking) {
                 DOM.pomoStatus.innerText = "🎯 집중 시간";
                 DOM.pomoStatus.className = "text-[10px] font-bold px-2.5 py-1 bg-[rgba(10,132,255,0.15)] text-[#0a84ff] border border-[rgba(10,132,255,0.2)] rounded-full transition-colors duration-300";
@@ -719,7 +618,6 @@
             if(isPomoRunning) return;
             const workMins = parseInt(DOM.pomoWorkInput.value) || 25;
             const breakMins = parseInt(DOM.pomoBreakInput.value) || 5;
-            
             isPomoRunning = true;
             DOM.pomoBtnStart.classList.add('hidden');
             DOM.pomoBtnPause.classList.remove('hidden');
@@ -777,9 +675,7 @@
         }
         window.handleDragLeave = function(event) { 
             const target = event.currentTarget;
-            if (target.classList.contains('calendar-cell')) {
-                target.classList.remove('drag-over'); 
-            }
+            if (target.classList.contains('calendar-cell')) target.classList.remove('drag-over'); 
         }
         
         window.processDrop = function(payloadJson, targetDateStr, targetTaskId = null) {
@@ -792,9 +688,7 @@
                     if (lecture) {
                         let record = dailyRecords.find(d => d.date === targetDateStr);
                         const shortName = getShortLectureName(lecture);
-                        const newTask = {
-                            id: generateId('T'), type: 'lecture', title: shortName, time: lecture.duration || 0, completed: false, refId: lecture.id
-                        };
+                        const newTask = { id: generateId('T'), type: 'lecture', title: shortName, time: lecture.duration || 0, completed: false, refId: lecture.id };
                         if (!record) {
                             record = { id: generateId('D'), date: targetDateStr, tasks: [] };
                             dailyRecords.push(record);
@@ -814,14 +708,12 @@
                         const taskIdx = sourceRecord.tasks.findIndex(t => t.id === payload.taskId);
                         if (taskIdx > -1) {
                             if (sourceRecord.date !== targetDateStr) {
-                                // 다른 날짜로 이동
                                 const taskToMove = sourceRecord.tasks.splice(taskIdx, 1)[0];
                                 let targetRecord = dailyRecords.find(d => d.date === targetDateStr);
                                 if (!targetRecord) {
                                     targetRecord = { id: generateId('D'), date: targetDateStr, tasks: [] };
                                     dailyRecords.push(targetRecord);
                                 }
-                                
                                 if (targetTaskId) {
                                     const targetIdx = targetRecord.tasks.findIndex(t => t.id === targetTaskId);
                                     targetRecord.tasks.splice(targetIdx !== -1 ? targetIdx : targetRecord.tasks.length, 0, taskToMove);
@@ -830,15 +722,10 @@
                                 }
                                 updated = true;
                             } else if (sourceRecord.date === targetDateStr && targetTaskId && payload.taskId !== targetTaskId) {
-                                // 동일 날짜 내 순서 변경
                                 const taskToMove = sourceRecord.tasks.splice(taskIdx, 1)[0];
                                 const adjustedTargetIdx = sourceRecord.tasks.findIndex(t => t.id === targetTaskId);
-                                
-                                if (adjustedTargetIdx > -1) {
-                                    sourceRecord.tasks.splice(adjustedTargetIdx, 0, taskToMove);
-                                } else {
-                                    sourceRecord.tasks.push(taskToMove);
-                                }
+                                if (adjustedTargetIdx > -1) sourceRecord.tasks.splice(adjustedTargetIdx, 0, taskToMove);
+                                else sourceRecord.tasks.push(taskToMove);
                                 updated = true;
                             }
                         }
@@ -846,11 +733,7 @@
                 }
 
                 if (updated) {
-                    saveData();
-                    renderCalendar();
-                    renderCharts();
-                    renderMasterDB();
-                    renderHeatmapAndStreak();
+                    saveData(); renderCalendar(); renderCharts(); renderMasterDB(); renderHeatmapAndStreak();
                 }
             } catch(e) {
                 console.error("Drop process error", e);
@@ -863,7 +746,6 @@
             if(cell) cell.classList.remove('drag-over');
             
             const payload = event.dataTransfer.getData('text/plain');
-            
             const targetItem = event.target.closest('.draggable-item');
             const targetTaskId = targetItem ? targetItem.dataset.taskId : null;
             
@@ -871,18 +753,14 @@
         }
 
         let touchTimer = null;
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let activeTouchGhost = null;
-        let activeTouchPayload = null;
-        let lastTouchTarget = null;
-        let currentDragTarget = null;
+        let touchStartX = 0, touchStartY = 0;
+        let activeTouchGhost = null, activeTouchPayload = null;
+        let lastTouchTarget = null, currentDragTarget = null;
         let isDragging = false; 
 
         window.handleTouchStartList = function(event, type, sourceId, taskId) {
             const touch = event.touches[0];
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
+            touchStartX = touch.clientX; touchStartY = touch.clientY;
             currentDragTarget = event.currentTarget;
             isDragging = false;
             
@@ -914,17 +792,11 @@
         window.handleTouchMoveList = function(event) {
             if (!activeTouchGhost) {
                 const touch = event.touches[0];
-                if (Math.abs(touch.clientX - touchStartX) > 10 || Math.abs(touch.clientY - touchStartY) > 10) {
-                    clearTimeout(touchTimer);
-                }
+                if (Math.abs(touch.clientX - touchStartX) > 10 || Math.abs(touch.clientY - touchStartY) > 10) clearTimeout(touchTimer);
             }
         };
 
-        window.handleTouchEndList = function(event) {
-            if (!activeTouchGhost) {
-                clearTimeout(touchTimer);
-            }
-        };
+        window.handleTouchEndList = function(event) { if (!activeTouchGhost) clearTimeout(touchTimer); };
 
         window.processTouchMove = function(event) {
             if (!activeTouchGhost) return;
@@ -936,12 +808,8 @@
             const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
             const dropTarget = elemBelow ? elemBelow.closest('.calendar-cell') : null;
 
-            if (lastTouchTarget && lastTouchTarget !== dropTarget) {
-                lastTouchTarget.classList.remove('drag-over');
-            }
-            if (dropTarget) {
-                dropTarget.classList.add('drag-over');
-            }
+            if (lastTouchTarget && lastTouchTarget !== dropTarget) lastTouchTarget.classList.remove('drag-over');
+            if (dropTarget) dropTarget.classList.add('drag-over');
             lastTouchTarget = dropTarget;
         }
 
@@ -957,64 +825,44 @@
             if (dropTarget) {
                 dropTarget.classList.remove('drag-over');
                 const dateStr = dropTarget.dataset.date;
-                if (dateStr) {
-                    window.processDrop(activeTouchPayload, dateStr, targetTaskId);
-                }
+                if (dateStr) window.processDrop(activeTouchPayload, dateStr, targetTaskId);
             }
 
             activeTouchGhost.remove();
-            activeTouchGhost = null;
-            activeTouchPayload = null;
+            activeTouchGhost = null; activeTouchPayload = null;
             
-            if (lastTouchTarget) {
-                lastTouchTarget.classList.remove('drag-over');
-                lastTouchTarget = null;
-            }
-            if (currentDragTarget) {
-                currentDragTarget.style.opacity = '1';
-                currentDragTarget = null;
-            }
+            if (lastTouchTarget) { lastTouchTarget.classList.remove('drag-over'); lastTouchTarget = null; }
+            if (currentDragTarget) { currentDragTarget.style.opacity = '1'; currentDragTarget = null; }
 
             document.removeEventListener('touchmove', window.processTouchMove);
             document.removeEventListener('touchend', window.processTouchEnd);
             document.removeEventListener('touchcancel', window.processTouchEnd);
             
-            setTimeout(() => {
-                isDragging = false;
-            }, 50);
+            setTimeout(() => { isDragging = false; }, 50);
         }
 
         function calculateStreak(recordsMap) {
             let streak = 0;
             let d = new Date(); 
-            
             const todayRec = recordsMap[getTodayStr()];
             const todayTotal = todayRec ? getDailyTaskStats(todayRec).total : 0;
-            
             if (todayTotal === 0) d.setDate(d.getDate() - 1);
             
             while(true) {
                 let dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                 let rec = recordsMap[dateStr];
                 let total = rec ? getDailyTaskStats(rec).total : 0;
-                
-                if (total > 0) {
-                    streak++;
-                    d.setDate(d.getDate() - 1);
-                } else {
-                    break;
-                }
+                if (total > 0) { streak++; d.setDate(d.getDate() - 1); } 
+                else break;
             }
             return streak;
         }
 
         function renderHeatmapAndStreak() {
             if(!DOM.heatmapContainer) return;
-            
             let html = '';
             let d = new Date();
             d.setDate(d.getDate() - 140); 
-            
             while(d.getDay() !== 0) d.setDate(d.getDate() - 1);
 
             const today = new Date();
@@ -1023,14 +871,16 @@
             while(d <= today) {
                 let dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                 let rec = recordsMap[dateStr];
-                let total = rec ? getDailyTaskStats(rec).total : 0;
+                let stats = getDailyTaskStats(rec);
+                let total = stats.total;
                 
                 let colorClass = 'bg-[#1c1c1e] border border-[rgba(255,255,255,0.05)]';
                 if (total > 0 && total < 60) colorClass = 'bg-[rgba(48,209,88,0.3)] border-transparent';
                 else if (total >= 60 && total < 120) colorClass = 'bg-[rgba(48,209,88,0.6)] border-transparent';
                 else if (total >= 120) colorClass = 'bg-[#30d158] shadow-[0_0_5px_rgba(48,209,88,0.5)] border-transparent';
                 
-                html += `<div class="w-[11px] h-[11px] sm:w-[13px] sm:h-[13px] rounded-[3px] ${colorClass} transition-all hover:ring-2 hover:ring-white cursor-pointer" title="${dateStr} : ${total}m"></div>`;
+                let tooltipText = total > 0 ? `${dateStr} | 총 ${total}m (인강 ${stats.lecture}m / 자습 ${stats.study}m)` : `${dateStr} : 0m`;
+                html += `<div class="w-[11px] h-[11px] sm:w-[13px] sm:h-[13px] rounded-[3px] ${colorClass} transition-all hover:ring-2 hover:ring-white cursor-pointer" title="${tooltipText}"></div>`;
                 d.setDate(d.getDate() + 1);
             }
             DOM.heatmapContainer.innerHTML = html;
@@ -1045,12 +895,10 @@
 
         function renderMemos() {
             if(!DOM.viewMemos) return;
-
             if (memos.length === 0) {
                 DOM.viewMemos.innerHTML = '<div class="text-sm text-[#86868b] text-center py-6 border border-[rgba(255,255,255,0.05)] border-dashed rounded-xl">등록된 메모가 없습니다.</div>';
                 return;
             }
-
             DOM.viewMemos.innerHTML = memos.map(m => `
                 <li class="flex items-center justify-between p-2.5 inner-squircle border border-[rgba(255,255,255,0.02)] transition hover:bg-[rgba(255,255,255,0.05)] group">
                     <div class="flex items-center space-x-3 overflow-hidden">
@@ -1067,14 +915,12 @@
             const target = new Date(targetDateStr);
             const diffTime = target.getTime() - today.getTime();
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
             if (diffDays === 0) return 'D-DAY';
             return diffDays > 0 ? `D-${diffDays}` : `D+${Math.abs(diffDays)}`;
         }
 
         function renderDdays() {
             if(!DOM.viewDdays) return;
-            
             const addBtnHtml = `
                 <button data-action="openDdayModal" class="flex items-center justify-center min-w-[80px] h-full px-4 py-2.5 rounded-2xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.1)] hover:border-white transition-all text-[#86868b] hover:text-white flex-shrink-0 group shadow-sm">
                     <span class="text-xl font-bold leading-none mb-0.5 group-hover:scale-110 transition-transform">+</span>
@@ -1108,8 +954,162 @@
                     </div>
                 `;
             }).join('');
-
             DOM.viewDdays.innerHTML = addBtnHtml + ddayHtml;
+        }
+
+        function renderTodoLectures() {
+            const dataCourses = getCourses();
+            const dataLectures = getLectures();
+            const todoLectures = dataLectures.filter(l => l.status === '미시작');
+            let activeSubjects = [...new Set(dataCourses.map(c => c.subject))];
+            
+            if (activeSubjects.length > 0 && (!currentSubjectTab || !activeSubjects.includes(currentSubjectTab))) {
+                currentSubjectTab = activeSubjects[0]; 
+            }
+
+            let tabsHtml = '';
+            if (activeSubjects.length > 0) {
+                tabsHtml = `<div class="flex border-b border-[rgba(255,255,255,0.08)] w-full overflow-x-auto hide-scrollbar">`;
+                tabsHtml += activeSubjects.map(subj => {
+                    const isActive = currentSubjectTab === subj;
+                    const theme = getTheme(subj);
+                    return `
+                        <button data-action="setLectureTab" data-subj="${esc(subj)}"
+                                class="relative px-3 sm:px-4 py-2.5 text-[11px] sm:text-xs font-bold transition-all uppercase tracking-widest flex-shrink-0 ${isActive ? 'text-white' : 'text-[#86868b] hover:text-gray-300'}"
+                                style="${isActive ? `color: ${theme.dot};` : ''}">
+                            ${esc(subj)}
+                            ${isActive ? `<div class="absolute bottom-0 left-0 w-full h-[2px] rounded-t-md" style="background-color: ${theme.dot}; box-shadow: 0 -2px 8px ${theme.dot};"></div>` : ''}
+                        </button>
+                    `;
+                }).join('');
+                tabsHtml += `</div>`;
+            }
+            DOM.todoTabsContainer.innerHTML = tabsHtml;
+
+            const filteredCourses = dataCourses.filter(c => c.subject === currentSubjectTab);
+            
+            if(filteredCourses.length === 0) {
+                DOM.viewTodoLectures.innerHTML = `<div class="py-12 text-center text-sm font-bold text-[#86868b]">이 과목의 강좌가 없습니다.</div>`;
+                return;
+            }
+
+            let html = '';
+            let hasAnyTodo = false;
+
+            filteredCourses.forEach((course) => {
+                const courseTodos = todoLectures.filter(l => l.courseId === course.id);
+                if (courseTodos.length === 0) return; 
+                hasAnyTodo = true;
+
+                const isOpen = openTodoCourses.has(course.id);
+                const cColor = course.color || getStringColor(course.title);
+
+                html += `
+                    <li class="mb-3 inner-squircle bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] overflow-hidden transition-all shadow-sm">
+                        <div class="flex justify-between items-center p-3.5 cursor-pointer hover:bg-[rgba(255,255,255,0.05)] transition" data-action="toggleTodoCourse" data-id="${course.id}">
+                            <div class="flex items-center space-x-3 font-bold text-sm text-white w-full overflow-hidden pr-2">
+                                <div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${cColor}; box-shadow: 0 0 8px ${cColor};"></div>
+                                <span class="truncate flex-1" title="${esc(course.title)}">${esc(course.title)}</span>
+                                <span class="text-[10px] text-[#86868b] bg-[rgba(0,0,0,0.3)] px-2 py-0.5 rounded-md flex-shrink-0">${courseTodos.length}강</span>
+                            </div>
+                            <span class="text-[#86868b] text-[10px] font-bold transform transition-transform ${isOpen ? 'rotate-180' : ''} flex-shrink-0">▼</span>
+                        </div>
+                        <div class="accordion-grid ${isOpen ? 'open' : 'closed'}">
+                            <div class="accordion-inner">
+                                <ul class="p-2 pt-0 space-y-1.5 border-t border-[rgba(255,255,255,0.03)] bg-[rgba(0,0,0,0.15)] max-h-[300px] overflow-y-auto pr-1">
+                                    ${courseTodos.map(l => `
+                                        <li draggable="true" 
+                                            ondragstart="handleDragStart(event, 'todo', '${l.id}')" 
+                                            ondragend="handleDragEnd(event)"
+                                            ontouchstart="handleTouchStartList(event, 'todo', '${l.id}')"
+                                            ontouchmove="handleTouchMoveList(event)"
+                                            ontouchend="handleTouchEndList(event)"
+                                            ontouchcancel="handleTouchEndList(event)"
+                                            style="-webkit-touch-callout: none; -webkit-user-select: none; user-select: none;"
+                                            class="draggable-item flex items-center justify-between text-xs p-3 rounded-xl border border-[rgba(255,255,255,0.02)] hover:border-[rgba(255,255,255,0.1)] transition group bg-[rgba(255,255,255,0.03)] hover:bg-[rgba(255,255,255,0.06)] shadow-sm">
+                                            <div class="flex items-center space-x-3 overflow-hidden flex-1 pointer-events-none">
+                                                <div data-action="toggleLecture" data-id="${l.id}" class="w-4 h-4 rounded-full border-2 border-[#555] flex-shrink-0 group-hover:border-white transition-colors cursor-pointer pointer-events-auto"></div>
+                                                <span class="text-white font-semibold truncate flex-1 pointer-events-none" title="${esc(l.title)}">${esc(l.title)}</span>
+                                                <span class="text-[10px] text-[#86868b] font-mono font-bold pointer-events-none flex-shrink-0">(${l.duration || 0}m)</span>
+                                            </div>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                `;
+            });
+
+            if(!hasAnyTodo) {
+                html = `<div class="py-12 text-center text-sm font-bold text-[#86868b]">이 과목의 남은 강의가 없습니다 🎉</div>`;
+            }
+            DOM.viewTodoLectures.innerHTML = html;
+        }
+
+        function renderCalendar() {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay(); 
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            DOM.calendarMonthLabel.innerText = `${monthNames[month]} ${year}`;
+
+            const recordsMap = getRecordsMap();
+            let calendarHTML = '';
+            for(let i=0; i<firstDay; i++) calendarHTML += `<div class="calendar-cell bg-transparent pointer-events-none border-transparent"></div>`;
+
+            for(let i=1; i<=daysInMonth; i++) {
+                const dateStr = `${year}-${String(month+1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const record = recordsMap[dateStr];
+                const stats = getDailyTaskStats(record);
+                const isToday = dateStr === TODAY;
+                
+                let cellClass = "calendar-cell cursor-pointer hover:bg-[rgba(255,255,255,0.05)]";
+                let dayTextClass = "text-[#86868b] font-bold";
+                if(isToday) {
+                    cellClass += " today-cell shadow-[inset_0_0_15px_rgba(10,132,255,0.15)]";
+                    dayTextClass = "text-[#0a84ff] font-extrabold";
+                }
+
+                let cellContent = `<div class="${dayTextClass} text-right text-xs mb-1.5 p-1 pointer-events-none">${i}</div>`;
+                
+                if(record && record.tasks && record.tasks.length > 0) {
+                    record.tasks.forEach(task => {
+                        const isCompleted = task.completed;
+                        const textStyle = isCompleted ? 'text-[#86868b] line-through' : 'text-gray-200';
+                        const bgStyle = isCompleted ? 'bg-[rgba(255,255,255,0.03)]' : 'bg-[rgba(255,255,255,0.08)]';
+                        const dotColor = task.type === 'lecture' ? '#bf5af2' : '#64d2ff';
+                        
+                        cellContent += `
+                            <div class="${bgStyle} ${textStyle} rounded-md px-1.5 py-1 mb-1 text-[10px] sm:text-[11px] font-semibold hover:bg-[rgba(255,255,255,0.15)] transition-colors flex justify-between items-center shadow-sm w-full min-w-0 draggable-item" 
+                                 data-action="toggleTask" data-rec-id="${record.id}" data-task-id="${task.id}" title="${esc(task.title)}"
+                                 draggable="true" ondragstart="handleDragStart(event, 'calendar', '${record.id}', '${task.id}')" ondragend="handleDragEnd(event)"
+                                 ontouchstart="handleTouchStartList(event, 'calendar', '${record.id}', '${task.id}')" ontouchmove="handleTouchMoveList(event)" ontouchend="handleTouchEndList(event)" ontouchcancel="handleTouchEndList(event)"
+                                 style="-webkit-touch-callout: none; -webkit-user-select: none; user-select: none;">
+                                 <span class="truncate flex-1 min-w-0 pointer-events-none">${esc(task.title)}</span>
+                                 <div class="w-1.5 h-1.5 rounded-full flex-shrink-0 ml-1.5 transition-all ${isCompleted ? 'bg-[#555]' : ''} pointer-events-none" style="${!isCompleted ? `background-color: ${dotColor}; box-shadow: 0 0 6px ${dotColor};` : ''}"></div>
+                            </div>
+                        `;
+                    });
+                    
+                    if(stats.total > 0) {
+                        cellContent += `<div class="mt-auto pt-1 flex flex-col items-end space-y-0.5">`;
+                        if (stats.lecture > 0) cellContent += `<span class="text-[9px] sm:text-[10px] text-[#bf5af2] font-mono font-bold tracking-tight leading-none bg-[rgba(191,90,242,0.1)] px-1 rounded">L: ${formatTime(stats.lecture)}</span>`;
+                        if (stats.study > 0) cellContent += `<span class="text-[9px] sm:text-[10px] text-[#64d2ff] font-mono font-bold tracking-tight leading-none bg-[rgba(100,210,255,0.1)] px-1 rounded">S: ${formatTime(stats.study)}</span>`;
+                        cellContent += `</div>`;
+                    }
+                }
+                
+                calendarHTML += `<div class="${cellClass}" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${dateStr}')" data-action="openDailyModal" data-date="${dateStr}">${cellContent}</div>`;
+            }
+
+            const totalCells = firstDay + daysInMonth;
+            const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+            for(let i=0; i<remainingCells; i++) calendarHTML += `<div class="calendar-cell bg-transparent pointer-events-none border-transparent"></div>`;
+
+            DOM.viewCalendar.innerHTML = calendarHTML;
         }
 
         let chartInstances = { daily: null, weekly: null, monthly: null };
@@ -1129,10 +1129,7 @@
 
         const getChartTooltip = (customLabelCb, customAfterTitleCb) => ({
             backgroundColor: 'rgba(28, 28, 30, 0.8)', padding: 12, cornerRadius: 12,
-            callbacks: {
-                label: customLabelCb,
-                afterTitle: customAfterTitleCb || (() => '')
-            }
+            callbacks: { label: customLabelCb, afterTitle: customAfterTitleCb || (() => '') }
         });
 
         function renderCharts() {
@@ -1144,6 +1141,19 @@
 
             const ctxDaily = document.getElementById('chartDaily').getContext('2d');
             DOM.dailyTotalText.innerText = formatTime(totalToday);
+            
+            const splitTextContainer = document.getElementById('dailySplitText');
+            if (splitTextContainer) {
+                if (totalToday > 0) {
+                    splitTextContainer.innerHTML = `
+                        ${todayStats.lecture > 0 ? `<span class="text-[#bf5af2] bg-[rgba(191,90,242,0.15)] px-1.5 py-0.5 rounded-md">인강 ${formatTime(todayStats.lecture)}</span>` : ''}
+                        ${todayStats.study > 0 ? `<span class="text-[#64d2ff] bg-[rgba(100,210,255,0.15)] px-1.5 py-0.5 rounded-md">자습 ${formatTime(todayStats.study)}</span>` : ''}
+                    `;
+                } else {
+                    splitTextContainer.innerHTML = '';
+                }
+            }
+
             const dailyData = totalToday > 0 ? [todayStats.lecture, todayStats.study, 0] : [0, 0, 1];
             const dailyBg = totalToday > 0 ? ['#bf5af2', '#64d2ff', 'rgba(255,255,255,0.05)'] : ['rgba(255,255,255,0.02)', 'rgba(255,255,255,0.02)', 'rgba(255,255,255,0.05)'];
 
@@ -1228,9 +1238,7 @@
             
             getDailyRecords().forEach(r => {
                 let d = new Date(r.date);
-                if(d.getFullYear() === targetYear) {
-                    monthTotals[d.getMonth()] += getDailyTaskStats(r).total;
-                }
+                if(d.getFullYear() === targetYear) monthTotals[d.getMonth()] += getDailyTaskStats(r).total;
             });
 
             let cumulativeDataHours = [];
@@ -1253,6 +1261,198 @@
                     options: mOpts
                 });
             }
+        }
+
+        function renderCourseGallery() {
+            const dataCourses = getCourses();
+            const lecsMap = getLecturesByCourse();
+            
+            DOM.viewCourseGallery.innerHTML = dataCourses.length > 0 
+                ? dataCourses.map(c => {
+                    const theme = getTheme(c.subject);
+                    return `
+                    <div class="inner-squircle p-5 flex flex-col justify-between min-h-[120px] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.15)] transition shadow-md relative overflow-hidden group bg-[rgba(0,0,0,0.2)]">
+                        <div class="absolute top-0 left-0 w-1.5 h-full" style="background-color: ${theme.dot}; box-shadow: 0 0 10px ${theme.dot};"></div>
+                        <div class="pl-3 w-full min-w-0">
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest mb-2 inline-block" style="color: ${theme.text};">${esc(c.subject)}</span>
+                            <div class="font-bold text-base text-white truncate w-full" title="${esc(c.title)}">${esc(c.title)}</div>
+                        </div>
+                        <div class="mt-4 pl-3">${renderProgressBar(getCourseProgress(lecsMap, c.id), theme.dot)}</div>
+                    </div>
+                    `}).join('')
+                : `<div class="col-span-full py-10 text-center text-sm font-medium text-[#86868b]">진행 중인 강좌가 없습니다.</div>`;
+        }
+
+        function renderCurriculumManager() {
+            const dataCourses = getCourses();
+            const lecsMap = getLecturesByCourse();
+
+            if (dataCourses.length === 0) {
+                DOM.curriculumManager.innerHTML = `<div class="col-span-full py-16 text-center text-[#86868b] border border-[rgba(255,255,255,0.05)] border-dashed rounded-[32px] text-sm font-medium">등록된 강좌가 없습니다.</div>`;
+                return;
+            }
+
+            let html = '';
+            subjects.forEach(subject => {
+                const subjCourses = dataCourses.filter(c => c.subject === subject);
+                if(subjCourses.length === 0) return; 
+
+                const theme = getTheme(subject);
+
+                html += `
+                    <div class="card-squircle overflow-hidden h-fit border border-[rgba(255,255,255,0.04)] shadow-lg">
+                        <div class="bg-[rgba(0,0,0,0.3)] px-6 py-5 flex justify-between items-center border-b border-[rgba(255,255,255,0.05)]">
+                            <h3 class="text-lg font-extrabold flex items-center space-x-3">
+                                <span class="w-3 h-3 rounded-full shadow-[0_0_8px_${theme.dot}]" style="background-color: ${theme.dot}"></span>
+                                <span style="color: ${theme.text}" class="tracking-wide">${esc(subject)}</span>
+                            </h3>
+                        </div>
+                        
+                        <div class="p-6 space-y-5">
+                            ${subjCourses.map(course => {
+                                const courseLecs = lecsMap[course.id] || [];
+                                const totalLecs = courseLecs.length;
+                                let visibleCount = courseViewCounts[course.id] !== undefined ? Math.min(courseViewCounts[course.id], totalLecs) : Math.min(10, totalLecs);
+                                const displayLecs = courseLecs.slice(0, visibleCount);
+                                const hiddenCount = totalLecs - visibleCount;
+                                const cColor = course.color || getStringColor(course.title);
+
+                                return `
+                                <div class="inner-squircle border border-[rgba(255,255,255,0.03)] p-5 transition hover:border-[rgba(255,255,255,0.1)] min-w-0 bg-[rgba(255,255,255,0.01)]">
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4 border-b border-[rgba(255,255,255,0.05)] pb-4">
+                                        <div class="flex items-center space-x-2 flex-1 min-w-0">
+                                            <div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${cColor}; box-shadow: 0 0 8px ${cColor};"></div>
+                                            <div class="font-bold text-white text-lg truncate" title="${esc(course.title)}">${esc(course.title)}</div>
+                                        </div>
+                                        <div class="flex space-x-2.5 text-xs flex-shrink-0 mt-1 sm:mt-0 items-center">
+                                            <button data-action="openLectureModal" data-course-id="${course.id}" class="text-white bg-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.2)] font-bold px-3 py-1.5 rounded-full transition shadow-sm">+ 추가</button>
+                                            <button data-action="openCourseModal" data-course-id="${course.id}" class="text-[#86868b] hover:text-white font-semibold px-2 py-1 transition">수정</button>
+                                            <button data-action="deleteCourse" data-id="${course.id}" class="text-red-500/80 hover:text-red-500 font-semibold px-1 transition">삭제</button>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        ${displayLecs.length > 0 ? `
+                                        <ul class="ml-1.5 pl-3 border-l-2 border-[rgba(255,255,255,0.1)] space-y-2.5">
+                                            ${displayLecs.map(lec => `
+                                                <li class="flex justify-between items-center text-sm group rounded-xl px-2.5 py-1.5 -ml-2.5 hover:bg-[rgba(255,255,255,0.05)] transition">
+                                                    <div class="flex items-center space-x-3 overflow-hidden flex-1">
+                                                        <input type="checkbox" class="custom-checkbox w-4 h-4 flex-shrink-0" ${lec.status === '완료' ? 'checked' : ''} data-action="toggleLecture" data-id="${lec.id}">
+                                                        <span class="truncate font-semibold ${lec.status === '완료' ? 'text-[#86868b] line-through' : 'text-gray-200'}" title="${esc(lec.title)}">${esc(lec.title)}</span>
+                                                        <span class="text-[11px] text-[#86868b] font-mono font-bold">(${lec.duration || 0}m)</span>
+                                                    </div>
+                                                    <div class="flex items-center space-x-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex-shrink-0 ml-3">
+                                                        <button data-action="openLectureModal" data-course-id="${course.id}" data-lec-id="${lec.id}" class="text-[10px] font-bold text-[#86868b] hover:text-white px-2.5 py-1 rounded-full hover:bg-[rgba(255,255,255,0.1)] transition">수정</button>
+                                                        <button data-action="deleteLecture" data-id="${lec.id}" class="text-[10px] font-bold text-red-400 hover:text-red-300 px-2.5 py-1 rounded-full hover:bg-[rgba(255,59,48,0.15)] transition">삭제</button>
+                                                    </div>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                        ` : (totalLecs === 0 ? '<p class="text-xs text-[#86868b] py-1 font-medium ml-1.5">등록된 강의가 없습니다.</p>' : '')}
+                                    </div>
+                                    ${totalLecs > 0 ? `
+                                        <div class="pt-3.5 flex justify-center items-center gap-2 border-t border-[rgba(255,255,255,0.05)] mt-3.5">
+                                            ${hiddenCount > 0 ? `
+                                                <button data-action="courseShowMore" data-id="${course.id}" class="text-xs font-bold text-white px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.1)] transition shadow-sm">▼ ${Math.min(10, hiddenCount)}개 더보기</button>
+                                            ` : ''}
+                                            ${visibleCount > 0 ? `
+                                                <button data-action="courseFoldLess" data-id="${course.id}" class="text-xs font-bold text-white px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.1)] transition shadow-sm">▲ ${visibleCount % 10 === 0 ? 10 : visibleCount % 10}개 접기</button>
+                                                <button data-action="courseFoldAll" data-id="${course.id}" class="text-[10px] font-bold text-[#86868b] px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.08)] hover:text-white transition shadow-sm">완전히 접기</button>
+                                            ` : ''}
+                                        </div>
+                                    ` : ''}
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            DOM.curriculumManager.innerHTML = html;
+        }
+
+        function renderMasterDB() {
+            const dataCourses = getCourses();
+            const lecsMap = getLecturesByCourse();
+
+            DOM.dbCourses.innerHTML = dataCourses.length > 0 ? dataCourses.map(c => {
+                const theme = getTheme(c.subject);
+                return `
+                <tr>
+                    <td><span class="text-[11px] font-extrabold uppercase tracking-widest" style="color: ${theme.text};">${esc(c.subject)}</span></td>
+                    <td class="text-white font-bold truncate max-w-[200px] sm:max-w-[400px]" title="${esc(c.title)}">${esc(c.title)}</td>
+                    <td>${renderProgressBar(getCourseProgress(lecsMap, c.id), theme.dot)}</td>
+                </tr>
+            `}).join('') : `<tr><td colspan="3" class="text-center text-[#86868b] py-8 font-semibold text-sm">데이터가 없습니다.</td></tr>`;
+
+            let lecturesHtml = '';
+            subjects.forEach(subj => {
+                const subjCourses = dataCourses.filter(c => c.subject === subj);
+                if(subjCourses.length === 0) return;
+                
+                const theme = getTheme(subj);
+                lecturesHtml += `<div class="mb-6"><h4 class="text-[11px] font-extrabold mb-3 flex items-center space-x-2 tracking-widest uppercase ml-1" style="color: ${theme.text}"><span class="w-2 h-2 rounded-full shadow-[0_0_8px_${theme.dot}]" style="background-color: ${theme.dot}"></span><span>${esc(subj)}</span></h4>`;
+                
+                subjCourses.forEach(course => {
+                    const courseLecs = lecsMap[course.id] || [];
+                    const isClosed = closedDbCourses.has(course.id); 
+                    
+                    lecturesHtml += `
+                    <div class="inner-squircle border border-[rgba(255,255,255,0.04)] mb-3 overflow-hidden bg-[rgba(0,0,0,0.2)] shadow-sm">
+                        <div class="px-5 py-4 flex justify-between items-center cursor-pointer hover:bg-[rgba(255,255,255,0.03)] transition-colors" data-action="toggleDbCourse" data-id="${course.id}">
+                            <div class="font-bold text-sm text-white pointer-events-none">${esc(course.title)} <span class="text-[10px] text-[#86868b] ml-3 font-semibold bg-[#111112] px-2.5 py-1 rounded-full border border-[rgba(255,255,255,0.05)]">${courseLecs.length}강</span></div>
+                            <div class="text-[#86868b] text-xs transform transition-transform duration-300 font-bold ${isClosed ? '' : 'rotate-180'} pointer-events-none">▼</div>
+                        </div>
+                        <div class="accordion-grid ${isClosed ? 'closed' : 'open'} bg-[#111112]">
+                            <div class="accordion-inner border-t border-[rgba(255,255,255,0.04)]">
+                                <table class="w-full text-sm">
+                                    <thead class="text-[#86868b] text-[10px] font-extrabold uppercase tracking-widest bg-[rgba(0,0,0,0.3)]">
+                                        <tr><th class="p-3 pl-5 text-left border-b border-[rgba(255,255,255,0.03)]">Title</th><th class="p-3 w-24 text-center border-b border-[rgba(255,255,255,0.03)]">Status</th><th class="p-3 w-20 text-center border-b border-[rgba(255,255,255,0.03)]">Time</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        ${courseLecs.length > 0 ? courseLecs.map(l => `
+                                        <tr class="border-b border-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.02)] transition-colors last:border-b-0">
+                                            <td class="p-3 pl-5 font-semibold ${l.status === '완료' ? 'text-[#86868b] line-through' : 'text-gray-200'}">${esc(l.title)}</td>
+                                            <td class="p-3 text-center"><span class="text-[10px] px-2.5 py-1 rounded-full font-bold border ${l.status === '완료' ? 'border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.02)] text-[#86868b]' : 'border-[rgba(255,255,255,0.15)] bg-[rgba(255,255,255,0.05)] text-white'} shadow-sm">${l.status}</span></td>
+                                            <td class="p-3 text-center text-[11px] text-[#86868b] font-mono font-bold">${l.duration||0}m</td>
+                                        </tr>
+                                        `).join('') : `<tr><td colspan="3" class="p-5 text-center text-[#86868b] text-xs font-semibold">등록된 강의가 없습니다.</td></tr>`}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                lecturesHtml += `</div>`;
+            });
+            if(Object.keys(lecsMap).length === 0) lecturesHtml = `<div class="text-center text-[#86868b] py-8 font-semibold text-sm inner-squircle border border-[rgba(255,255,255,0.06)]">데이터가 없습니다.</div>`;
+            DOM.dbLecturesContainer.innerHTML = lecturesHtml;
+
+            const records = getDailyRecords();
+            DOM.dbDaily.innerHTML = records.length > 0 ? records.map(d => {
+                const stats = getDailyTaskStats(d);
+                return `
+                <tr class="cursor-pointer hover:bg-[rgba(255,255,255,0.04)] transition-colors" data-action="openDailyModal" data-date="${d.date}">
+                    <td class="text-[#86868b] font-mono font-bold text-center text-xs tracking-wider">${d.date.substring(5)}</td>
+                    <td class="text-white font-semibold truncate max-w-[150px] sm:max-w-[250px]" title="${esc(stats.goals)}">${esc(stats.goals) || '<span class="text-[#86868b] italic">목표 없음</span>'}</td>
+                    <td class="text-right text-[#86868b] font-mono font-semibold text-xs">${stats.lecture > 0 ? stats.lecture + 'm' : '-'}</td>
+                    <td class="text-right text-[#86868b] font-mono font-semibold text-xs">${stats.study > 0 ? formatTime(stats.study) : '-'}</td>
+                    <td class="text-right text-[#0a84ff] font-bold font-mono text-sm tracking-tight">${formatTime(stats.total)}</td>
+                    <td class="text-center" onclick="event.stopPropagation()">
+                        <input type="checkbox" data-action="toggleDailyAchieved" data-id="${d.id}" ${stats.allCompleted ? 'checked' : ''} class="custom-checkbox mx-auto scale-90">
+                    </td>
+                </tr>
+            `}).join('') : `<tr><td colspan="6" class="text-center text-[#86868b] py-8 font-semibold text-sm">데이터가 없습니다.</td></tr>`;
+        }
+
+        function renderAll() {
+            renderCourseGallery();
+            renderTodoLectures();
+            renderCalendar();
+            renderCurriculumManager();
+            renderMasterDB();
+            renderCharts();
+            renderHeatmapAndStreak();
+            renderMemos();
+            renderDdays();
         }
 
         function showUndoToast(message, onUndo = null, onConfirm = null, isUndoMode = true) {
@@ -1298,387 +1498,7 @@
         }
         function closeModal() { DOM.modalOverlay.classList.add('hidden'); }
 
-
-        function renderCourseGallery() {
-            const dataCourses = getCourses();
-            const lecsMap = getLecturesByCourse();
-            
-            DOM.viewCourseGallery.innerHTML = dataCourses.length > 0 
-                ? dataCourses.map(c => {
-                    const theme = getTheme(c.subject);
-                    const courseColor = c.color || theme.dot;
-                    return `
-                    <div class="inner-squircle p-5 flex flex-col justify-between min-h-[120px] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.15)] transition shadow-md relative overflow-hidden group bg-[rgba(0,0,0,0.2)]">
-                        <div class="absolute top-0 left-0 w-1.5 h-full" style="background-color: ${courseColor}; box-shadow: 0 0 10px ${courseColor};"></div>
-                        <div class="pl-3 w-full min-w-0">
-                            <span class="text-[10px] font-extrabold uppercase tracking-widest mb-2 inline-block" style="color: ${theme.text};">${esc(c.subject)}</span>
-                            <div class="font-bold text-base text-white truncate w-full" title="${esc(c.title)}">${esc(c.title)}</div>
-                        </div>
-                        <div class="mt-4 pl-3">${renderProgressBar(getCourseProgress(lecsMap, c.id), courseColor)}</div>
-                    </div>
-                    `}).join('')
-                : `<div class="col-span-full py-10 text-center text-sm font-medium text-[#86868b]">진행 중인 강좌가 없습니다.</div>`;
-        }
-
-        function renderTodoLectures() {
-            const dataCourses = getCourses();
-            const dataLectures = getLectures();
-            const todoLectures = dataLectures.filter(l => l.status === '미시작');
-            let activeSubjects = [...new Set(dataCourses.map(c => c.subject))];
-            
-            if (activeSubjects.length > 0 && (!currentSubjectTab || !activeSubjects.includes(currentSubjectTab))) {
-                currentSubjectTab = activeSubjects[0]; 
-            }
-
-            let tabsHtml = '';
-            if (activeSubjects.length > 0) {
-                tabsHtml = `<div class="flex border-b border-[rgba(255,255,255,0.08)] w-full overflow-x-auto hide-scrollbar">`;
-                tabsHtml += activeSubjects.map(subj => {
-                    const isActive = currentSubjectTab === subj;
-                    const theme = getTheme(subj);
-                    return `
-                        <button data-action="setLectureTab" data-subj="${esc(subj)}"
-                                class="relative px-3 sm:px-4 py-2.5 text-[11px] sm:text-xs font-bold transition-all uppercase tracking-widest flex-shrink-0 ${isActive ? 'text-white' : 'text-[#86868b] hover:text-gray-300'}"
-                                style="${isActive ? `color: ${theme.dot};` : ''}">
-                            ${esc(subj)}
-                            ${isActive ? `<div class="absolute bottom-0 left-0 w-full h-[2px] rounded-t-md" style="background-color: ${theme.dot}; box-shadow: 0 -2px 8px ${theme.dot};"></div>` : ''}
-                        </button>
-                    `;
-                }).join('');
-                tabsHtml += `</div>`;
-            }
-            DOM.todoTabsContainer.innerHTML = tabsHtml;
-
-            const filteredCourses = dataCourses.filter(c => c.subject === currentSubjectTab);
-            
-            if(filteredCourses.length === 0) {
-                DOM.viewTodoLectures.innerHTML = `<div class="py-12 text-center text-sm font-bold text-[#86868b]">이 과목의 강좌가 없습니다.</div>`;
-                return;
-            }
-
-            let html = '';
-            let hasAnyTodo = false;
-
-            filteredCourses.forEach((course, index) => {
-                const courseTodos = todoLectures.filter(l => l.courseId === course.id);
-                if (courseTodos.length === 0) return; 
-                hasAnyTodo = true;
-
-                // 기본적으로 첫 번째 강좌의 아코디언만 열어둠 (만약 openTodoCourses가 비어있다면)
-                if(openTodoCourses.size === 0 && index === 0) openTodoCourses.add(course.id);
-                
-                const isOpen = openTodoCourses.has(course.id);
-                const cColor = course.color || '#bf5af2';
-
-                html += `
-                    <li class="mb-3 inner-squircle bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] overflow-hidden transition-all shadow-sm">
-                        <div class="flex justify-between items-center p-3.5 cursor-pointer hover:bg-[rgba(255,255,255,0.05)] transition" data-action="toggleTodoCourse" data-id="${course.id}">
-                            <div class="flex items-center space-x-3 font-bold text-sm text-white w-full overflow-hidden pr-2">
-                                <div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${cColor}; box-shadow: 0 0 8px ${cColor};"></div>
-                                <span class="truncate flex-1" title="${esc(course.title)}">${esc(course.title)}</span>
-                                <span class="text-[10px] text-[#86868b] bg-[rgba(0,0,0,0.3)] px-2 py-0.5 rounded-md flex-shrink-0">${courseTodos.length}강</span>
-                            </div>
-                            <span class="text-[#86868b] text-[10px] font-bold transform transition-transform ${isOpen ? 'rotate-180' : ''} flex-shrink-0">▼</span>
-                        </div>
-                        <div class="accordion-grid ${isOpen ? 'open' : 'closed'}">
-                            <div class="accordion-inner">
-                                <ul class="p-2 pt-0 space-y-1.5 border-t border-[rgba(255,255,255,0.03)] bg-[rgba(0,0,0,0.15)] max-h-[300px] overflow-y-auto pr-1">
-                                    ${courseTodos.map(l => `
-                                        <li draggable="true" 
-                                            ondragstart="handleDragStart(event, 'todo', '${l.id}')" 
-                                            ondragend="handleDragEnd(event)"
-                                            ontouchstart="handleTouchStartList(event, 'todo', '${l.id}')"
-                                            ontouchmove="handleTouchMoveList(event)"
-                                            ontouchend="handleTouchEndList(event)"
-                                            ontouchcancel="handleTouchEndList(event)"
-                                            style="-webkit-touch-callout: none; -webkit-user-select: none; user-select: none;"
-                                            class="draggable-item flex items-center justify-between text-xs p-3 rounded-xl border border-[rgba(255,255,255,0.02)] hover:border-[rgba(255,255,255,0.1)] transition group bg-[rgba(255,255,255,0.03)] hover:bg-[rgba(255,255,255,0.06)] shadow-sm">
-                                            <div class="flex items-center space-x-3 overflow-hidden flex-1 pointer-events-none">
-                                                <div data-action="toggleLecture" data-id="${l.id}" class="w-4 h-4 rounded-full border border-[#86868b] flex-shrink-0 group-hover:border-white transition-colors cursor-pointer pointer-events-auto"></div>
-                                                <span class="text-gray-200 font-semibold truncate flex-1 pointer-events-none" title="${esc(l.title)}">${esc(l.title)}</span>
-                                                <span class="text-[10px] text-[#86868b] font-mono font-bold pointer-events-none flex-shrink-0">(${l.duration || 0}m)</span>
-                                            </div>
-                                        </li>
-                                    `).join('')}
-                                </ul>
-                            </div>
-                        </div>
-                    </li>
-                `;
-            });
-
-            if(!hasAnyTodo) {
-                html = `<div class="py-12 text-center text-sm font-bold text-[#86868b]">이 과목의 남은 강의가 없습니다 🎉</div>`;
-            }
-            DOM.viewTodoLectures.innerHTML = html;
-        }
-
-        function renderCalendar() {
-            const year = currentCalendarDate.getFullYear();
-            const month = currentCalendarDate.getMonth();
-            const firstDay = new Date(year, month, 1).getDay(); 
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
-            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            DOM.calendarMonthLabel.innerText = `${monthNames[month]} ${year}`;
-
-            const recordsMap = getRecordsMap();
-
-            let calendarHTML = '';
-            for(let i=0; i<firstDay; i++) {
-                calendarHTML += `<div class="calendar-cell bg-transparent pointer-events-none border-transparent"></div>`;
-            }
-
-            for(let i=1; i<=daysInMonth; i++) {
-                const dateStr = `${year}-${String(month+1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                const record = recordsMap[dateStr];
-                const stats = getDailyTaskStats(record);
-                const isToday = dateStr === TODAY;
-                
-                let cellClass = "calendar-cell cursor-pointer hover:bg-[rgba(255,255,255,0.05)]";
-                let dayTextClass = "text-[#86868b] font-bold";
-
-                if(isToday) {
-                    cellClass += " today-cell shadow-[inset_0_0_15px_rgba(10,132,255,0.15)]";
-                    dayTextClass = "text-[#0a84ff] font-extrabold";
-                }
-
-                let cellContent = `<div class="${dayTextClass} text-right text-xs mb-1.5 p-1 pointer-events-none">${i}</div>`;
-                
-                if(record && record.tasks && record.tasks.length > 0) {
-                    record.tasks.forEach(task => {
-                        const isCompleted = task.completed;
-                        const textStyle = isCompleted ? 'text-[#86868b] line-through' : 'text-gray-200';
-                        const bgStyle = isCompleted ? 'bg-[rgba(255,255,255,0.03)]' : 'bg-[rgba(255,255,255,0.08)]';
-                        
-                        let dotColor = '#64d2ff'; // default for study
-                        if (task.type === 'lecture' && task.refId) {
-                            const lec = getLectures().find(l => l.id === task.refId);
-                            if(lec) dotColor = getCourseColor(lec.courseId);
-                            else dotColor = '#bf5af2';
-                        }
-                        
-                        cellContent += `
-                            <div class="${bgStyle} ${textStyle} rounded-md px-1.5 py-1 mb-1 text-[10px] sm:text-[11px] font-semibold hover:bg-[rgba(255,255,255,0.15)] transition-colors flex justify-between items-center shadow-sm w-full min-w-0 draggable-item" 
-                                 data-action="toggleTask" data-rec-id="${record.id}" data-task-id="${task.id}" title="${esc(task.title)}"
-                                 draggable="true"
-                                 ondragstart="handleDragStart(event, 'calendar', '${record.id}', '${task.id}')"
-                                 ondragend="handleDragEnd(event)"
-                                 ontouchstart="handleTouchStartList(event, 'calendar', '${record.id}', '${task.id}')"
-                                 ontouchmove="handleTouchMoveList(event)"
-                                 ontouchend="handleTouchEndList(event)"
-                                 ontouchcancel="handleTouchEndList(event)"
-                                 style="-webkit-touch-callout: none; -webkit-user-select: none; user-select: none;">
-                                 <span class="truncate flex-1 min-w-0 pointer-events-none">${esc(task.title)}</span>
-                                 <div class="w-1.5 h-1.5 rounded-full flex-shrink-0 ml-1.5 transition-all ${isCompleted ? 'bg-[#555]' : ''} pointer-events-none" style="${!isCompleted ? `background-color: ${dotColor}; box-shadow: 0 0 6px ${dotColor};` : ''}"></div>
-                            </div>
-                        `;
-                    });
-                    
-                    if(stats.total > 0) {
-                        cellContent += `<div class="mt-auto pt-1 text-right text-[9px] sm:text-[10px] text-[#0a84ff] font-mono font-bold tracking-tight">${formatTime(stats.total)}</div>`;
-                    }
-                }
-                
-                calendarHTML += `<div class="${cellClass}" 
-                                      ondragover="handleDragOver(event)" 
-                                      ondragleave="handleDragLeave(event)"
-                                      ondrop="handleDrop(event, '${dateStr}')" 
-                                      data-action="openDailyModal" data-date="${dateStr}">${cellContent}</div>`;
-            }
-
-            const totalCells = firstDay + daysInMonth;
-            const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-            for(let i=0; i<remainingCells; i++) {
-                calendarHTML += `<div class="calendar-cell bg-transparent pointer-events-none border-transparent"></div>`;
-            }
-
-            DOM.viewCalendar.innerHTML = calendarHTML;
-        }
-
-        function renderCurriculumManager() {
-            const dataCourses = getCourses();
-            const lecsMap = getLecturesByCourse();
-
-            if (dataCourses.length === 0) {
-                DOM.curriculumManager.innerHTML = `<div class="col-span-full py-16 text-center text-[#86868b] border border-[rgba(255,255,255,0.05)] border-dashed rounded-[32px] text-sm font-medium">등록된 강좌가 없습니다.</div>`;
-                return;
-            }
-
-            let html = '';
-            subjects.forEach(subject => {
-                const subjCourses = dataCourses.filter(c => c.subject === subject);
-                if(subjCourses.length === 0) return; 
-
-                const theme = getTheme(subject);
-
-                html += `
-                    <div class="card-squircle overflow-hidden h-fit border border-[rgba(255,255,255,0.04)] shadow-lg">
-                        <div class="bg-[rgba(0,0,0,0.3)] px-6 py-5 flex justify-between items-center border-b border-[rgba(255,255,255,0.05)]">
-                            <h3 class="text-lg font-extrabold flex items-center space-x-3">
-                                <span class="w-3 h-3 rounded-full shadow-[0_0_8px_${theme.dot}]" style="background-color: ${theme.dot}"></span>
-                                <span style="color: ${theme.text}" class="tracking-wide">${esc(subject)}</span>
-                            </h3>
-                        </div>
-                        
-                        <div class="p-6 space-y-5">
-                            ${subjCourses.map(course => {
-                                const courseColor = course.color || theme.dot;
-                                const courseLecs = lecsMap[course.id] || [];
-                                const totalLecs = courseLecs.length;
-                                
-                                let visibleCount = courseViewCounts[course.id] !== undefined ? Math.min(courseViewCounts[course.id], totalLecs) : Math.min(10, totalLecs);
-                                const displayLecs = courseLecs.slice(0, visibleCount);
-                                const hiddenCount = totalLecs - visibleCount;
-
-                                return `
-                                <div class="inner-squircle border border-[rgba(255,255,255,0.03)] p-5 transition hover:border-[rgba(255,255,255,0.1)] min-w-0 bg-[rgba(255,255,255,0.01)] relative overflow-hidden">
-                                    <div class="absolute top-0 left-0 w-1 h-full" style="background-color: ${courseColor}; opacity: 0.8;"></div>
-                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4 border-b border-[rgba(255,255,255,0.05)] pb-4 pl-2">
-                                        <div class="font-bold text-white text-lg truncate flex-1" title="${esc(course.title)}">${esc(course.title)}</div>
-                                        <div class="flex space-x-2.5 text-xs flex-shrink-0 mt-1 sm:mt-0 items-center">
-                                            <button data-action="openLectureModal" data-course-id="${course.id}" class="text-white bg-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.2)] font-bold px-3 py-1.5 rounded-full transition shadow-sm">+ 추가</button>
-                                            <button data-action="openCourseModal" data-course-id="${course.id}" class="text-[#86868b] hover:text-white font-semibold px-2 py-1 transition">수정</button>
-                                            <button data-action="deleteCourse" data-id="${course.id}" class="text-red-500/80 hover:text-red-500 font-semibold px-1 transition">삭제</button>
-                                        </div>
-                                    </div>
-                                    <div class="mt-2 pl-2">
-                                        ${displayLecs.length > 0 ? `
-                                        <ul class="ml-1.5 pl-3 border-l-2 border-[rgba(255,255,255,0.1)] space-y-2.5">
-                                            ${displayLecs.map(lec => `
-                                                <li class="flex justify-between items-center text-sm group rounded-xl px-2.5 py-1.5 -ml-2.5 hover:bg-[rgba(255,255,255,0.05)] transition">
-                                                    <div class="flex items-center space-x-3 overflow-hidden flex-1">
-                                                        <input type="checkbox" class="custom-checkbox w-4 h-4 flex-shrink-0" ${lec.status === '완료' ? 'checked' : ''} data-action="toggleLecture" data-id="${lec.id}">
-                                                        <span class="truncate font-semibold ${lec.status === '완료' ? 'text-[#86868b] line-through' : 'text-gray-200'}" title="${esc(lec.title)}">${esc(lec.title)}</span>
-                                                        <span class="text-[11px] text-[#86868b] font-mono font-bold">(${lec.duration || 0}m)</span>
-                                                    </div>
-                                                    <div class="flex items-center space-x-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex-shrink-0 ml-3">
-                                                        <button data-action="openLectureModal" data-course-id="${course.id}" data-lec-id="${lec.id}" class="text-[10px] font-bold text-[#86868b] hover:text-white px-2.5 py-1 rounded-full hover:bg-[rgba(255,255,255,0.1)] transition">수정</button>
-                                                        <button data-action="deleteLecture" data-id="${lec.id}" class="text-[10px] font-bold text-red-400 hover:text-red-300 px-2.5 py-1 rounded-full hover:bg-[rgba(255,59,48,0.15)] transition">삭제</button>
-                                                    </div>
-                                                </li>
-                                            `).join('')}
-                                        </ul>
-                                        ` : (totalLecs === 0 ? '<p class="text-xs text-[#86868b] py-1 font-medium ml-1.5">등록된 강의가 없습니다.</p>' : '')}
-                                    </div>
-                                    ${totalLecs > 0 ? `
-                                        <div class="pt-3.5 flex justify-center items-center gap-2 border-t border-[rgba(255,255,255,0.05)] mt-3.5 pl-2">
-                                            ${hiddenCount > 0 ? `
-                                                <button data-action="courseShowMore" data-id="${course.id}" class="text-xs font-bold text-white px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.1)] transition shadow-sm">▼ ${Math.min(10, hiddenCount)}개 더보기</button>
-                                            ` : ''}
-                                            ${visibleCount > 0 ? `
-                                                <button data-action="courseFoldLess" data-id="${course.id}" class="text-xs font-bold text-white px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.1)] transition shadow-sm">▲ ${visibleCount % 10 === 0 ? 10 : visibleCount % 10}개 접기</button>
-                                                <button data-action="courseFoldAll" data-id="${course.id}" class="text-[10px] font-bold text-[#86868b] px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.08)] hover:text-white transition shadow-sm">완전히 접기</button>
-                                            ` : ''}
-                                        </div>
-                                    ` : ''}
-                                </div>`;
-                            }).join('')}
-                        </div>
-                    </div>
-                `;
-            });
-            DOM.curriculumManager.innerHTML = html;
-        }
-
-        function renderMasterDB() {
-            const dataCourses = getCourses();
-            const lecsMap = getLecturesByCourse();
-
-            // [1] Course DB
-            DOM.dbCourses.innerHTML = dataCourses.length > 0 ? dataCourses.map(c => {
-                const theme = getTheme(c.subject);
-                const courseColor = c.color || theme.dot;
-                return `
-                <tr>
-                    <td><span class="text-[11px] font-extrabold uppercase tracking-widest" style="color: ${theme.text};">${esc(c.subject)}</span></td>
-                    <td class="text-white font-bold truncate max-w-[200px] sm:max-w-[400px]" title="${esc(c.title)}">
-                        <span class="inline-block w-2 h-2 rounded-full mr-2" style="background-color: ${courseColor}"></span>
-                        ${esc(c.title)}
-                    </td>
-                    <td>${renderProgressBar(getCourseProgress(lecsMap, c.id), courseColor)}</td>
-                </tr>
-            `}).join('') : `<tr><td colspan="3" class="text-center text-[#86868b] py-8 font-semibold text-sm">데이터가 없습니다.</td></tr>`;
-
-            // [2] Lectures DB
-            let lecturesHtml = '';
-            subjects.forEach(subj => {
-                const subjCourses = dataCourses.filter(c => c.subject === subj);
-                if(subjCourses.length === 0) return;
-                
-                const theme = getTheme(subj);
-                lecturesHtml += `<div class="mb-6"><h4 class="text-[11px] font-extrabold mb-3 flex items-center space-x-2 tracking-widest uppercase ml-1" style="color: ${theme.text}"><span class="w-2 h-2 rounded-full shadow-[0_0_8px_${theme.dot}]" style="background-color: ${theme.dot}"></span><span>${esc(subj)}</span></h4>`;
-                
-                subjCourses.forEach(course => {
-                    const courseLecs = lecsMap[course.id] || [];
-                    const isClosed = closedDbCourses.has(course.id); 
-                    const courseColor = course.color || theme.dot;
-                    
-                    lecturesHtml += `
-                    <div class="inner-squircle border border-[rgba(255,255,255,0.04)] mb-3 overflow-hidden bg-[rgba(0,0,0,0.2)] shadow-sm relative">
-                        <div class="absolute top-0 left-0 w-1 h-full" style="background-color: ${courseColor}; opacity: 0.6;"></div>
-                        <div class="px-5 pl-6 py-4 flex justify-between items-center cursor-pointer hover:bg-[rgba(255,255,255,0.03)] transition-colors" data-action="toggleDbCourse" data-id="${course.id}">
-                            <div class="font-bold text-sm text-white pointer-events-none">${esc(course.title)} <span class="text-[10px] text-[#86868b] ml-3 font-semibold bg-[#111112] px-2.5 py-1 rounded-full border border-[rgba(255,255,255,0.05)]">${courseLecs.length}강</span></div>
-                            <div class="text-[#86868b] text-xs transform transition-transform duration-300 font-bold ${isClosed ? '' : 'rotate-180'} pointer-events-none">▼</div>
-                        </div>
-                        <div class="accordion-grid ${isClosed ? 'closed' : 'open'} bg-[#111112]">
-                            <div class="accordion-inner border-t border-[rgba(255,255,255,0.04)]">
-                                <table class="w-full text-sm">
-                                    <thead class="text-[#86868b] text-[10px] font-extrabold uppercase tracking-widest bg-[rgba(0,0,0,0.3)]">
-                                        <tr><th class="p-3 pl-6 text-left border-b border-[rgba(255,255,255,0.03)]">Title</th><th class="p-3 w-24 text-center border-b border-[rgba(255,255,255,0.03)]">Status</th><th class="p-3 w-20 text-center border-b border-[rgba(255,255,255,0.03)]">Time</th></tr>
-                                    </thead>
-                                    <tbody>
-                                        ${courseLecs.length > 0 ? courseLecs.map(l => `
-                                        <tr class="border-b border-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.02)] transition-colors last:border-b-0">
-                                            <td class="p-3 pl-6 font-semibold ${l.status === '완료' ? 'text-[#86868b] line-through' : 'text-gray-200'}">${esc(l.title)}</td>
-                                            <td class="p-3 text-center"><span class="text-[10px] px-2.5 py-1 rounded-full font-bold border ${l.status === '완료' ? 'border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.02)] text-[#86868b]' : 'border-[rgba(255,255,255,0.15)] bg-[rgba(255,255,255,0.05)] text-white'} shadow-sm">${l.status}</span></td>
-                                            <td class="p-3 text-center text-[11px] text-[#86868b] font-mono font-bold">${l.duration||0}m</td>
-                                        </tr>
-                                        `).join('') : `<tr><td colspan="3" class="p-5 text-center text-[#86868b] text-xs font-semibold">등록된 강의가 없습니다.</td></tr>`}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>`;
-                });
-                lecturesHtml += `</div>`;
-            });
-            if(Object.keys(lecsMap).length === 0) lecturesHtml = `<div class="text-center text-[#86868b] py-8 font-semibold text-sm inner-squircle border border-[rgba(255,255,255,0.06)]">데이터가 없습니다.</div>`;
-            DOM.dbLecturesContainer.innerHTML = lecturesHtml;
-
-            // [3] Daily DB
-            const records = getDailyRecords();
-            DOM.dbDaily.innerHTML = records.length > 0 ? records.map(d => {
-                const stats = getDailyTaskStats(d);
-                return `
-                <tr class="cursor-pointer hover:bg-[rgba(255,255,255,0.04)] transition-colors" data-action="openDailyModal" data-date="${d.date}">
-                    <td class="text-[#86868b] font-mono font-bold text-center text-xs tracking-wider">${d.date.substring(5)}</td>
-                    <td class="text-white font-semibold truncate max-w-[150px] sm:max-w-[250px]" title="${esc(stats.goals)}">${esc(stats.goals) || '<span class="text-[#86868b] italic">목표 없음</span>'}</td>
-                    <td class="text-right text-[#86868b] font-mono font-semibold text-xs">${stats.lecture > 0 ? stats.lecture + 'm' : '-'}</td>
-                    <td class="text-right text-[#86868b] font-mono font-semibold text-xs">${stats.study > 0 ? formatTime(stats.study) : '-'}</td>
-                    <td class="text-right text-[#0a84ff] font-bold font-mono text-sm tracking-tight">${formatTime(stats.total)}</td>
-                    <td class="text-center" onclick="event.stopPropagation()">
-                        <input type="checkbox" data-action="toggleDailyAchieved" data-id="${d.id}" ${stats.allCompleted ? 'checked' : ''} class="custom-checkbox mx-auto scale-90">
-                    </td>
-                </tr>
-            `}).join('') : `<tr><td colspan="6" class="text-center text-[#86868b] py-8 font-semibold text-sm">데이터가 없습니다.</td></tr>`;
-        }
-
-        function renderAll() {
-            renderCourseGallery();
-            renderTodoLectures();
-            renderCalendar();
-            renderCurriculumManager();
-            renderMasterDB();
-            renderCharts();
-            renderHeatmapAndStreak();
-            renderMemos();
-            renderDdays();
-        }
-
         document.addEventListener('click', (e) => {
-            
-            // Color Picker in Modal
             const colorOpt = e.target.closest('.color-option');
             if (colorOpt) {
                 document.querySelectorAll('.color-option').forEach(el => {
@@ -1697,30 +1517,17 @@
             const action = target.dataset.action;
 
             switch(action) {
-                case 'refreshPage': {
-                    window.location.reload();
-                    break;
-                }
-
+                case 'refreshPage': window.location.reload(); break;
                 case 'switchTab': {
                     const tabName = target.dataset.tab;
-                    
                     document.querySelectorAll('.tab-btn').forEach(btn => {
-                        if(btn.dataset.tab === tabName) {
-                            btn.className = "tab-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all bg-[rgba(255,255,255,0.1)] text-white shadow-sm flex-shrink-0";
-                        } else {
-                            btn.className = "tab-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all text-[#86868b] hover:bg-[rgba(255,255,255,0.05)] hover:text-white flex-shrink-0";
-                        }
+                        if(btn.dataset.tab === tabName) btn.className = "tab-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all bg-[rgba(255,255,255,0.1)] text-white shadow-sm flex-shrink-0";
+                        else btn.className = "tab-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all text-[#86868b] hover:bg-[rgba(255,255,255,0.05)] hover:text-white flex-shrink-0";
                     });
-
                     document.querySelectorAll('.tab-content').forEach(content => {
-                        if(content.id === `tab-${tabName}`) {
-                            content.classList.remove('hidden');
-                        } else {
-                            content.classList.add('hidden');
-                        }
+                        if(content.id === `tab-${tabName}`) content.classList.remove('hidden');
+                        else content.classList.add('hidden');
                     });
-
                     if (tabName === 'dashboard') {
                         renderCharts();
                         requestAnimationFrame(() => {
@@ -1731,56 +1538,42 @@
                     }
                     break;
                 }
-
                 case 'toggleMasterDbSection': {
                     const sec = target.dataset.section;
                     masterDbFoldState[sec] = !masterDbFoldState[sec];
                     const wrap = document.getElementById(`wrap-db-${sec}`);
                     const icon = document.getElementById(`icon-db-${sec}`);
-                    if(masterDbFoldState[sec]) {
-                        wrap.classList.replace('open', 'closed');
-                        icon.classList.add('rotate-180');
-                    } else {
-                        wrap.classList.replace('closed', 'open');
-                        icon.classList.remove('rotate-180');
-                    }
+                    if(masterDbFoldState[sec]) { wrap.classList.replace('open', 'closed'); icon.classList.add('rotate-180'); } 
+                    else { wrap.classList.replace('closed', 'open'); icon.classList.remove('rotate-180'); }
                     break;
                 }
-
                 case 'startPomo': startPomo(); break;
                 case 'pausePomo': pausePomo(); break;
                 case 'resetPomo': resetPomo(); break;
-                
                 case 'addMemo': {
                     const input = document.getElementById('memo-input');
                     const text = input.value.trim();
                     if(text) {
                         memos.unshift({ id: generateId('M'), text, completed: false });
-                        input.value = '';
-                        saveData(); renderMemos();
+                        input.value = ''; saveData(); renderMemos();
                     }
                     break;
                 }
-                
                 case 'toggleMemo': {
-                    const memoId = target.dataset.id;
-                    const memo = memos.find(m => m.id === memoId);
+                    const memo = memos.find(m => m.id === target.dataset.id);
                     if(memo) { memo.completed = !memo.completed; saveData(); renderMemos(); }
                     break;
                 }
-                
                 case 'deleteMemo': {
                     memos = memos.filter(m => m.id !== target.dataset.id);
                     saveData(); renderMemos();
                     break;
                 }
-                
                 case 'openDdayModal': {
                     const html = `
                         <div>
                             <label class="block text-sm text-[#86868b] font-semibold mb-2 tracking-wide">디데이 이름</label>
                             <input type="text" id="input-dday-title" class="input-dark mb-6 !py-3 !text-lg font-bold placeholder:font-normal placeholder:text-gray-500" placeholder="예: 편입시험, 모의고사 등">
-                            
                             <label class="block text-sm text-[#86868b] font-semibold mb-2 tracking-wide">목표 날짜</label>
                             <input type="date" id="input-dday-date" class="input-dark mb-2 !py-3 !text-lg font-bold w-full cursor-pointer hover:bg-[rgba(255,255,255,0.05)] transition-colors" value="${TODAY}">
                             <p class="text-[11px] text-[#86868b] mt-2 font-medium">위 영역을 탭하여 캘린더에서 날짜를 선택하세요.</p>
@@ -1792,33 +1585,27 @@
                         if(dateVal) {
                             ddays.push({ id: generateId('DD'), title, targetDate: dateVal });
                             ddays.sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate));
-                            saveData();
-                            renderDdays();
+                            saveData(); renderDdays();
                         }
                     });
                     break;
                 }
-
                 case 'deleteDday': {
                     ddays = ddays.filter(d => d.id !== target.dataset.id);
                     saveData(); renderDdays();
                     break;
                 }
-
                 case 'changeMonth': {
                     currentCalendarDate.setMonth(currentCalendarDate.getMonth() + parseInt(target.dataset.val));
-                    renderCalendar();
-                    renderCharts();
+                    renderCalendar(); renderCharts();
                     break;
                 }
-                
                 case 'openCourseModal': {
                     const cId = target.dataset.courseId;
-                    const course = cId ? getCourses().find(c => c.id === cId) : { subject: '수학', title: '', color: getRandomColor() };
+                    const course = cId ? getCourses().find(c => c.id === cId) : { subject: '수학', title: '', color: '' };
                     const options = subjects.map(s => `<option value="${s}" ${course.subject === s ? 'selected' : ''}>${s}</option>`).join('');
-                    
                     const colorOptionsHtml = COURSE_COLORS.map(c => `
-                        <div data-color="${c}" class="color-option w-7 h-7 rounded-full cursor-pointer border-2 transition-transform hover:scale-110 ${course.color === c ? 'border-white scale-110' : 'border-transparent'}" style="background-color: ${c}"></div>
+                        <div data-color="${c}" class="color-option w-7 h-7 rounded-full cursor-pointer border-2 transition-transform hover:scale-110 ${(course.color || getStringColor(course.title)) === c ? 'border-white scale-110' : 'border-transparent'}" style="background-color: ${c}"></div>
                     `).join('');
 
                     const html = `
@@ -1835,13 +1622,13 @@
                             <div class="flex flex-wrap gap-3" id="color-picker-container">
                                 ${colorOptionsHtml}
                             </div>
-                            <input type="hidden" id="input-ccolor" value="${course.color}">
+                            <input type="hidden" id="input-ccolor" value="${course.color || ''}">
                         </div>
                     `;
                     openModal(cId ? '강좌 수정' : '새로운 강좌 추가', html, () => {
                         const subj = document.getElementById('input-subject').value;
                         const tit = document.getElementById('input-ctitle').value || '제목 없음';
-                        const col = document.getElementById('input-ccolor').value || getRandomColor();
+                        const col = document.getElementById('input-ccolor').value || getStringColor(tit);
                         if (cId) { 
                             const idx = courses.findIndex(c => c.id === cId); 
                             if(idx > -1) courses[idx] = { ...courses[idx], subject: subj, title: tit, color: col }; 
@@ -1850,7 +1637,6 @@
                     });
                     break;
                 }
-                
                 case 'openLectureModal': {
                     const cId = target.dataset.courseId;
                     const lId = target.dataset.lecId;
@@ -1890,21 +1676,18 @@
                     });
                     break;
                 }
-                
                 case 'deleteCourse': {
                     const cId = target.dataset.id;
                     pendingDeletes.add(cId); renderAll(); 
                     showUndoToast('강좌가 삭제 대기 중입니다.', () => { pendingDeletes.delete(cId); renderAll(); }, () => { pendingDeletes.delete(cId); courses = courses.filter(c => c.id !== cId); lectures = lectures.filter(l => l.courseId !== cId); saveData(); renderAll(); });
                     break;
                 }
-                
                 case 'deleteLecture': {
                     const lId = target.dataset.id;
                     pendingDeletes.add(lId); renderAll();
                     showUndoToast('강의가 삭제 대기 중입니다.', () => { pendingDeletes.delete(lId); renderAll(); }, () => { pendingDeletes.delete(lId); lectures = lectures.filter(l => l.id !== lId); saveData(); renderAll(); });
                     break;
                 }
-                
                 case 'courseShowMore': {
                     const cId = target.dataset.id;
                     const lecsMap = getLecturesByCourse();
@@ -1912,10 +1695,8 @@
                     let current = courseViewCounts[cId] !== undefined ? courseViewCounts[cId] : Math.min(10, total);
                     current = Math.min(current, total);
                     courseViewCounts[cId] = Math.min(total, current + 10);
-                    renderCurriculumManager();
-                    break;
+                    renderCurriculumManager(); break;
                 }
-                
                 case 'courseFoldLess': {
                     const cId = target.dataset.id;
                     const lecsMap = getLecturesByCourse();
@@ -1924,38 +1705,29 @@
                     current = Math.min(current, total);
                     const foldCount = current % 10 === 0 ? 10 : current % 10;
                     courseViewCounts[cId] = Math.max(0, current - foldCount);
-                    renderCurriculumManager();
-                    break;
+                    renderCurriculumManager(); break;
                 }
-                
                 case 'courseFoldAll': {
-                    const cId = target.dataset.id;
-                    courseViewCounts[cId] = 0;
-                    renderCurriculumManager();
-                    break;
+                    courseViewCounts[target.dataset.id] = 0;
+                    renderCurriculumManager(); break;
                 }
-                
                 case 'toggleDbCourse': {
                     const cId = target.dataset.id;
                     if(closedDbCourses.has(cId)) closedDbCourses.delete(cId); else closedDbCourses.add(cId);
-                    renderMasterDB();
-                    break;
+                    renderMasterDB(); break;
                 }
-                
                 case 'setLectureTab': {
                     currentSubjectTab = target.dataset.subj;
-                    renderTodoLectures();
-                    break;
+                    openTodoCourses.clear();
+                    const firstCourse = getCourses().find(c => c.subject === currentSubjectTab);
+                    if (firstCourse) openTodoCourses.add(firstCourse.id);
+                    renderTodoLectures(); break;
                 }
-
                 case 'toggleTodoCourse': {
                     const cId = target.dataset.id;
-                    if(openTodoCourses.has(cId)) openTodoCourses.delete(cId);
-                    else openTodoCourses.add(cId);
-                    renderTodoLectures();
-                    break;
+                    if(openTodoCourses.has(cId)) openTodoCourses.delete(cId); else openTodoCourses.add(cId);
+                    renderTodoLectures(); break;
                 }
-                
                 case 'openDailyModal': {
                     const dateStr = target.dataset.date;
                     currentModalDate = dateStr;
@@ -1970,7 +1742,6 @@
                             <label class="block text-sm text-[#86868b] font-bold uppercase tracking-widest">학습 날짜</label>
                             <div class="text-white font-mono text-xl font-bold tracking-tight">${dateStr}</div>
                         </div>
-
                         <div class="bg-[rgba(255,255,255,0.03)] p-5 rounded-[20px] border border-[rgba(255,255,255,0.05)] mb-8 space-y-5 shadow-inner">
                             <div>
                                 <label class="block text-[11px] text-[#bf5af2] mb-2.5 font-bold uppercase tracking-widest">인강 추가</label>
@@ -1997,7 +1768,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div>
                             <div class="flex items-end justify-between mb-3">
                                 <label class="block text-sm text-white font-bold tracking-wide">학습 항목 목록</label>
@@ -2008,29 +1778,20 @@
                     `;
                     openModal(`학습 기록`, html, () => {
                         const idx = dailyRecords.findIndex(d => d.date === currentModalDate);
-                        if(idx > -1) {
-                            dailyRecords[idx].tasks = currentModalTasks;
-                        } 
-                        else { 
-                            dailyRecords.push({ id: generateId('D'), date: currentModalDate, tasks: currentModalTasks }); 
-                        }
+                        if(idx > -1) dailyRecords[idx].tasks = currentModalTasks;
+                        else dailyRecords.push({ id: generateId('D'), date: currentModalDate, tasks: currentModalTasks }); 
                         
                         currentModalTasks.forEach(t => {
                             if (t.type === 'lecture' && t.refId) {
                                 const originalLecture = lectures.find(l => l.id === t.refId);
-                                if (originalLecture) {
-                                    originalLecture.status = t.completed ? '완료' : '미시작';
-                                }
+                                if (originalLecture) originalLecture.status = t.completed ? '완료' : '미시작';
                             }
                         });
-
-                        saveData(); 
-                        renderAll();
+                        saveData(); renderAll();
                     });
                     renderModalTaskList();
                     break;
                 }
-                
                 case 'addModalLecTask': {
                     const sel = document.getElementById('modal-lecture-select');
                     if(!sel.value) return;
@@ -2041,7 +1802,6 @@
                     }
                     break;
                 }
-                
                 case 'addModalStudyTask': {
                     const titleEl = document.getElementById('modal-study-title');
                     const hEl = document.getElementById('modal-study-h');
@@ -2053,69 +1813,47 @@
                     titleEl.value = ''; hEl.value = ''; mEl.value = ''; renderModalTaskList();
                     break;
                 }
-                
                 case 'removeModalTask': {
                     currentModalTasks = currentModalTasks.filter(t => t.id !== target.dataset.id);
-                    renderModalTaskList();
-                    break;
+                    renderModalTaskList(); break;
                 }
-                
-                case 'toggleTask': { 
-                    if (isDragging) {
-                        isDragging = false;
-                        return; 
-                    }
-                    const recId = target.dataset.recId;
-                    const taskId = target.dataset.taskId;
-                    const record = dailyRecords.find(d => d.id === recId);
+                case 'toggleTask': {
+                    if (isDragging) { isDragging = false; return; }
+                    const record = dailyRecords.find(d => d.id === target.dataset.recId);
                     if(record && record.tasks) {
-                        const task = record.tasks.find(t => t.id === taskId);
+                        const task = record.tasks.find(t => t.id === target.dataset.taskId);
                         if(task) { 
                             task.completed = !task.completed; 
-                            
                             if (task.type === 'lecture' && task.refId) {
                                 const originalLecture = lectures.find(l => l.id === task.refId);
-                                if (originalLecture) {
-                                    originalLecture.status = task.completed ? '완료' : '미시작';
-                                }
+                                if (originalLecture) originalLecture.status = task.completed ? '완료' : '미시작';
                             }
-                            
-                            saveData(); 
-                            renderAll();
+                            saveData(); renderAll();
                         }
                     }
                     break;
                 }
-                
                 case 'undoToast': {
                     const tId = target.dataset.toastId;
                     if(toastTimers[tId]) { clearTimeout(toastTimers[tId].timer); if(toastTimers[tId].onUndo) toastTimers[tId].onUndo(); toastTimers[tId].removeToast(); }
                     break;
                 }
-                
                 case 'closeToast': {
                     const tId = target.dataset.toastId;
                     if(toastTimers[tId]) { clearTimeout(toastTimers[tId].timer); toastTimers[tId].removeToast(); }
                     break;
                 }
-                
                 case 'exportData': {
                     const data = { courses, lectures, dailyRecords, memos, ddays };
                     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `data.json`;
-                    a.click();
+                    a.href = url; a.download = `data.json`; a.click();
                     URL.revokeObjectURL(url);
                     showUndoToast('data.json 파일 다운로드가 완료되었습니다.', null, null, false);
                     break;
                 }
-                
-                case 'closeModal': {
-                    closeModal();
-                    break;
-                }
+                case 'closeModal': closeModal(); break;
             }
         });
 
@@ -2126,50 +1864,36 @@
 
             switch(action) {
                 case 'updateTaskTime': {
-                    const taskId = target.dataset.id;
-                    const newTime = parseInt(target.value) || 0;
-                    const task = currentModalTasks.find(t => t.id === taskId);
+                    const task = currentModalTasks.find(t => t.id === target.dataset.id);
                     if(task) {
-                        task.time = newTime;
+                        task.time = parseInt(target.value) || 0;
                         const idx = dailyRecords.findIndex(d => d.date === currentModalDate);
-                        if(idx > -1) {
-                            dailyRecords[idx].tasks = currentModalTasks;
-                        } else {
-                            dailyRecords.push({ id: generateId('D'), date: currentModalDate, tasks: currentModalTasks });
-                        }
-                        saveData();
-                        renderModalTaskList();
-                        renderCalendar();
-                        renderCharts();
-                        renderMasterDB();
-                        renderHeatmapAndStreak();
+                        if(idx > -1) dailyRecords[idx].tasks = currentModalTasks;
+                        else dailyRecords.push({ id: generateId('D'), date: currentModalDate, tasks: currentModalTasks });
+                        saveData(); renderAll(); renderModalTaskList();
                     }
                     break;
                 }
-                case 'toggleLecture': { 
+                case 'toggleLecture': {
                     const idx = lectures.findIndex(l => l.id === target.dataset.id);
                     if(idx > -1) { 
                         lectures[idx].status = lectures[idx].status === '완료' ? '미시작' : '완료'; 
-                        saveData(); renderCourseGallery(); renderTodoLectures(); renderCurriculumManager(); renderMasterDB();
+                        saveData(); renderAll();
                     }
                     break;
                 }
                 case 'toggleDailyAchieved': {
                     const record = dailyRecords.find(d => d.id === target.dataset.id);
                     if (record && record.tasks) {
-                        const stats = getDailyTaskStats(record);
-                        const targetStatus = !stats.allCompleted;
+                        const targetStatus = !getDailyTaskStats(record).allCompleted;
                         record.tasks.forEach(t => {
                             t.completed = targetStatus;
                             if (t.type === 'lecture' && t.refId) {
                                 const originalLecture = lectures.find(l => l.id === t.refId);
-                                if (originalLecture) {
-                                    originalLecture.status = t.completed ? '완료' : '미시작';
-                                }
+                                if (originalLecture) originalLecture.status = t.completed ? '완료' : '미시작';
                             }
                         }); 
-                        saveData(); 
-                        renderAll();
+                        saveData(); renderAll();
                     }
                     break;
                 }
@@ -2186,11 +1910,9 @@
                         try {
                             const data = JSON.parse(ev.target.result);
                             if (data.courses && data.lectures && data.dailyRecords) {
-                                courses = data.courses.map(c => ({ ...c, color: c.color || getRandomColor() }));
-                                lectures = data.lectures; 
-                                dailyRecords = data.dailyRecords;
-                                if(data.memos) memos = data.memos;
-                                if(data.ddays) ddays = data.ddays;
+                                courses = data.courses.map(c => ({ ...c, color: c.color || getStringColor(c.title) })); 
+                                lectures = data.lectures; dailyRecords = data.dailyRecords;
+                                if(data.memos) memos = data.memos; if(data.ddays) ddays = data.ddays;
                                 saveData(); renderAll();
                                 showUndoToast('데이터가 성공적으로 복원되었습니다.', null, null, false);
                             } else { alert('올바른 백업 파일 형식이 아닙니다.'); }
@@ -2210,28 +1932,12 @@
                 container.innerHTML = '<div class="text-sm text-[#86868b] text-center py-8 inner-squircle border border-[rgba(255,255,255,0.05)] border-dashed font-medium">등록된 학습 항목이 없습니다.</div>';
                 return;
             }
-            container.innerHTML = currentModalTasks.map(t => {
-                let taskColor = '#64d2ff'; // Default for study
-                let typeText = '자습';
-                let typeStyle = 'bg-[rgba(100,210,255,0.1)] text-[#64d2ff] border-[rgba(100,210,255,0.2)]';
-
-                if (t.type === 'lecture') {
-                    typeText = '인강';
-                    if (t.refId) {
-                        const lec = getLectures().find(l => l.id === t.refId);
-                        if (lec) taskColor = getCourseColor(lec.courseId);
-                    } else {
-                        taskColor = '#bf5af2';
-                    }
-                    typeStyle = `bg-[rgba(255,255,255,0.05)] text-white border-transparent`;
-                }
-
-                return `
+            container.innerHTML = currentModalTasks.map(t => `
                 <div class="flex items-center justify-between p-3.5 inner-squircle border border-[rgba(255,255,255,0.03)] transition hover:bg-[rgba(255,255,255,0.02)] mb-2 shadow-sm bg-[rgba(0,0,0,0.2)]">
                     <div class="flex items-center space-x-3.5 flex-1 min-w-0">
                         <input type="checkbox" class="custom-checkbox w-5 h-5 flex-shrink-0" ${t.completed ? 'checked' : ''} data-action="toggleModalTask" data-id="${t.id}">
                         <div class="flex-1 truncate flex items-center min-w-0">
-                            <span class="text-[10px] px-2 py-0.5 rounded-full border mr-3 flex-shrink-0 font-bold ${typeStyle}" style="${t.type==='lecture' ? `color: ${taskColor}; border-color: ${taskColor}40; background-color: ${taskColor}15;` : ''}">${typeText}</span>
+                            <span class="text-[10px] px-2.5 py-0.5 rounded-full border mr-3 flex-shrink-0 font-bold ${t.type === 'lecture' ? 'bg-[rgba(191,90,242,0.1)] text-[#bf5af2] border-[rgba(191,90,242,0.2)]' : 'bg-[rgba(100,210,255,0.1)] text-[#64d2ff] border-[rgba(100,210,255,0.2)]'}">${t.type === 'lecture' ? '인강' : '자습'}</span>
                             <span class="text-white text-sm font-medium truncate min-w-0 ${t.completed ? 'line-through text-[#86868b]' : ''}" title="${esc(t.title)}">${esc(t.title)}</span>
                         </div>
                     </div>
@@ -2247,21 +1953,13 @@
                         <button data-action="removeModalTask" data-id="${t.id}" class="text-red-400 hover:text-red-300 font-bold px-3 py-1.5 rounded-full bg-[rgba(255,59,48,0.1)] hover:bg-[rgba(255,59,48,0.2)] transition text-[11px]">삭제</button>
                     </div>
                 </div>
-                `;
-            }).join('');
+            `).join('');
         }
 
-        // --- App Initialization ---
-        async function initApp() {
-            initDOM();
-            loadLocalData(); 
-        }
+        async function initApp() { initDOM(); loadLocalData(); }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initApp);
+        else initApp();
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp();
-        }
     </script>
     
     <script type="module">
@@ -2294,19 +1992,17 @@
                 if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(true);
                 
                 unsub = onSnapshot(docRef, (snapshot) => {
-                    isCloudInitialized = true; 
+                    isCloudInitialized = true;
                     if (snapshot.exists()) {
                         const data = snapshot.data();
                         try {
                             const parsed = JSON.parse(data.payload);
-                            isRemoteUpdate = true; 
+                            isRemoteUpdate = true;
                             if(window.updateFromCloud) window.updateFromCloud(parsed);
                             isRemoteUpdate = false;
                         } catch(e) { console.error(e); }
                     } else {
-                        if(window.getExportData) {
-                            window.triggerCloudSave(window.getExportData());
-                        }
+                        if(window.getExportData) window.triggerCloudSave(window.getExportData());
                     }
                     if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(false);
                 }, (error) => {
@@ -2331,10 +2027,7 @@
                 
                 if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(true);
                 try {
-                    await setDoc(docRef, { 
-                        payload: JSON.stringify(dataObj), 
-                        updatedAt: Date.now() 
-                    });
+                    await setDoc(docRef, { payload: JSON.stringify(dataObj), updatedAt: Date.now() });
                     if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(false);
                 } catch(e) {
                     console.error("Firebase Write Error:", e);
