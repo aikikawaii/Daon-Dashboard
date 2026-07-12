@@ -471,8 +471,7 @@
             const activeSubjects = [...new Set(courses.map(c => c.subject))];
             if (activeSubjects.length > 0 && !currentSubjectTab) {
                 currentSubjectTab = activeSubjects[0];
-                const firstCourse = courses.find(c => c.subject === currentSubjectTab);
-                if (firstCourse) openTodoCourses.add(firstCourse.id);
+                // 기본으로 강좌를 펼쳐두는 코드 제거됨 (전체 접힘 상태 유지)
             }
             
             renderAll();
@@ -1729,9 +1728,7 @@
                 }
                 case 'setLectureTab': {
                     currentSubjectTab = target.dataset.subj;
-                    openTodoCourses.clear();
-                    const firstCourse = getCourses().find(c => c.subject === currentSubjectTab);
-                    if (firstCourse) openTodoCourses.add(firstCourse.id);
+                    openTodoCourses.clear(); // 탭 이동 시 열려있던 아코디언 모두 초기화(접힘)
                     renderTodoLectures(); break;
                 }
                 case 'toggleTodoCourse': {
