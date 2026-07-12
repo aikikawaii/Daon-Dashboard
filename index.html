@@ -90,9 +90,7 @@
             box-sizing: border-box;
             font-size: 0.9rem;
         }
-        .input-dark[type="date"] {
-            color-scheme: dark;
-        }
+        .input-dark[type="date"] { color-scheme: dark; }
         .input-dark:focus { 
             border-color: rgba(255, 255, 255, 0.3); 
             background-color: rgba(0, 0, 0, 0.5);
@@ -119,12 +117,7 @@
             box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
         }
         .custom-checkbox:checked::after {
-            content: '';
-            width: 6px;
-            height: 11px;
-            border: solid #000;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg) translateY(-1px);
+            content: ''; width: 6px; height: 11px; border: solid #000; border-width: 0 2px 2px 0; transform: rotate(45deg) translateY(-1px);
         }
 
         .truncate-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -133,9 +126,9 @@
 
         .accordion-grid {
             display: grid;
-            transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+            transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
         }
-        .accordion-grid.closed { grid-template-rows: 0fr; opacity: 0; pointer-events: none; }
+        .accordion-grid.closed { grid-template-rows: 0fr; opacity: 0.3; pointer-events: none; }
         .accordion-grid.open { grid-template-rows: 1fr; opacity: 1; pointer-events: auto; }
         .accordion-inner { overflow: hidden; }
 
@@ -167,9 +160,7 @@
         .calendar-cell:hover { background-color: rgba(44, 44, 46, 0.9); }
         .calendar-cell.today-cell { background-color: rgba(10, 132, 255, 0.08); }
         
-        .sync-spinner {
-            animation: spin 1s linear infinite;
-        }
+        .sync-spinner { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -236,7 +227,7 @@
                         <span class="text-[10px] font-bold text-[#86868b] bg-[rgba(255,255,255,0.05)] px-2.5 py-1 rounded-full border border-[rgba(255,255,255,0.05)]">Drag & Drop</span>
                     </div>
                     <div id="todo-tabs-container" class="mb-4"></div>
-                    <ul id="view-todo-lectures" class="overflow-y-auto pr-2 flex-1 space-y-3 min-h-0"></ul>
+                    <ul id="view-todo-lectures" class="overflow-y-auto pr-1 flex-1 min-h-0"></ul>
                 </div>
 
                 <!-- 학습 캘린더 -->
@@ -446,7 +437,7 @@
         <div class="bg-[rgba(28,28,30,0.8)] border border-[rgba(255,255,255,0.1)] rounded-[32px] p-6 sm:p-8 w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <h2 id="modal-title" class="text-2xl font-bold mb-6 pb-4 border-b border-[rgba(255,255,255,0.1)] text-white tracking-tight">Title</h2>
             <div id="modal-body" class="space-y-5 sm:space-y-6"></div>
-            <div class="mt-8 flex justify-end space-x-3 pt-4">
+            <div class="mt-8 flex justify-end space-x-3 pt-4 border-t border-[rgba(255,255,255,0.05)]">
                 <button data-action="closeModal" class="px-5 py-2.5 rounded-full bg-[rgba(255,255,255,0.05)] text-gray-300 hover:text-white hover:bg-[rgba(255,255,255,0.1)] transition font-semibold">취소</button>
                 <button id="modal-save-btn" class="px-6 py-2.5 rounded-full bg-white text-black font-bold hover:bg-gray-200 transition shadow-[0_0_15px_rgba(255,255,255,0.2)]">저장</button>
             </div>
@@ -455,69 +446,20 @@
 
     <script>
         // --- DOM Element Cache & Initialization ---
-        const DOM = {
-            viewCourseGallery: null,
-            todoTabsContainer: null,
-            viewTodoLectures: null,
-            calendarMonthLabel: null,
-            viewCalendar: null,
-            curriculumManager: null,
-            dbCourses: null,
-            dbLecturesContainer: null,
-            dbDaily: null,
-            heatmapContainer: null,
-            streakCounter: null,
-            viewMemos: null,
-            viewDdays: null,
-            toastContainer: null,
-            modalOverlay: null,
-            modalTitle: null,
-            modalBody: null,
-            modalSaveBtn: null,
-            pomoDisplay: null,
-            pomoStatus: null,
-            pomoBtnStart: null,
-            pomoBtnPause: null,
-            pomoWorkInput: null,
-            pomoBreakInput: null,
-            dailyTotalText: null,
-            monthlyChartTitle: null,
-            syncIndicator: null
-        };
-
+        const DOM = {};
         function initDOM() {
-            for (const key in DOM) {
-                const elementId = key.replace(/([A-Z])/g, "-$1").toLowerCase().replace(/^-/, '');
-                DOM[key] = document.getElementById(elementId) || document.getElementById(key);
-            }
-            // 수동 맵핑 필요한 예외 처리
-            DOM.viewCourseGallery = document.getElementById('view-course-gallery');
-            DOM.todoTabsContainer = document.getElementById('todo-tabs-container');
-            DOM.viewTodoLectures = document.getElementById('view-todo-lectures');
-            DOM.calendarMonthLabel = document.getElementById('calendar-month-label');
-            DOM.viewCalendar = document.getElementById('view-calendar');
-            DOM.curriculumManager = document.getElementById('curriculum-manager');
-            DOM.dbCourses = document.getElementById('db-courses');
-            DOM.dbLecturesContainer = document.getElementById('db-lectures-container');
-            DOM.dbDaily = document.getElementById('db-daily');
-            DOM.heatmapContainer = document.getElementById('heatmap-container');
-            DOM.streakCounter = document.getElementById('streak-counter');
-            DOM.viewMemos = document.getElementById('view-memos');
-            DOM.viewDdays = document.getElementById('view-ddays');
-            DOM.toastContainer = document.getElementById('toast-container');
-            DOM.modalOverlay = document.getElementById('modal-overlay');
-            DOM.modalTitle = document.getElementById('modal-title');
-            DOM.modalBody = document.getElementById('modal-body');
-            DOM.modalSaveBtn = document.getElementById('modal-save-btn');
-            DOM.pomoDisplay = document.getElementById('pomo-display');
-            DOM.pomoStatus = document.getElementById('pomo-status');
-            DOM.pomoBtnStart = document.getElementById('pomo-btn-start');
-            DOM.pomoBtnPause = document.getElementById('pomo-btn-pause');
-            DOM.pomoWorkInput = document.getElementById('pomo-work-input');
-            DOM.pomoBreakInput = document.getElementById('pomo-break-input');
-            DOM.dailyTotalText = document.getElementById('dailyTotalText');
-            DOM.monthlyChartTitle = document.getElementById('monthly-chart-title');
-            DOM.syncIndicator = document.getElementById('sync-status-indicator');
+            const ids = [
+                'view-course-gallery', 'todo-tabs-container', 'view-todo-lectures', 'calendar-month-label',
+                'view-calendar', 'curriculum-manager', 'db-courses', 'db-lectures-container', 'db-daily',
+                'heatmap-container', 'streak-counter', 'view-memos', 'view-ddays', 'toast-container',
+                'modal-overlay', 'modal-title', 'modal-body', 'modal-save-btn', 'pomo-display',
+                'pomo-status', 'pomo-btn-start', 'pomo-btn-pause', 'pomo-work-input', 'pomo-break-input',
+                'dailyTotalText', 'monthly-chart-title', 'sync-status-indicator'
+            ];
+            ids.forEach(id => {
+                const key = id.replace(/-([a-z])/g, g => g[1].toUpperCase());
+                DOM[key] = document.getElementById(id);
+            });
         }
 
         const esc = (str) => {
@@ -536,22 +478,33 @@
         let currentCalendarDate = new Date(); 
 
         const SUBJECT_THEMES = {
-            '수학': { bg: 'rgba(191, 90, 242, 0.15)', text: '#bf5af2', border: 'rgba(191, 90, 242, 0.25)', dot: '#bf5af2' },
-            '물리': { bg: 'rgba(100, 210, 255, 0.15)', text: '#64d2ff', border: 'rgba(100, 210, 255, 0.25)', dot: '#64d2ff' },
-            '영어': { bg: 'rgba(255, 214, 10, 0.15)', text: '#ffd60a', border: 'rgba(255, 214, 10, 0.25)', dot: '#ffd60a' },
-            '화학': { bg: 'rgba(255, 55, 95, 0.15)', text: '#ff375f', border: 'rgba(255, 55, 95, 0.25)', dot: '#ff375f' },
-            '기타': { bg: 'rgba(142, 142, 147, 0.15)', text: '#8e8e93', border: 'rgba(142, 142, 147, 0.25)', dot: '#8e8e93' }
+            '수학': { text: '#bf5af2', dot: '#bf5af2' },
+            '물리': { text: '#64d2ff', dot: '#64d2ff' },
+            '영어': { text: '#ffd60a', dot: '#ffd60a' },
+            '화학': { text: '#ff375f', dot: '#ff375f' },
+            '기타': { text: '#8e8e93', dot: '#8e8e93' }
         };
         const subjects = Object.keys(SUBJECT_THEMES);
+        
+        // Course 고유 식별 색상 풀
+        const COURSE_COLORS = [
+            '#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#00C7BE',
+            '#32ADE6', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55'
+        ];
+        function getRandomColor() {
+            return COURSE_COLORS[Math.floor(Math.random() * COURSE_COLORS.length)];
+        }
 
         const defaultCourses = [
-            { id: 'C1', subject: '수학', title: '미적분학 완벽 마스터' },
-            { id: 'C2', subject: '물리', title: '일반물리학 1 (역학)' }
+            { id: 'C1', subject: '수학', title: '미적분학 완벽 마스터', color: '#AF52DE' },
+            { id: 'C2', subject: '물리', title: '일반물리학 1 (역학)', color: '#007AFF' },
+            { id: 'C3', subject: '수학', title: '선형대수학 기초', color: '#FF9500' }
         ];
         const defaultLectures = [
             { id: 'L1', title: '1강. 함수의 극한과 연속', courseId: 'C1', status: '완료', duration: 50 },
             { id: 'L2', title: '2강. 로피탈 정리', courseId: 'C1', status: '미시작', duration: 60 },
             { id: 'L3', title: '1강. 벡터와 운동학 기초', courseId: 'C2', status: '미시작', duration: 45 },
+            { id: 'L4', title: '1강. 행렬과 벡터공간', courseId: 'C3', status: '미시작', duration: 55 },
         ];
         const defaultMemos = [
             { id: generateId('M'), text: '기출문제집 주문하기', completed: false },
@@ -569,21 +522,24 @@
         let ddays = [];
 
         window.showSyncIndicator = function(isLoading, isError = false) {
-            if(!DOM.syncIndicator) return;
-            DOM.syncIndicator.classList.remove('hidden');
+            if(!DOM.syncStatusIndicator) return;
+            DOM.syncStatusIndicator.classList.remove('hidden');
             if(isError) {
-                DOM.syncIndicator.innerHTML = `<span class="text-rose-500 font-bold">연결 오류</span>`;
+                DOM.syncStatusIndicator.innerHTML = `<span class="text-rose-500 font-bold">연결 오류</span>`;
                 return;
             }
             if(isLoading) {
-                DOM.syncIndicator.innerHTML = `<svg class="w-3 h-3 mr-1 text-[#86868b] sync-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> 동기화 중...`;
+                DOM.syncStatusIndicator.innerHTML = `<svg class="w-3 h-3 mr-1 text-[#86868b] sync-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> 동기화 중...`;
             } else {
-                DOM.syncIndicator.innerHTML = `<svg class="w-3 h-3 mr-1 text-[#30d158]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> 동기화됨`;
+                DOM.syncStatusIndicator.innerHTML = `<svg class="w-3 h-3 mr-1 text-[#30d158]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> 동기화됨`;
             }
         };
 
         function loadLocalData() {
-            courses = JSON.parse(localStorage.getItem('courses')) || defaultCourses;
+            const rawCourses = JSON.parse(localStorage.getItem('courses')) || defaultCourses;
+            // 과거 데이터 하위 호환: color가 없는 경우 부여
+            courses = rawCourses.map(c => ({ ...c, color: c.color || getRandomColor() }));
+            
             lectures = JSON.parse(localStorage.getItem('lectures')) || defaultLectures;
             
             let rawDailyRecords = JSON.parse(localStorage.getItem('dailyRecords')) || [];
@@ -603,13 +559,12 @@
 
         window.updateFromCloud = (data) => {
             if(data) {
-                if(data.courses) courses = data.courses;
+                if(data.courses) courses = data.courses.map(c => ({ ...c, color: c.color || getRandomColor() }));
                 if(data.lectures) lectures = data.lectures;
                 if(data.dailyRecords) dailyRecords = data.dailyRecords;
                 if(data.memos) memos = data.memos;
                 if(data.ddays) ddays = data.ddays;
                 
-                // 로컬에도 동기화 저장 (단, 무한루프 방지를 위해 triggerCloudSave는 호출 안 함)
                 localStorage.setItem('courses', JSON.stringify(courses));
                 localStorage.setItem('lectures', JSON.stringify(lectures));
                 localStorage.setItem('dailyRecords', JSON.stringify(dailyRecords));
@@ -640,11 +595,12 @@
         let toastTimers = {};
         
         let closedDbCourses = new Set(); 
-        let masterDbFoldState = { courses: false, lectures: false, daily: false }; // false = open, true = closed
+        let masterDbFoldState = { courses: false, lectures: false, daily: false }; 
         
         let currentModalDate = null;
         let currentModalTasks = []; 
         let currentSubjectTab = null; 
+        let openTodoCourses = new Set(); // 남은 강의 강좌별 아코디언 상태
 
         let courseViewCounts = {};
 
@@ -675,6 +631,7 @@
         // --- Core Helpers ---
         const getTheme = (subj) => SUBJECT_THEMES[subj] || SUBJECT_THEMES['기타'];
         const getCourseName = id => getCourses().find(c => c.id === id)?.title || '-';
+        const getCourseColor = id => getCourses().find(c => c.id === id)?.color || '#bf5af2';
         
         function getCourseProgress(lecsMap, courseId) {
             const courseLecs = lecsMap[courseId] || [];
@@ -696,11 +653,8 @@
         }
 
         function getShortLectureName(lecture) {
-            const course = getCourses().find(c => c.id === lecture.courseId);
-            const subjChar = course && course.subject ? course.subject.charAt(0) : '';
             const match = lecture.title.match(/(\d+강)/);
-            const lecPart = match ? match[1] : lecture.title.split(/[\s.]+/)[0];
-            return subjChar ? `${subjChar} ${lecPart}` : lecPart;
+            return match ? match[1] : lecture.title.split(/[\s.]+/)[0];
         }
 
         function getDailyTaskStats(record) {
@@ -723,7 +677,6 @@
                     }
                 }
             }
-            
             return { lecture: lec, study: stu, total: lec + stu, allCompleted, goals: goalsArr.join(', ') };
         }
 
@@ -736,7 +689,6 @@
             </div>
         `;
 
-        // --- Pomodoro Timer Logic ---
         let pomoInterval;
         let pomoTime = 25 * 60;
         let isPomoWorking = true; 
@@ -808,8 +760,6 @@
             }
         }
 
-        // --- Drag & Drop Logic (Desktop & Mobile) ---
-        
         window.handleDragStart = function(event, type, sourceId, taskId) {
             const payload = JSON.stringify({ type, sourceId, taskId });
             event.dataTransfer.setData('text/plain', payload);
@@ -1034,7 +984,6 @@
             }, 50);
         }
 
-        // --- Heatmap & Streak Logic ---
         function calculateStreak(recordsMap) {
             let streak = 0;
             let d = new Date(); 
@@ -1087,7 +1036,6 @@
             DOM.heatmapContainer.innerHTML = html;
             DOM.streakCounter.innerText = `🔥 ${calculateStreak(recordsMap)}일째`;
             
-            // 최신 날짜가 보이도록 스크롤 이동
             requestAnimationFrame(() => {
                 if(DOM.heatmapContainer && DOM.heatmapContainer.parentElement) {
                     DOM.heatmapContainer.parentElement.scrollLeft = DOM.heatmapContainer.parentElement.scrollWidth;
@@ -1095,7 +1043,6 @@
             });
         }
 
-        // --- Quick Memo Logic ---
         function renderMemos() {
             if(!DOM.viewMemos) return;
 
@@ -1115,7 +1062,6 @@
             `).join('');
         }
 
-        // --- D-DAY Logic ---
         function calculateDday(targetDateStr) {
             const today = new Date(TODAY);
             const target = new Date(targetDateStr);
@@ -1166,7 +1112,6 @@
             DOM.viewDdays.innerHTML = addBtnHtml + ddayHtml;
         }
 
-        // --- Chart.js Optimizations ---
         let chartInstances = { daily: null, weekly: null, monthly: null };
         Chart.defaults.color = '#86868b';
         Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif';
@@ -1310,7 +1255,6 @@
             }
         }
 
-        // --- Toast & Modals ---
         function showUndoToast(message, onUndo = null, onConfirm = null, isUndoMode = true) {
             const toastId = 'toast-' + Date.now();
             const toast = document.createElement('div');
@@ -1355,7 +1299,6 @@
         function closeModal() { DOM.modalOverlay.classList.add('hidden'); }
 
 
-        // --- Core Rendering ---
         function renderCourseGallery() {
             const dataCourses = getCourses();
             const lecsMap = getLecturesByCourse();
@@ -1363,14 +1306,15 @@
             DOM.viewCourseGallery.innerHTML = dataCourses.length > 0 
                 ? dataCourses.map(c => {
                     const theme = getTheme(c.subject);
+                    const courseColor = c.color || theme.dot;
                     return `
                     <div class="inner-squircle p-5 flex flex-col justify-between min-h-[120px] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.15)] transition shadow-md relative overflow-hidden group bg-[rgba(0,0,0,0.2)]">
-                        <div class="absolute top-0 left-0 w-1.5 h-full" style="background-color: ${theme.dot}; box-shadow: 0 0 10px ${theme.dot};"></div>
+                        <div class="absolute top-0 left-0 w-1.5 h-full" style="background-color: ${courseColor}; box-shadow: 0 0 10px ${courseColor};"></div>
                         <div class="pl-3 w-full min-w-0">
                             <span class="text-[10px] font-extrabold uppercase tracking-widest mb-2 inline-block" style="color: ${theme.text};">${esc(c.subject)}</span>
                             <div class="font-bold text-base text-white truncate w-full" title="${esc(c.title)}">${esc(c.title)}</div>
                         </div>
-                        <div class="mt-4 pl-3">${renderProgressBar(getCourseProgress(lecsMap, c.id), theme.dot)}</div>
+                        <div class="mt-4 pl-3">${renderProgressBar(getCourseProgress(lecsMap, c.id), courseColor)}</div>
                     </div>
                     `}).join('')
                 : `<div class="col-span-full py-10 text-center text-sm font-medium text-[#86868b]">진행 중인 강좌가 없습니다.</div>`;
@@ -1405,33 +1349,68 @@
             }
             DOM.todoTabsContainer.innerHTML = tabsHtml;
 
-            const filteredTodoLectures = todoLectures.filter(l => {
-                const c = dataCourses.find(c => c.id === l.courseId);
-                return c && c.subject === currentSubjectTab;
+            const filteredCourses = dataCourses.filter(c => c.subject === currentSubjectTab);
+            
+            if(filteredCourses.length === 0) {
+                DOM.viewTodoLectures.innerHTML = `<div class="py-12 text-center text-sm font-bold text-[#86868b]">이 과목의 강좌가 없습니다.</div>`;
+                return;
+            }
+
+            let html = '';
+            let hasAnyTodo = false;
+
+            filteredCourses.forEach((course, index) => {
+                const courseTodos = todoLectures.filter(l => l.courseId === course.id);
+                if (courseTodos.length === 0) return; 
+                hasAnyTodo = true;
+
+                // 기본적으로 첫 번째 강좌의 아코디언만 열어둠 (만약 openTodoCourses가 비어있다면)
+                if(openTodoCourses.size === 0 && index === 0) openTodoCourses.add(course.id);
+                
+                const isOpen = openTodoCourses.has(course.id);
+                const cColor = course.color || '#bf5af2';
+
+                html += `
+                    <li class="mb-3 inner-squircle bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] overflow-hidden transition-all shadow-sm">
+                        <div class="flex justify-between items-center p-3.5 cursor-pointer hover:bg-[rgba(255,255,255,0.05)] transition" data-action="toggleTodoCourse" data-id="${course.id}">
+                            <div class="flex items-center space-x-3 font-bold text-sm text-white w-full overflow-hidden pr-2">
+                                <div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${cColor}; box-shadow: 0 0 8px ${cColor};"></div>
+                                <span class="truncate flex-1" title="${esc(course.title)}">${esc(course.title)}</span>
+                                <span class="text-[10px] text-[#86868b] bg-[rgba(0,0,0,0.3)] px-2 py-0.5 rounded-md flex-shrink-0">${courseTodos.length}강</span>
+                            </div>
+                            <span class="text-[#86868b] text-[10px] font-bold transform transition-transform ${isOpen ? 'rotate-180' : ''} flex-shrink-0">▼</span>
+                        </div>
+                        <div class="accordion-grid ${isOpen ? 'open' : 'closed'}">
+                            <div class="accordion-inner">
+                                <ul class="p-2 pt-0 space-y-1.5 border-t border-[rgba(255,255,255,0.03)] bg-[rgba(0,0,0,0.15)] max-h-[300px] overflow-y-auto pr-1">
+                                    ${courseTodos.map(l => `
+                                        <li draggable="true" 
+                                            ondragstart="handleDragStart(event, 'todo', '${l.id}')" 
+                                            ondragend="handleDragEnd(event)"
+                                            ontouchstart="handleTouchStartList(event, 'todo', '${l.id}')"
+                                            ontouchmove="handleTouchMoveList(event)"
+                                            ontouchend="handleTouchEndList(event)"
+                                            ontouchcancel="handleTouchEndList(event)"
+                                            style="-webkit-touch-callout: none; -webkit-user-select: none; user-select: none;"
+                                            class="draggable-item flex items-center justify-between text-xs p-3 rounded-xl border border-[rgba(255,255,255,0.02)] hover:border-[rgba(255,255,255,0.1)] transition group bg-[rgba(255,255,255,0.03)] hover:bg-[rgba(255,255,255,0.06)] shadow-sm">
+                                            <div class="flex items-center space-x-3 overflow-hidden flex-1 pointer-events-none">
+                                                <div data-action="toggleLecture" data-id="${l.id}" class="w-4 h-4 rounded-full border border-[#86868b] flex-shrink-0 group-hover:border-white transition-colors cursor-pointer pointer-events-auto"></div>
+                                                <span class="text-gray-200 font-semibold truncate flex-1 pointer-events-none" title="${esc(l.title)}">${esc(l.title)}</span>
+                                                <span class="text-[10px] text-[#86868b] font-mono font-bold pointer-events-none flex-shrink-0">(${l.duration || 0}m)</span>
+                                            </div>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                `;
             });
 
-            DOM.viewTodoLectures.innerHTML = filteredTodoLectures.length > 0
-                ? filteredTodoLectures.map(l => {
-                    const cName = getCourseName(l.courseId);
-                    return `
-                    <li draggable="true" 
-                        ondragstart="handleDragStart(event, 'todo', '${l.id}')" 
-                        ondragend="handleDragEnd(event)"
-                        ontouchstart="handleTouchStartList(event, 'todo', '${l.id}')"
-                        ontouchmove="handleTouchMoveList(event)"
-                        ontouchend="handleTouchEndList(event)"
-                        ontouchcancel="handleTouchEndList(event)"
-                        style="-webkit-touch-callout: none; -webkit-user-select: none; user-select: none;"
-                        class="draggable-item flex flex-col sm:flex-row sm:items-center justify-between text-sm p-3.5 inner-squircle border border-[rgba(255,255,255,0.02)] hover:border-[rgba(255,255,255,0.1)] transition group bg-[rgba(0,0,0,0.2)] shadow-sm">
-                        <div class="flex items-center space-x-3 overflow-hidden min-w-0 flex-1 pointer-events-none">
-                            <div data-action="toggleLecture" data-id="${l.id}" class="w-4 h-4 rounded-full border-2 border-[#555] flex-shrink-0 group-hover:border-white transition-colors" style="cursor: pointer; pointer-events: auto;"></div>
-                            <span class="text-white font-semibold truncate w-full pointer-events-none" title="${esc(l.title)}">${esc(l.title)}</span>
-                            <span class="text-[10px] text-[#86868b] font-mono font-bold pointer-events-none flex-shrink-0">(${l.duration || 0}m)</span>
-                        </div>
-                        <span class="text-[#86868b] text-[10px] sm:text-xs mt-2 sm:mt-0 sm:ml-4 truncate flex-shrink-0 sm:max-w-[130px] text-left sm:text-right font-semibold pointer-events-none tracking-wide" title="${esc(cName)}">${esc(cName)}</span>
-                    </li>
-                    `}).join('')
-                : `<div class="py-12 text-center text-sm font-bold text-[#86868b]">이 과목의 남은 강의가 없습니다 🎉</div>`;
+            if(!hasAnyTodo) {
+                html = `<div class="py-12 text-center text-sm font-bold text-[#86868b]">이 과목의 남은 강의가 없습니다 🎉</div>`;
+            }
+            DOM.viewTodoLectures.innerHTML = html;
         }
 
         function renderCalendar() {
@@ -1471,7 +1450,13 @@
                         const isCompleted = task.completed;
                         const textStyle = isCompleted ? 'text-[#86868b] line-through' : 'text-gray-200';
                         const bgStyle = isCompleted ? 'bg-[rgba(255,255,255,0.03)]' : 'bg-[rgba(255,255,255,0.08)]';
-                        const dotColor = task.type === 'lecture' ? '#bf5af2' : '#64d2ff';
+                        
+                        let dotColor = '#64d2ff'; // default for study
+                        if (task.type === 'lecture' && task.refId) {
+                            const lec = getLectures().find(l => l.id === task.refId);
+                            if(lec) dotColor = getCourseColor(lec.courseId);
+                            else dotColor = '#bf5af2';
+                        }
                         
                         cellContent += `
                             <div class="${bgStyle} ${textStyle} rounded-md px-1.5 py-1 mb-1 text-[10px] sm:text-[11px] font-semibold hover:bg-[rgba(255,255,255,0.15)] transition-colors flex justify-between items-center shadow-sm w-full min-w-0 draggable-item" 
@@ -1538,17 +1523,18 @@
                         
                         <div class="p-6 space-y-5">
                             ${subjCourses.map(course => {
+                                const courseColor = course.color || theme.dot;
                                 const courseLecs = lecsMap[course.id] || [];
                                 const totalLecs = courseLecs.length;
                                 
-                                // 표시할 개수 가져오기 (기본값: 최소 10개 혹은 전체)
                                 let visibleCount = courseViewCounts[course.id] !== undefined ? Math.min(courseViewCounts[course.id], totalLecs) : Math.min(10, totalLecs);
                                 const displayLecs = courseLecs.slice(0, visibleCount);
                                 const hiddenCount = totalLecs - visibleCount;
 
                                 return `
-                                <div class="inner-squircle border border-[rgba(255,255,255,0.03)] p-5 transition hover:border-[rgba(255,255,255,0.1)] min-w-0 bg-[rgba(255,255,255,0.01)]">
-                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4 border-b border-[rgba(255,255,255,0.05)] pb-4">
+                                <div class="inner-squircle border border-[rgba(255,255,255,0.03)] p-5 transition hover:border-[rgba(255,255,255,0.1)] min-w-0 bg-[rgba(255,255,255,0.01)] relative overflow-hidden">
+                                    <div class="absolute top-0 left-0 w-1 h-full" style="background-color: ${courseColor}; opacity: 0.8;"></div>
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4 border-b border-[rgba(255,255,255,0.05)] pb-4 pl-2">
                                         <div class="font-bold text-white text-lg truncate flex-1" title="${esc(course.title)}">${esc(course.title)}</div>
                                         <div class="flex space-x-2.5 text-xs flex-shrink-0 mt-1 sm:mt-0 items-center">
                                             <button data-action="openLectureModal" data-course-id="${course.id}" class="text-white bg-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.2)] font-bold px-3 py-1.5 rounded-full transition shadow-sm">+ 추가</button>
@@ -1556,7 +1542,7 @@
                                             <button data-action="deleteCourse" data-id="${course.id}" class="text-red-500/80 hover:text-red-500 font-semibold px-1 transition">삭제</button>
                                         </div>
                                     </div>
-                                    <div class="mt-2">
+                                    <div class="mt-2 pl-2">
                                         ${displayLecs.length > 0 ? `
                                         <ul class="ml-1.5 pl-3 border-l-2 border-[rgba(255,255,255,0.1)] space-y-2.5">
                                             ${displayLecs.map(lec => `
@@ -1576,7 +1562,7 @@
                                         ` : (totalLecs === 0 ? '<p class="text-xs text-[#86868b] py-1 font-medium ml-1.5">등록된 강의가 없습니다.</p>' : '')}
                                     </div>
                                     ${totalLecs > 0 ? `
-                                        <div class="pt-3.5 flex justify-center items-center gap-2 border-t border-[rgba(255,255,255,0.05)] mt-3.5">
+                                        <div class="pt-3.5 flex justify-center items-center gap-2 border-t border-[rgba(255,255,255,0.05)] mt-3.5 pl-2">
                                             ${hiddenCount > 0 ? `
                                                 <button data-action="courseShowMore" data-id="${course.id}" class="text-xs font-bold text-white px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.1)] transition shadow-sm">▼ ${Math.min(10, hiddenCount)}개 더보기</button>
                                             ` : ''}
@@ -1602,11 +1588,15 @@
             // [1] Course DB
             DOM.dbCourses.innerHTML = dataCourses.length > 0 ? dataCourses.map(c => {
                 const theme = getTheme(c.subject);
+                const courseColor = c.color || theme.dot;
                 return `
                 <tr>
                     <td><span class="text-[11px] font-extrabold uppercase tracking-widest" style="color: ${theme.text};">${esc(c.subject)}</span></td>
-                    <td class="text-white font-bold truncate max-w-[200px] sm:max-w-[400px]" title="${esc(c.title)}">${esc(c.title)}</td>
-                    <td>${renderProgressBar(getCourseProgress(lecsMap, c.id), theme.dot)}</td>
+                    <td class="text-white font-bold truncate max-w-[200px] sm:max-w-[400px]" title="${esc(c.title)}">
+                        <span class="inline-block w-2 h-2 rounded-full mr-2" style="background-color: ${courseColor}"></span>
+                        ${esc(c.title)}
+                    </td>
+                    <td>${renderProgressBar(getCourseProgress(lecsMap, c.id), courseColor)}</td>
                 </tr>
             `}).join('') : `<tr><td colspan="3" class="text-center text-[#86868b] py-8 font-semibold text-sm">데이터가 없습니다.</td></tr>`;
 
@@ -1622,10 +1612,12 @@
                 subjCourses.forEach(course => {
                     const courseLecs = lecsMap[course.id] || [];
                     const isClosed = closedDbCourses.has(course.id); 
+                    const courseColor = course.color || theme.dot;
                     
                     lecturesHtml += `
-                    <div class="inner-squircle border border-[rgba(255,255,255,0.04)] mb-3 overflow-hidden bg-[rgba(0,0,0,0.2)] shadow-sm">
-                        <div class="px-5 py-4 flex justify-between items-center cursor-pointer hover:bg-[rgba(255,255,255,0.03)] transition-colors" data-action="toggleDbCourse" data-id="${course.id}">
+                    <div class="inner-squircle border border-[rgba(255,255,255,0.04)] mb-3 overflow-hidden bg-[rgba(0,0,0,0.2)] shadow-sm relative">
+                        <div class="absolute top-0 left-0 w-1 h-full" style="background-color: ${courseColor}; opacity: 0.6;"></div>
+                        <div class="px-5 pl-6 py-4 flex justify-between items-center cursor-pointer hover:bg-[rgba(255,255,255,0.03)] transition-colors" data-action="toggleDbCourse" data-id="${course.id}">
                             <div class="font-bold text-sm text-white pointer-events-none">${esc(course.title)} <span class="text-[10px] text-[#86868b] ml-3 font-semibold bg-[#111112] px-2.5 py-1 rounded-full border border-[rgba(255,255,255,0.05)]">${courseLecs.length}강</span></div>
                             <div class="text-[#86868b] text-xs transform transition-transform duration-300 font-bold ${isClosed ? '' : 'rotate-180'} pointer-events-none">▼</div>
                         </div>
@@ -1633,12 +1625,12 @@
                             <div class="accordion-inner border-t border-[rgba(255,255,255,0.04)]">
                                 <table class="w-full text-sm">
                                     <thead class="text-[#86868b] text-[10px] font-extrabold uppercase tracking-widest bg-[rgba(0,0,0,0.3)]">
-                                        <tr><th class="p-3 pl-5 text-left border-b border-[rgba(255,255,255,0.03)]">Title</th><th class="p-3 w-24 text-center border-b border-[rgba(255,255,255,0.03)]">Status</th><th class="p-3 w-20 text-center border-b border-[rgba(255,255,255,0.03)]">Time</th></tr>
+                                        <tr><th class="p-3 pl-6 text-left border-b border-[rgba(255,255,255,0.03)]">Title</th><th class="p-3 w-24 text-center border-b border-[rgba(255,255,255,0.03)]">Status</th><th class="p-3 w-20 text-center border-b border-[rgba(255,255,255,0.03)]">Time</th></tr>
                                     </thead>
                                     <tbody>
                                         ${courseLecs.length > 0 ? courseLecs.map(l => `
                                         <tr class="border-b border-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.02)] transition-colors last:border-b-0">
-                                            <td class="p-3 pl-5 font-semibold ${l.status === '완료' ? 'text-[#86868b] line-through' : 'text-gray-200'}">${esc(l.title)}</td>
+                                            <td class="p-3 pl-6 font-semibold ${l.status === '완료' ? 'text-[#86868b] line-through' : 'text-gray-200'}">${esc(l.title)}</td>
                                             <td class="p-3 text-center"><span class="text-[10px] px-2.5 py-1 rounded-full font-bold border ${l.status === '완료' ? 'border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.02)] text-[#86868b]' : 'border-[rgba(255,255,255,0.15)] bg-[rgba(255,255,255,0.05)] text-white'} shadow-sm">${l.status}</span></td>
                                             <td class="p-3 text-center text-[11px] text-[#86868b] font-mono font-bold">${l.duration||0}m</td>
                                         </tr>
@@ -1684,8 +1676,22 @@
             renderDdays();
         }
 
-        // --- Event Delegation ---
         document.addEventListener('click', (e) => {
+            
+            // Color Picker in Modal
+            const colorOpt = e.target.closest('.color-option');
+            if (colorOpt) {
+                document.querySelectorAll('.color-option').forEach(el => {
+                    el.classList.remove('border-white', 'scale-110');
+                    el.classList.add('border-transparent');
+                });
+                colorOpt.classList.remove('border-transparent');
+                colorOpt.classList.add('border-white', 'scale-110');
+                const inputColor = document.getElementById('input-ccolor');
+                if (inputColor) inputColor.value = colorOpt.dataset.color;
+                return;
+            }
+
             const target = e.target.closest('[data-action]');
             if(!target) return;
             const action = target.dataset.action;
@@ -1717,7 +1723,6 @@
 
                     if (tabName === 'dashboard') {
                         renderCharts();
-                        // 탭 전환 시 히트맵 스크롤 보정
                         requestAnimationFrame(() => {
                             if(DOM.heatmapContainer && DOM.heatmapContainer.parentElement) {
                                 DOM.heatmapContainer.parentElement.scrollLeft = DOM.heatmapContainer.parentElement.scrollWidth;
@@ -1786,7 +1791,6 @@
                         const dateVal = document.getElementById('input-dday-date').value;
                         if(dateVal) {
                             ddays.push({ id: generateId('DD'), title, targetDate: dateVal });
-                            // 날짜순 정렬
                             ddays.sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate));
                             saveData();
                             renderDdays();
@@ -1810,8 +1814,13 @@
                 
                 case 'openCourseModal': {
                     const cId = target.dataset.courseId;
-                    const course = cId ? getCourses().find(c => c.id === cId) : { subject: '수학', title: '' };
+                    const course = cId ? getCourses().find(c => c.id === cId) : { subject: '수학', title: '', color: getRandomColor() };
                     const options = subjects.map(s => `<option value="${s}" ${course.subject === s ? 'selected' : ''}>${s}</option>`).join('');
+                    
+                    const colorOptionsHtml = COURSE_COLORS.map(c => `
+                        <div data-color="${c}" class="color-option w-7 h-7 rounded-full cursor-pointer border-2 transition-transform hover:scale-110 ${course.color === c ? 'border-white scale-110' : 'border-transparent'}" style="background-color: ${c}"></div>
+                    `).join('');
+
                     const html = `
                         <div>
                             <label class="block text-sm text-[#86868b] mb-2 font-semibold">과목 분류</label>
@@ -1819,16 +1828,24 @@
                         </div>
                         <div class="mt-5">
                             <label class="block text-sm text-[#86868b] mb-2 font-semibold">강좌 제목</label>
-                            <input type="text" id="input-ctitle" class="input-dark" value="${esc(course.title)}">
+                            <input type="text" id="input-ctitle" class="input-dark" value="${esc(course.title)}" placeholder="강좌 제목 입력">
+                        </div>
+                        <div class="mt-5">
+                            <label class="block text-sm text-[#86868b] mb-3 font-semibold">강좌 색상 (캘린더 표시용)</label>
+                            <div class="flex flex-wrap gap-3" id="color-picker-container">
+                                ${colorOptionsHtml}
+                            </div>
+                            <input type="hidden" id="input-ccolor" value="${course.color}">
                         </div>
                     `;
                     openModal(cId ? '강좌 수정' : '새로운 강좌 추가', html, () => {
                         const subj = document.getElementById('input-subject').value;
                         const tit = document.getElementById('input-ctitle').value || '제목 없음';
+                        const col = document.getElementById('input-ccolor').value || getRandomColor();
                         if (cId) { 
                             const idx = courses.findIndex(c => c.id === cId); 
-                            if(idx > -1) courses[idx] = { ...courses[idx], subject: subj, title: tit }; 
-                        } else { courses.push({ id: generateId('C'), subject: subj, title: tit }); }
+                            if(idx > -1) courses[idx] = { ...courses[idx], subject: subj, title: tit, color: col }; 
+                        } else { courses.push({ id: generateId('C'), subject: subj, title: tit, color: col }); }
                         saveData(); renderAll();
                     });
                     break;
@@ -1930,6 +1947,14 @@
                     renderTodoLectures();
                     break;
                 }
+
+                case 'toggleTodoCourse': {
+                    const cId = target.dataset.id;
+                    if(openTodoCourses.has(cId)) openTodoCourses.delete(cId);
+                    else openTodoCourses.add(cId);
+                    renderTodoLectures();
+                    break;
+                }
                 
                 case 'openDailyModal': {
                     const dateStr = target.dataset.date;
@@ -1990,7 +2015,6 @@
                             dailyRecords.push({ id: generateId('D'), date: currentModalDate, tasks: currentModalTasks }); 
                         }
                         
-                        // 모달 저장 시 강의 상태 연동 업데이트
                         currentModalTasks.forEach(t => {
                             if (t.type === 'lecture' && t.refId) {
                                 const originalLecture = lectures.find(l => l.id === t.refId);
@@ -2001,13 +2025,7 @@
                         });
 
                         saveData(); 
-                        renderCalendar(); 
-                        renderCharts(); 
-                        renderMasterDB(); 
-                        renderHeatmapAndStreak();
-                        renderTodoLectures(); 
-                        renderCourseGallery(); 
-                        renderCurriculumManager();
+                        renderAll();
                     });
                     renderModalTaskList();
                     break;
@@ -2042,10 +2060,10 @@
                     break;
                 }
                 
-                case 'toggleTask': { // from Calendar
+                case 'toggleTask': { 
                     if (isDragging) {
                         isDragging = false;
-                        return; // 드래그 중이었다면 토글 클릭을 무시합니다.
+                        return; 
                     }
                     const recId = target.dataset.recId;
                     const taskId = target.dataset.taskId;
@@ -2055,7 +2073,6 @@
                         if(task) { 
                             task.completed = !task.completed; 
                             
-                            // 캘린더에서 체크 시 강의 상태 연동 업데이트
                             if (task.type === 'lecture' && task.refId) {
                                 const originalLecture = lectures.find(l => l.id === task.refId);
                                 if (originalLecture) {
@@ -2064,13 +2081,7 @@
                             }
                             
                             saveData(); 
-                            renderCalendar(); 
-                            renderCharts(); 
-                            renderMasterDB(); 
-                            renderHeatmapAndStreak(); 
-                            renderTodoLectures(); 
-                            renderCourseGallery(); 
-                            renderCurriculumManager();
+                            renderAll();
                         }
                     }
                     break;
@@ -2120,7 +2131,6 @@
                     const task = currentModalTasks.find(t => t.id === taskId);
                     if(task) {
                         task.time = newTime;
-                        // 실시간 저장을 위해 모달 데이터와 백그라운드 데이터 연동 업데이트
                         const idx = dailyRecords.findIndex(d => d.date === currentModalDate);
                         if(idx > -1) {
                             dailyRecords[idx].tasks = currentModalTasks;
@@ -2136,7 +2146,7 @@
                     }
                     break;
                 }
-                case 'toggleLecture': { // For actual input checkboxes
+                case 'toggleLecture': { 
                     const idx = lectures.findIndex(l => l.id === target.dataset.id);
                     if(idx > -1) { 
                         lectures[idx].status = lectures[idx].status === '완료' ? '미시작' : '완료'; 
@@ -2151,8 +2161,6 @@
                         const targetStatus = !stats.allCompleted;
                         record.tasks.forEach(t => {
                             t.completed = targetStatus;
-                            
-                            // DB 표에서 완료 체크 시 강의 연동 업데이트
                             if (t.type === 'lecture' && t.refId) {
                                 const originalLecture = lectures.find(l => l.id === t.refId);
                                 if (originalLecture) {
@@ -2161,13 +2169,7 @@
                             }
                         }); 
                         saveData(); 
-                        renderCalendar(); 
-                        renderCharts(); 
-                        renderMasterDB(); 
-                        renderHeatmapAndStreak();
-                        renderTodoLectures();
-                        renderCourseGallery();
-                        renderCurriculumManager();
+                        renderAll();
                     }
                     break;
                 }
@@ -2184,7 +2186,9 @@
                         try {
                             const data = JSON.parse(ev.target.result);
                             if (data.courses && data.lectures && data.dailyRecords) {
-                                courses = data.courses; lectures = data.lectures; dailyRecords = data.dailyRecords;
+                                courses = data.courses.map(c => ({ ...c, color: c.color || getRandomColor() }));
+                                lectures = data.lectures; 
+                                dailyRecords = data.dailyRecords;
                                 if(data.memos) memos = data.memos;
                                 if(data.ddays) ddays = data.ddays;
                                 saveData(); renderAll();
@@ -2199,7 +2203,6 @@
             }
         });
 
-        // 모달 전용 렌더러
         function renderModalTaskList() {
             const container = document.getElementById('modal-task-list');
             if (!container) return;
@@ -2207,12 +2210,28 @@
                 container.innerHTML = '<div class="text-sm text-[#86868b] text-center py-8 inner-squircle border border-[rgba(255,255,255,0.05)] border-dashed font-medium">등록된 학습 항목이 없습니다.</div>';
                 return;
             }
-            container.innerHTML = currentModalTasks.map(t => `
+            container.innerHTML = currentModalTasks.map(t => {
+                let taskColor = '#64d2ff'; // Default for study
+                let typeText = '자습';
+                let typeStyle = 'bg-[rgba(100,210,255,0.1)] text-[#64d2ff] border-[rgba(100,210,255,0.2)]';
+
+                if (t.type === 'lecture') {
+                    typeText = '인강';
+                    if (t.refId) {
+                        const lec = getLectures().find(l => l.id === t.refId);
+                        if (lec) taskColor = getCourseColor(lec.courseId);
+                    } else {
+                        taskColor = '#bf5af2';
+                    }
+                    typeStyle = `bg-[rgba(255,255,255,0.05)] text-white border-transparent`;
+                }
+
+                return `
                 <div class="flex items-center justify-between p-3.5 inner-squircle border border-[rgba(255,255,255,0.03)] transition hover:bg-[rgba(255,255,255,0.02)] mb-2 shadow-sm bg-[rgba(0,0,0,0.2)]">
                     <div class="flex items-center space-x-3.5 flex-1 min-w-0">
                         <input type="checkbox" class="custom-checkbox w-5 h-5 flex-shrink-0" ${t.completed ? 'checked' : ''} data-action="toggleModalTask" data-id="${t.id}">
                         <div class="flex-1 truncate flex items-center min-w-0">
-                            <span class="text-[10px] px-2.5 py-0.5 rounded-full border mr-3 flex-shrink-0 font-bold ${t.type === 'lecture' ? 'bg-[rgba(191,90,242,0.1)] text-[#bf5af2] border-[rgba(191,90,242,0.2)]' : 'bg-[rgba(100,210,255,0.1)] text-[#64d2ff] border-[rgba(100,210,255,0.2)]'}">${t.type === 'lecture' ? '인강' : '자습'}</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full border mr-3 flex-shrink-0 font-bold ${typeStyle}" style="${t.type==='lecture' ? `color: ${taskColor}; border-color: ${taskColor}40; background-color: ${taskColor}15;` : ''}">${typeText}</span>
                             <span class="text-white text-sm font-medium truncate min-w-0 ${t.completed ? 'line-through text-[#86868b]' : ''}" title="${esc(t.title)}">${esc(t.title)}</span>
                         </div>
                     </div>
@@ -2228,13 +2247,14 @@
                         <button data-action="removeModalTask" data-id="${t.id}" class="text-red-400 hover:text-red-300 font-bold px-3 py-1.5 rounded-full bg-[rgba(255,59,48,0.1)] hover:bg-[rgba(255,59,48,0.2)] transition text-[11px]">삭제</button>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // --- App Initialization ---
         async function initApp() {
             initDOM();
-            loadLocalData(); // 임시로 로컬 데이터 먼저 표시
+            loadLocalData(); 
         }
 
         if (document.readyState === 'loading') {
@@ -2242,10 +2262,8 @@
         } else {
             initApp();
         }
-
     </script>
     
-    <!-- Firebase Real-time Sync Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
@@ -2266,29 +2284,26 @@
             const auth = getAuth(app);
             const db = getFirestore(app);
             
-            // 모든 기기가 공유할 공통 문서 경로 지정 (아이패드와 노트북 연동의 핵심)
             const docRef = doc(db, 'dashboards', 'shared_dashboard_room');
 
             let unsub = null;
             let isRemoteUpdate = false;
-            let isCloudInitialized = false; // 클라우드 데이터 첫 수신 여부
+            let isCloudInitialized = false; 
 
-            // 2. 실시간 동기화 시작 (onSnapshot)
             function startRealtime() {
                 if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(true);
                 
                 unsub = onSnapshot(docRef, (snapshot) => {
-                    isCloudInitialized = true; // 최초 데이터를 받았으므로 락 해제
+                    isCloudInitialized = true; 
                     if (snapshot.exists()) {
                         const data = snapshot.data();
                         try {
                             const parsed = JSON.parse(data.payload);
-                            isRemoteUpdate = true; // 화면 그릴 때 다시 업로드되는 무한루프 방지
+                            isRemoteUpdate = true; 
                             if(window.updateFromCloud) window.updateFromCloud(parsed);
                             isRemoteUpdate = false;
                         } catch(e) { console.error(e); }
                     } else {
-                        // 클라우드가 비어있으면 로컬 데이터를 최초 업로드
                         if(window.getExportData) {
                             window.triggerCloudSave(window.getExportData());
                         }
@@ -2300,7 +2315,6 @@
                 });
             }
 
-            // 3. 익명 로그인 및 연결 트리거
             const initAuth = async () => {
                 try {
                     await signInAnonymously(auth);
@@ -2312,9 +2326,7 @@
             };
             initAuth();
 
-            // 4. 로컬에서 데이터 변경 시 호출되는 저장 함수
             window.triggerCloudSave = async (dataObj) => {
-                // 클라우드 데이터를 처음 받아오기 전에는 덮어쓰기 방지 (초기화 문제 해결 핵심)
                 if(isRemoteUpdate || !auth.currentUser || !isCloudInitialized) return; 
                 
                 if(typeof window.showSyncIndicator === 'function') window.showSyncIndicator(true);
