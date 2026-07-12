@@ -1080,7 +1080,18 @@
                         const isCompleted = task.completed;
                         const textStyle = isCompleted ? 'text-[#86868b] line-through' : 'text-gray-200';
                         const bgStyle = isCompleted ? 'bg-[rgba(255,255,255,0.03)]' : 'bg-[rgba(255,255,255,0.08)]';
-                        const dotColor = task.type === 'lecture' ? '#bf5af2' : '#64d2ff';
+                        
+                        let dotColor = '#64d2ff'; // 기본 자습 색상
+                        if (task.type === 'lecture') {
+                            dotColor = '#bf5af2'; // 기본 인강 색상
+                            if (task.refId) {
+                                const lec = lectures.find(l => l.id === task.refId);
+                                if (lec) {
+                                    const crs = courses.find(c => c.id === lec.courseId);
+                                    if (crs) dotColor = crs.color || getStringColor(crs.title);
+                                }
+                            }
+                        }
                         
                         cellContent += `
                             <div class="${bgStyle} ${textStyle} rounded-md px-1.5 py-1 mb-1 text-[10px] sm:text-[11px] font-semibold hover:bg-[rgba(255,255,255,0.15)] transition-colors flex justify-between items-center shadow-sm w-full min-w-0 draggable-item" 
@@ -1932,12 +1943,34 @@
                 container.innerHTML = '<div class="text-sm text-[#86868b] text-center py-8 inner-squircle border border-[rgba(255,255,255,0.05)] border-dashed font-medium">등록된 학습 항목이 없습니다.</div>';
                 return;
             }
-            container.innerHTML = currentModalTasks.map(t => `
+            container.innerHTML = currentModalTasks.map(t => {
+                let badgeColor = '#64d2ff';
+                let badgeBg = 'rgba(100,210,255,0.1)';
+                let badgeBorder = 'rgba(100,210,255,0.2)';
+                
+                if (t.type === 'lecture') {
+                    badgeColor = '#bf5af2';
+                    badgeBg = 'rgba(191,90,242,0.1)';
+                    badgeBorder = 'rgba(191,90,242,0.2)';
+                    if (t.refId) {
+                        const lec = lectures.find(l => l.id === t.refId);
+                        if (lec) {
+                            const crs = courses.find(c => c.id === lec.courseId);
+                            if (crs) {
+                                badgeColor = crs.color || getStringColor(crs.title);
+                                badgeBg = badgeColor + '1a'; // 10% 투명도 적용
+                                badgeBorder = badgeColor + '33'; // 20% 투명도 적용
+                            }
+                        }
+                    }
+                }
+
+                return `
                 <div class="flex items-center justify-between p-3.5 inner-squircle border border-[rgba(255,255,255,0.03)] transition hover:bg-[rgba(255,255,255,0.02)] mb-2 shadow-sm bg-[rgba(0,0,0,0.2)]">
                     <div class="flex items-center space-x-3.5 flex-1 min-w-0">
                         <input type="checkbox" class="custom-checkbox w-5 h-5 flex-shrink-0" ${t.completed ? 'checked' : ''} data-action="toggleModalTask" data-id="${t.id}">
                         <div class="flex-1 truncate flex items-center min-w-0">
-                            <span class="text-[10px] px-2.5 py-0.5 rounded-full border mr-3 flex-shrink-0 font-bold ${t.type === 'lecture' ? 'bg-[rgba(191,90,242,0.1)] text-[#bf5af2] border-[rgba(191,90,242,0.2)]' : 'bg-[rgba(100,210,255,0.1)] text-[#64d2ff] border-[rgba(100,210,255,0.2)]'}">${t.type === 'lecture' ? '인강' : '자습'}</span>
+                            <span class="text-[10px] px-2.5 py-0.5 rounded-full border mr-3 flex-shrink-0 font-bold" style="color: ${badgeColor}; background-color: ${badgeBg}; border-color: ${badgeBorder};">${t.type === 'lecture' ? '인강' : '자습'}</span>
                             <span class="text-white text-sm font-medium truncate min-w-0 ${t.completed ? 'line-through text-[#86868b]' : ''}" title="${esc(t.title)}">${esc(t.title)}</span>
                         </div>
                     </div>
@@ -1953,7 +1986,7 @@
                         <button data-action="removeModalTask" data-id="${t.id}" class="text-red-400 hover:text-red-300 font-bold px-3 py-1.5 rounded-full bg-[rgba(255,59,48,0.1)] hover:bg-[rgba(255,59,48,0.2)] transition text-[11px]">삭제</button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         async function initApp() { initDOM(); loadLocalData(); }
