@@ -4,8 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daon's Dashboard</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 마크다운 및 수식(LaTeX) 렌더링 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
     <style>
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -15,55 +24,99 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        :root {
+            --bg-color: #000000;
+            --text-main: #f5f5f7;
+            --card-bg: rgba(28, 28, 30, 0.45);
+            --inner-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+
         body {
-            background-color: #000000;
-            color: #f5f5f7;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
             letter-spacing: -0.01em;
             position: relative;
             overflow-x: hidden;
-            color-scheme: dark;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        .ambient-glow-1 { position: fixed; top: -15%; left: -10%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(191,90,242,0.15) 0%, rgba(0,0,0,0) 70%); z-index: -1; pointer-events: none; }
-        .ambient-glow-2 { position: fixed; bottom: -20%; right: -10%; width: 700px; height: 700px; background: radial-gradient(circle, rgba(100,210,255,0.1) 0%, rgba(0,0,0,0) 70%); z-index: -1; pointer-events: none; }
+        body.light-mode {
+            --bg-color: #f5f5f7;
+            --text-main: #1c1c1e;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --inner-bg: rgba(0, 0, 0, 0.03);
+            --border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .ambient-glow-1 { position: fixed; top: -15%; left: -10%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(191,90,242,0.15) 0%, rgba(0,0,0,0) 70%); z-index: -1; pointer-events: none; transition: background 0.3s; }
+        .ambient-glow-2 { position: fixed; bottom: -20%; right: -10%; width: 700px; height: 700px; background: radial-gradient(circle, rgba(100,210,255,0.1) 0%, rgba(0,0,0,0) 70%); z-index: -1; pointer-events: none; transition: background 0.3s; }
+        
+        body.light-mode .ambient-glow-1 { background: radial-gradient(circle, rgba(191,90,242,0.1) 0%, rgba(255,255,255,0) 70%); }
+        body.light-mode .ambient-glow-2 { background: radial-gradient(circle, rgba(10,132,255,0.08) 0%, rgba(255,255,255,0) 70%); }
 
         .card-squircle {
             border-radius: 32px;
-            background-color: rgba(28, 28, 30, 0.45);
+            background-color: var(--card-bg);
             backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-color);
             box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
         }
+        body.light-mode .card-squircle { box-shadow: 0 12px 48px rgba(0, 0, 0, 0.05); }
+
         .inner-squircle {
             border-radius: 20px;
-            background-color: rgba(255, 255, 255, 0.03);
+            background-color: var(--inner-bg);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
+        body.light-mode .inner-squircle { border-color: rgba(0, 0, 0, 0.05); }
 
         .db-table { border-collapse: separate; border-spacing: 0; width: 100%; }
         .db-table th, .db-table td { padding: 1rem 1.25rem; text-align: left; vertical-align: middle; white-space: nowrap; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        body.light-mode .db-table th, body.light-mode .db-table td { border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
         .db-table th { font-weight: 600; color: #86868b; font-size: 0.8125rem; background-color: rgba(0, 0, 0, 0.2); text-transform: uppercase; letter-spacing: 0.05em; }
+        body.light-mode .db-table th { background-color: rgba(0, 0, 0, 0.05); color: #1c1c1e; }
         .db-table th:first-child { border-top-left-radius: 18px; }
         .db-table th:last-child { border-top-right-radius: 18px; }
         .db-table tr:hover td { background-color: rgba(255, 255, 255, 0.04); }
+        body.light-mode .db-table tr:hover td { background-color: rgba(0, 0, 0, 0.02); }
         .db-table tr:last-child td { border-bottom: none; }
 
         .input-dark {
             background-color: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;
             padding: 0.75rem 1rem; border-radius: 14px; width: 100%; outline: none; transition: all 0.3s ease; box-sizing: border-box; font-size: 0.9rem;
         }
-        .input-dark[type="date"] { color-scheme: dark; }
+        body.light-mode .input-dark { background-color: rgba(255, 255, 255, 0.7); color: #1c1c1e; border-color: rgba(0, 0, 0, 0.1); }
         .input-dark:focus { border-color: rgba(255, 255, 255, 0.3); background-color: rgba(0, 0, 0, 0.5); box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05); }
+        body.light-mode .input-dark:focus { border-color: #0a84ff; background-color: #fff; box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.1); }
 
         .custom-checkbox {
             appearance: none; width: 1.35rem; height: 1.35rem; background-color: rgba(255, 255, 255, 0.05); border: 1.5px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink: 0;
         }
+        body.light-mode .custom-checkbox { background-color: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.2); }
         .custom-checkbox:checked { background-color: #f5f5f7; border-color: #f5f5f7; box-shadow: 0 0 12px rgba(255, 255, 255, 0.4); }
+        body.light-mode .custom-checkbox:checked { background-color: #1c1c1e; border-color: #1c1c1e; box-shadow: 0 0 12px rgba(0, 0, 0, 0.1); }
         .custom-checkbox:checked::after { content: ''; width: 6px; height: 11px; border: solid #000; border-width: 0 2px 2px 0; transform: rotate(45deg) translateY(-1px); }
+        body.light-mode .custom-checkbox:checked::after { border-color: #fff; }
+
+        .notion-preview { font-size: 0.95rem; line-height: 1.6; color: inherit; word-break: break-word; }
+        .notion-preview h1 { font-size: 1.8em; font-weight: 800; margin-top: 1.2em; margin-bottom: 0.5em; letter-spacing: -0.02em; }
+        .notion-preview h2 { font-size: 1.5em; font-weight: 700; margin-top: 1em; margin-bottom: 0.5em; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3em; }
+        .notion-preview h3 { font-size: 1.25em; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; }
+        .notion-preview p { margin-bottom: 1em; }
+        .notion-preview ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+        .notion-preview ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; }
+        .notion-preview blockquote { border-left: 3px solid #0a84ff; padding-left: 1em; color: #86868b; margin-bottom: 1em; background: rgba(10,132,255,0.05); padding: 0.5em 1em; border-radius: 0 8px 8px 0; }
+        .notion-preview code { background: rgba(150,150,150,0.15); padding: 0.2em 0.4em; border-radius: 4px; font-family: monospace; font-size: 0.9em; color: #ff375f; }
+        .notion-preview pre { background: rgba(0,0,0,0.3); padding: 1em; border-radius: 8px; overflow-x: auto; margin-bottom: 1em; }
+        body.light-mode .notion-preview pre { background: rgba(240,240,240,0.8); }
+        .notion-preview pre code { background: transparent; padding: 0; color: inherit; }
+        .notion-preview a { color: #0a84ff; text-decoration: underline; }
 
         .truncate-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
@@ -76,16 +129,30 @@
         .accordion-inner { overflow: hidden; }
 
         .drag-over { background-color: rgba(255, 255, 255, 0.1) !important; border-color: rgba(255, 255, 255, 0.5) !important; }
+        body.light-mode .drag-over { background-color: rgba(0, 0, 0, 0.05) !important; border-color: rgba(0, 0, 0, 0.2) !important; }
         .draggable-item { cursor: grab; touch-action: pan-y; }
         .draggable-item:active { cursor: grabbing; transform: scale(0.98); }
 
         .calendar-wrapper { background-color: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; overflow: hidden; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; }
+        body.light-mode .calendar-wrapper { background-color: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.05); }
         .calendar-cell { background-color: rgba(28, 28, 30, 0.8); min-height: 110px; padding: 0.35rem; display: flex; flex-direction: column; transition: background-color 0.2s ease; min-width: 0; }
+        body.light-mode .calendar-cell { background-color: rgba(255, 255, 255, 0.6); }
         .calendar-cell:hover { background-color: rgba(44, 44, 46, 0.9); }
+        body.light-mode .calendar-cell:hover { background-color: rgba(255, 255, 255, 0.9); }
         .calendar-cell.today-cell { background-color: rgba(10, 132, 255, 0.08); }
         
         .sync-spinner { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Light mode text utilities */
+        body.light-mode .text-white { color: #1c1c1e !important; }
+        body.light-mode .text-\[#86868b\] { color: #6b6b70 !important; }
+        body.light-mode .bg-\[rgba\(255\,255\,255\,0\.02\)\] { background-color: rgba(0,0,0,0.02) !important; }
+        body.light-mode .bg-\[rgba\(255\,255\,255\,0\.05\)\] { background-color: rgba(0,0,0,0.05) !important; }
+        body.light-mode .bg-\[rgba\(255\,255\,255\,0\.1\)\] { background-color: rgba(0,0,0,0.1) !important; }
+        body.light-mode .border-\[rgba\(255\,255\,255\,0\.05\)\] { border-color: rgba(0,0,0,0.05) !important; }
+        body.light-mode .border-\[rgba\(255\,255\,255\,0\.08\)\] { border-color: rgba(0,0,0,0.08) !important; }
+        body.light-mode .border-\[rgba\(255\,255\,255\,0\.1\)\] { border-color: rgba(0,0,0,0.1) !important; }
     </style>
 </head>
 <body class="p-4 md:p-6 lg:p-8">
@@ -98,7 +165,7 @@
         <header class="flex flex-col sm:flex-row justify-between items-start sm:items-end pb-5 gap-4">
             <div>
                 <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tighter mb-1 flex items-center gap-3">
-                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#ffffff] via-[#e5e5ea] to-[#8e8e93] drop-shadow-sm">Daon's Dashboard</span>
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#ffffff] via-[#e5e5ea] to-[#8e8e93] drop-shadow-sm text-white">Daon's Dashboard</span>
                     <span id="sync-status-indicator" class="text-xs font-medium px-2 py-1 rounded-md bg-[rgba(255,255,255,0.1)] text-[#86868b] flex items-center hidden transition-all duration-300">
                         <span id="cloud-icon" class="mr-1"></span>
                         <span id="cloud-text">연결 중...</span>
@@ -107,17 +174,17 @@
                 <p class="text-sm text-[#86868b] mt-1 font-medium tracking-wide">자동 로컬 저장 방식 및 개인 클라우드 실시간 동기화</p>
             </div>
             <div class="flex flex-wrap items-center gap-2.5">
+                <button data-action="toggleTheme" class="px-4 py-2 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] text-[#86868b] hover:text-white text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+                    <span id="theme-icon">☀️ 라이트 모드</span>
+                </button>
                 <a href="https://cafe.naver.com/kcidorcen" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-gradient-to-b from-[#03c75a] to-[#02b350] hover:from-[#02b350] hover:to-[#029a45] text-white text-xs font-bold transition shadow-[0_4px_14px_rgba(3,199,90,0.3)] flex items-center gap-1.5 border border-[#02b350]">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg> 독편사 바로가기
                 </a>
                 <a href="https://www.kimyoung.co.kr/offmegaky.asp" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-gradient-to-b from-[#e11d48] to-[#f43f5e] hover:from-[#be123c] hover:to-[#e11d48] text-white text-xs font-bold transition shadow-[0_4px_14px_rgba(225,29,72,0.4)] flex items-center gap-1.5 border border-[#e11d48]">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg> 김영편입 바로가기
                 </a>
-                <button data-action="refreshPage" class="px-4 py-2 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] text-[#86868b] hover:text-white text-xs font-bold transition shadow-sm flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> 새로고침
-                </button>
                 <label class="px-4 py-2 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] text-xs font-bold text-[#86868b] hover:text-white transition cursor-pointer shadow-sm">
-                    데이터 복원 (JSON) <input type="file" class="hidden" accept=".json" data-action="importData">
+                    복원 (JSON) <input type="file" class="hidden" accept=".json" data-action="importData">
                 </label>
                 <button data-action="exportData" class="px-4 py-2 rounded-xl bg-[rgba(10,132,255,0.15)] border border-[rgba(10,132,255,0.2)] hover:bg-[#0a84ff] text-[#0a84ff] hover:text-white text-xs font-bold transition shadow-sm">
                     데이터 백업
@@ -127,6 +194,7 @@
 
         <div class="flex space-x-2 pb-2 border-b border-[rgba(255,255,255,0.08)] overflow-x-auto hide-scrollbar">
             <button data-action="switchTab" data-tab="dashboard" class="tab-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all bg-[rgba(255,255,255,0.1)] text-white shadow-sm flex-shrink-0">Dashboard</button>
+            <button data-action="switchTab" data-tab="memo" class="tab-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all text-[#86868b] hover:bg-[rgba(255,255,255,0.05)] hover:text-white flex-shrink-0">Memo</button>
             <button data-action="switchTab" data-tab="curriculum" class="tab-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all text-[#86868b] hover:bg-[rgba(255,255,255,0.05)] hover:text-white flex-shrink-0">Curriculum</button>
             <button data-action="switchTab" data-tab="database" class="tab-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all text-[#86868b] hover:bg-[rgba(255,255,255,0.05)] hover:text-white flex-shrink-0">Master DB</button>
         </div>
@@ -164,6 +232,7 @@
                 </div>
             </div>
 
+            <!-- Charts -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div class="card-squircle p-6 shadow-sm flex flex-col items-center">
                     <h3 class="text-xs font-bold text-[#86868b] mb-2 w-full text-left uppercase tracking-widest">Today's Focus</h3>
@@ -175,46 +244,20 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="card-squircle p-6 shadow-sm flex flex-col">
                     <h3 class="text-xs font-bold text-[#86868b] mb-4 uppercase tracking-widest">Weekly Trends</h3>
                     <div class="w-full flex-1 min-h-[160px]"><canvas id="chartWeekly"></canvas></div>
                 </div>
-
                 <div class="card-squircle p-6 shadow-sm flex flex-col">
                     <h3 class="text-xs font-bold text-[#86868b] mb-4 uppercase tracking-widest" id="monthly-chart-title">Monthly Progress</h3>
                     <div class="w-full flex-1 min-h-[160px]"><canvas id="chartMonthly"></canvas></div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <!-- Pomodoro -->
-                <div class="card-squircle p-6 shadow-sm flex flex-col items-center justify-between">
-                    <div class="w-full flex justify-between items-center mb-2">
-                        <h2 class="text-lg font-bold text-white tracking-tight">뽀모도로 타이머</h2>
-                        <span id="pomo-status" class="text-[10px] font-bold px-2.5 py-1 bg-[rgba(10,132,255,0.15)] text-[#0a84ff] border border-[rgba(10,132,255,0.2)] rounded-full">대기 중</span>
-                    </div>
-                    <div id="pomo-display" class="text-6xl font-mono font-extrabold text-white tracking-tight my-4 drop-shadow-[0_0_15px_rgba(10,132,255,0.3)] transition-colors duration-300">25:00</div>
-                    <div class="flex space-x-4 mb-5 w-full justify-center">
-                        <div class="flex flex-col items-center">
-                            <label class="text-[10px] text-[#86868b] uppercase font-bold mb-1.5 tracking-wider">Work (m)</label>
-                            <input type="number" id="pomo-work-input" value="25" min="1" class="input-dark text-center w-[70px] !py-1.5 !text-sm" onchange="onPomoInputChange()">
-                        </div>
-                        <div class="flex flex-col items-center">
-                            <label class="text-[10px] text-[#86868b] uppercase font-bold mb-1.5 tracking-wider">Break (m)</label>
-                            <input type="number" id="pomo-break-input" value="5" min="1" class="input-dark text-center w-[70px] !py-1.5 !text-sm">
-                        </div>
-                    </div>
-                    <div class="flex space-x-3 w-full">
-                        <button id="pomo-btn-start" data-action="startPomo" class="flex-1 bg-[#0a84ff] hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition shadow-[0_0_15px_rgba(10,132,255,0.3)]">시작</button>
-                        <button id="pomo-btn-pause" data-action="pausePomo" class="flex-1 bg-[#ff9f0a] hover:bg-orange-500 text-white font-bold py-2.5 rounded-xl transition shadow-[0_0_15px_rgba(255,159,10,0.3)] hidden">일시정지</button>
-                        <button data-action="resetPomo" class="px-5 bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.1)] text-white font-bold py-2.5 rounded-xl transition">리셋</button>
-                    </div>
-                </div>
-
-                <!-- Memo -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- 퀵 체크리스트 -->
                 <div class="card-squircle p-6 shadow-sm flex flex-col h-[300px] md:h-auto">
-                    <h2 class="text-lg font-bold text-white tracking-tight mb-4">퀵 메모 & 체크리스트</h2>
+                    <h2 class="text-lg font-bold text-white tracking-tight mb-4">퀵 체크리스트</h2>
                     <div class="flex space-x-2 mb-4">
                         <input type="text" id="memo-input" placeholder="새로운 할 일..." class="input-dark flex-1 !py-2 !text-sm" onkeypress="if(event.key === 'Enter') document.querySelector('[data-action=addMemo]').click()">
                         <button data-action="addMemo" class="bg-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.2)] text-white font-bold px-3.5 py-2 rounded-xl transition">+</button>
@@ -248,6 +291,41 @@
                 <h2 class="text-xl font-bold mb-6 text-white tracking-tight">과목별 진도 현황</h2>
                 <div id="view-course-gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"></div>
             </div>
+        </div>
+
+        <!-- New Advanced Memo Tab (Notion + LaTeX) -->
+        <div id="tab-memo" class="tab-content hidden pb-24">
+            <section class="space-y-6 pt-4 h-[75vh] flex flex-col">
+                <div class="flex flex-wrap justify-between items-end gap-2 border-b border-[rgba(255,255,255,0.08)] pb-4 flex-shrink-0">
+                    <h2 class="text-3xl font-bold text-white tracking-tight">Advanced Memo <span class="text-sm font-medium text-[#86868b] ml-2 font-mono hidden sm:inline-block">with LaTeX & Markdown</span></h2>
+                    <div class="flex space-x-2">
+                        <button data-action="createNewNote" class="px-5 py-2.5 rounded-xl bg-[#0a84ff] hover:bg-blue-500 text-white font-bold transition shadow-sm text-sm">새 메모 작성</button>
+                    </div>
+                </div>
+                <div class="flex flex-col lg:flex-row gap-5 flex-1 min-h-0">
+                    <!-- Sidebar List -->
+                    <div class="card-squircle w-full lg:w-1/4 p-4 flex flex-col h-[250px] lg:h-full flex-shrink-0">
+                        <h3 class="text-xs font-bold text-[#86868b] uppercase tracking-widest mb-4 px-2">메모 목록</h3>
+                        <ul id="advanced-notes-list" class="overflow-y-auto hide-scrollbar space-y-1.5 flex-1"></ul>
+                    </div>
+                    <!-- Editor & Preview -->
+                    <div class="card-squircle w-full lg:w-3/4 p-0 flex flex-col overflow-hidden h-[600px] lg:h-full relative group" id="advanced-note-editor-container">
+                        <div class="absolute inset-0 flex items-center justify-center text-[#86868b] font-medium" id="empty-note-placeholder">
+                            좌측에서 메모를 선택하거나 새 메모를 작성하세요.
+                        </div>
+                        <div id="note-active-area" class="hidden flex-col h-full w-full">
+                            <div class="p-4 sm:p-5 border-b border-[rgba(255,255,255,0.05)] flex items-center bg-[rgba(0,0,0,0.2)]">
+                                <input type="text" id="note-edit-title" class="bg-transparent border-none outline-none text-xl sm:text-2xl font-extrabold text-white w-full placeholder:text-gray-500" placeholder="제목 없음..." oninput="handleNoteInput()">
+                                <button data-action="deleteActiveNote" class="ml-4 text-red-500 hover:text-red-400 font-bold text-xs bg-[rgba(255,59,48,0.1)] px-3 py-1.5 rounded-lg whitespace-nowrap transition">삭제</button>
+                            </div>
+                            <div class="flex-1 flex flex-col sm:flex-row min-h-0">
+                                <textarea id="note-edit-content" class="w-full sm:w-1/2 p-4 sm:p-5 bg-transparent border-none outline-none resize-none font-mono text-xs sm:text-sm leading-relaxed text-white placeholder:text-gray-500 sm:border-r border-[rgba(255,255,255,0.05)] overflow-y-auto hide-scrollbar" placeholder="# 마크다운 및 수식(LaTeX) 지원&#10;&#10;수식 입력 예시:&#10;질량-에너지 등가 원리: $E = mc^2$&#10;&#10;푸리에 변환:&#10;$$&#10;\hat{f}(\xi) = \int_{-\infty}^{\infty} f(x) e^{-2\pi i x \xi} dx&#10;$$&#10;&#10;마크다운:&#10;- 목록 1&#10;- 목록 2&#10;> 인용구입니다." oninput="handleNoteInput()"></textarea>
+                                <div id="note-preview-content" class="w-full sm:w-1/2 p-4 sm:p-6 overflow-y-auto hide-scrollbar notion-preview bg-[rgba(0,0,0,0.1)]"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
 
         <div id="tab-curriculum" class="tab-content hidden pb-24">
@@ -341,8 +419,8 @@
             viewCourseGallery: null, todoTabsContainer: null, viewTodoLectures: null, calendarMonthLabel: null, viewCalendar: null,
             curriculumManager: null, dbCourses: null, dbLecturesContainer: null, dbDaily: null, heatmapContainer: null,
             streakCounter: null, viewMemos: null, viewDdays: null, toastContainer: null, modalOverlay: null, modalTitle: null,
-            modalBody: null, modalSaveBtn: null, pomoDisplay: null, pomoStatus: null, pomoBtnStart: null, pomoBtnPause: null,
-            pomoWorkInput: null, pomoBreakInput: null, dailyTotalText: null, monthlyChartTitle: null, syncIndicator: null
+            modalBody: null, modalSaveBtn: null, dailyTotalText: null, monthlyChartTitle: null, syncIndicator: null,
+            advancedNotesList: null, noteActiveArea: null, emptyNotePlaceholder: null, noteEditTitle: null, noteEditContent: null, notePreviewContent: null, themeIcon: null
         };
 
         function initDOM() {
@@ -368,15 +446,16 @@
             DOM.modalTitle = document.getElementById('modal-title');
             DOM.modalBody = document.getElementById('modal-body');
             DOM.modalSaveBtn = document.getElementById('modal-save-btn');
-            DOM.pomoDisplay = document.getElementById('pomo-display');
-            DOM.pomoStatus = document.getElementById('pomo-status');
-            DOM.pomoBtnStart = document.getElementById('pomo-btn-start');
-            DOM.pomoBtnPause = document.getElementById('pomo-btn-pause');
-            DOM.pomoWorkInput = document.getElementById('pomo-work-input');
-            DOM.pomoBreakInput = document.getElementById('pomo-break-input');
             DOM.dailyTotalText = document.getElementById('dailyTotalText');
             DOM.monthlyChartTitle = document.getElementById('monthly-chart-title');
             DOM.syncIndicator = document.getElementById('sync-status-indicator');
+            DOM.advancedNotesList = document.getElementById('advanced-notes-list');
+            DOM.noteActiveArea = document.getElementById('note-active-area');
+            DOM.emptyNotePlaceholder = document.getElementById('empty-note-placeholder');
+            DOM.noteEditTitle = document.getElementById('note-edit-title');
+            DOM.noteEditContent = document.getElementById('note-edit-content');
+            DOM.notePreviewContent = document.getElementById('note-preview-content');
+            DOM.themeIcon = document.getElementById('theme-icon');
         }
 
         const esc = (str) => {
@@ -424,8 +503,9 @@
         ];
         const defaultMemos = [ { id: generateId('M'), text: '기출문제집 주문하기', completed: false } ];
         const defaultDdays = [ { id: generateId('DD'), title: '편입시험', targetDate: '2026-12-20' } ];
+        const defaultNotes = [ { id: generateId('AN'), title: '일반물리학 공식 요약', content: '# 역학 공식\n\n운동 에너지: $K = \\frac{1}{2}mv^2$\n\n## 1차원 운동\n- 등가속도 운동 방정식\n$$v = v_0 + at$$\n$$x = x_0 + v_0 t + \\frac{1}{2}at^2$$', updatedAt: Date.now() } ];
 
-        let courses = [], lectures = [], dailyRecords = [], memos = [], ddays = [];
+        let courses = [], lectures = [], dailyRecords = [], memos = [], ddays = [], advancedNotes = [];
         let pendingDeletes = new Set();
         let toastTimers = {};
         let closedDbCourses = new Set(); 
@@ -435,6 +515,7 @@
         let currentSubjectTab = null; 
         let openTodoCourses = new Set(); 
         let courseViewCounts = {};
+        let activeNoteId = null;
 
         window.showSyncIndicator = function(isLoading, isError = false) {
             if(!DOM.syncIndicator) return;
@@ -467,11 +548,11 @@
 
             memos = JSON.parse(localStorage.getItem('memos')) || defaultMemos;
             ddays = JSON.parse(localStorage.getItem('ddays')) || defaultDdays;
+            advancedNotes = JSON.parse(localStorage.getItem('advancedNotes')) || defaultNotes;
             
             const activeSubjects = [...new Set(courses.map(c => c.subject))];
             if (activeSubjects.length > 0 && !currentSubjectTab) {
                 currentSubjectTab = activeSubjects[0];
-                // 기본으로 강좌를 펼쳐두는 코드 제거됨 (전체 접힘 상태 유지)
             }
             
             renderAll();
@@ -484,17 +565,19 @@
                 if(data.dailyRecords) dailyRecords = data.dailyRecords;
                 if(data.memos) memos = data.memos;
                 if(data.ddays) ddays = data.ddays;
+                if(data.advancedNotes) advancedNotes = data.advancedNotes;
                 
                 localStorage.setItem('courses', JSON.stringify(courses));
                 localStorage.setItem('lectures', JSON.stringify(lectures));
                 localStorage.setItem('dailyRecords', JSON.stringify(dailyRecords));
                 localStorage.setItem('memos', JSON.stringify(memos));
                 localStorage.setItem('ddays', JSON.stringify(ddays));
+                localStorage.setItem('advancedNotes', JSON.stringify(advancedNotes));
                 renderAll();
             }
         };
 
-        window.getExportData = () => ({ courses, lectures, dailyRecords, memos, ddays });
+        window.getExportData = () => ({ courses, lectures, dailyRecords, memos, ddays, advancedNotes });
 
         function saveData(syncToCloud = true) {
             localStorage.setItem('courses', JSON.stringify(courses));
@@ -502,9 +585,10 @@
             localStorage.setItem('dailyRecords', JSON.stringify(dailyRecords));
             localStorage.setItem('memos', JSON.stringify(memos));
             localStorage.setItem('ddays', JSON.stringify(ddays));
+            localStorage.setItem('advancedNotes', JSON.stringify(advancedNotes));
 
             if (syncToCloud && typeof window.triggerCloudSave === 'function') {
-                window.triggerCloudSave({ courses, lectures, dailyRecords, memos, ddays });
+                window.triggerCloudSave({ courses, lectures, dailyRecords, memos, ddays, advancedNotes });
             }
         }
 
@@ -588,74 +672,63 @@
             </div>
         `;
 
-        let pomoInterval;
-        let pomoTime = 25 * 60;
-        let isPomoWorking = true; 
-        let isPomoRunning = false;
+        window.renderAdvancedNotesList = function() {
+            if(!DOM.advancedNotesList) return;
+            advancedNotes.sort((a, b) => b.updatedAt - a.updatedAt);
+            DOM.advancedNotesList.innerHTML = advancedNotes.map(n => `
+                <li data-action="openAdvancedNote" data-id="${n.id}" class="px-3 py-2.5 rounded-xl cursor-pointer transition flex items-center space-x-2 ${activeNoteId === n.id ? 'bg-[#0a84ff] text-white shadow-md' : 'hover:bg-[rgba(255,255,255,0.05)] text-[#86868b] hover:text-white'}">
+                    <span class="truncate font-semibold text-sm flex-1 pointer-events-none">${esc(n.title) || '제목 없음'}</span>
+                </li>
+            `).join('');
+        };
 
-        function formatPomoTime(secs) {
-            const m = Math.floor(secs / 60).toString().padStart(2, '0');
-            const s = (secs % 60).toString().padStart(2, '0');
-            return `${m}:${s}`;
-        }
-
-        function updatePomoDisplay() {
-            if(!DOM.pomoDisplay || !DOM.pomoStatus) return;
-            DOM.pomoDisplay.innerText = formatPomoTime(pomoTime);
-            if(isPomoWorking) {
-                DOM.pomoStatus.innerText = "🎯 집중 시간";
-                DOM.pomoStatus.className = "text-[10px] font-bold px-2.5 py-1 bg-[rgba(10,132,255,0.15)] text-[#0a84ff] border border-[rgba(10,132,255,0.2)] rounded-full transition-colors duration-300";
-                DOM.pomoDisplay.style.textShadow = "0 0 15px rgba(10,132,255,0.4)";
-            } else {
-                DOM.pomoStatus.innerText = "☕ 휴식 시간";
-                DOM.pomoStatus.className = "text-[10px] font-bold px-2.5 py-1 bg-[rgba(48,209,88,0.15)] text-[#30d158] border border-[rgba(48,209,88,0.2)] rounded-full transition-colors duration-300";
-                DOM.pomoDisplay.style.textShadow = "0 0 15px rgba(48,209,88,0.4)";
+        window.handleNoteInput = function() {
+            if(!activeNoteId) return;
+            const note = advancedNotes.find(n => n.id === activeNoteId);
+            if(note) {
+                note.title = DOM.noteEditTitle.value;
+                note.content = DOM.noteEditContent.value;
+                note.updatedAt = Date.now();
+                saveData();
+                renderAdvancedNotesList(); // 사이드바 제목 실시간 업데이트
+                renderMarkdownPreview();
             }
-        }
+        };
 
-        function startPomo() {
-            if(isPomoRunning) return;
-            const workMins = parseInt(DOM.pomoWorkInput.value) || 25;
-            const breakMins = parseInt(DOM.pomoBreakInput.value) || 5;
-            isPomoRunning = true;
-            DOM.pomoBtnStart.classList.add('hidden');
-            DOM.pomoBtnPause.classList.remove('hidden');
+        window.renderMarkdownPreview = function() {
+            if(!DOM.notePreviewContent) return;
+            const raw = DOM.noteEditContent.value;
+            // 1. Markdown 렌더링
+            let parsedHTML = marked.parse(raw, { breaks: true });
+            // 2. DOMPurify로 XSS 방어 (수식을 위해 필요한 기본 태그 허용)
+            parsedHTML = DOMPurify.sanitize(parsedHTML, { ADD_ATTR: ['target'] });
+            DOM.notePreviewContent.innerHTML = parsedHTML;
             
-            pomoInterval = setInterval(() => {
-                if(pomoTime > 0) {
-                    pomoTime--;
-                    updatePomoDisplay();
-                } else {
-                    isPomoWorking = !isPomoWorking;
-                    pomoTime = isPomoWorking ? (workMins * 60) : (breakMins * 60);
-                    showUndoToast(isPomoWorking ? '🎯 휴식 끝! 집중 시간이 다시 시작되었습니다.' : '☕ 집중 끝! 꿀맛 같은 휴식 시간입니다.', null, null, false);
-                    updatePomoDisplay();
-                }
-            }, 1000);
-        }
-
-        function pausePomo() {
-            isPomoRunning = false;
-            clearInterval(pomoInterval);
-            DOM.pomoBtnStart.classList.remove('hidden');
-            DOM.pomoBtnPause.classList.add('hidden');
-        }
-
-        function resetPomo() {
-            pausePomo();
-            isPomoWorking = true;
-            const workMins = parseInt(DOM.pomoWorkInput.value) || 25;
-            pomoTime = workMins * 60;
-            updatePomoDisplay();
-        }
-
-        window.onPomoInputChange = function() {
-            if(!isPomoRunning && isPomoWorking) {
-                const workMins = parseInt(DOM.pomoWorkInput.value) || 25;
-                pomoTime = workMins * 60;
-                updatePomoDisplay();
+            // 3. KaTeX 수식 적용
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(DOM.notePreviewContent, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
             }
-        }
+        };
+
+        window.openAdvancedNote = function(id) {
+            activeNoteId = id;
+            renderAdvancedNotesList();
+            const note = advancedNotes.find(n => n.id === id);
+            if(note) {
+                DOM.emptyNotePlaceholder.classList.add('hidden');
+                DOM.noteActiveArea.classList.remove('hidden');
+                DOM.noteActiveArea.classList.add('flex');
+                DOM.noteEditTitle.value = note.title;
+                DOM.noteEditContent.value = note.content;
+                renderMarkdownPreview();
+            }
+        };
 
         window.handleDragStart = function(event, type, sourceId, taskId) {
             const payload = JSON.stringify({ type, sourceId, taskId });
@@ -946,8 +1019,8 @@
                 return `
                     <div class="relative flex items-center px-4 py-2.5 rounded-2xl border transition-all flex-shrink-0 group ${themeClass} backdrop-blur-md">
                         <div class="flex flex-col">
-                            <span class="text-[10px] font-medium text-white/70 mb-0.5 tracking-wide truncate max-w-[100px]" title="${esc(d.title)}">${esc(d.title)}</span>
-                            <span class="text-lg font-extrabold tracking-tight leading-none">${ddayText}</span>
+                            <span class="text-[10px] font-medium text-current opacity-70 mb-0.5 tracking-wide truncate max-w-[100px]" title="${esc(d.title)}">${esc(d.title)}</span>
+                            <span class="text-lg font-extrabold tracking-tight leading-none text-current">${ddayText}</span>
                         </div>
                         <button data-action="deleteDday" data-id="${d.id}" class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#1c1c1e] text-[#86868b] hover:text-red-400 border border-[rgba(255,255,255,0.1)] rounded-full flex items-center justify-center text-[10px] font-bold opacity-0 group-hover:opacity-100 transition shadow-md z-10 hidden md:flex">✕</button>
                     </div>
@@ -1138,9 +1211,30 @@
         });
 
         const getChartTooltip = (customLabelCb, customAfterTitleCb) => ({
-            backgroundColor: 'rgba(28, 28, 30, 0.8)', padding: 12, cornerRadius: 12,
+            backgroundColor: 'rgba(28, 28, 30, 0.9)', padding: 12, cornerRadius: 12,
             callbacks: { label: customLabelCb, afterTitle: customAfterTitleCb || (() => '') }
         });
+
+        function updateChartTheme(isLight) {
+            const textColor = isLight ? '#6b6b70' : '#86868b';
+            const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+            Chart.defaults.color = textColor;
+            
+            if(chartInstances.daily) {
+                const todayTotal = getDailyTaskStats(getRecordsMap()[TODAY]).total;
+                const dailyBg = todayTotal > 0 ? ['#bf5af2', '#64d2ff', isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)'] : [isLight?'rgba(0,0,0,0.02)':'rgba(255,255,255,0.02)', isLight?'rgba(0,0,0,0.02)':'rgba(255,255,255,0.02)', isLight?'rgba(0,0,0,0.05)':'rgba(255,255,255,0.05)'];
+                chartInstances.daily.data.datasets[0].backgroundColor = dailyBg;
+                chartInstances.daily.update();
+            }
+            if(chartInstances.weekly) {
+                chartInstances.weekly.options.scales.y.grid.color = gridColor;
+                chartInstances.weekly.update();
+            }
+            if(chartInstances.monthly) {
+                chartInstances.monthly.options.scales.y.grid.color = gridColor;
+                chartInstances.monthly.update();
+            }
+        }
 
         function renderCharts() {
             if (!document.getElementById('tab-dashboard').classList.contains('block')) return; 
@@ -1148,6 +1242,7 @@
             const todayRecord = recordsMap[TODAY];
             const todayStats = getDailyTaskStats(todayRecord);
             const totalToday = todayStats.total;
+            const isLight = document.body.classList.contains('light-mode');
 
             const ctxDaily = document.getElementById('chartDaily').getContext('2d');
             DOM.dailyTotalText.innerText = formatTime(totalToday);
@@ -1165,7 +1260,7 @@
             }
 
             const dailyData = totalToday > 0 ? [todayStats.lecture, todayStats.study, 0] : [0, 0, 1];
-            const dailyBg = totalToday > 0 ? ['#bf5af2', '#64d2ff', 'rgba(255,255,255,0.05)'] : ['rgba(255,255,255,0.02)', 'rgba(255,255,255,0.02)', 'rgba(255,255,255,0.05)'];
+            const dailyBg = totalToday > 0 ? ['#bf5af2', '#64d2ff', isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)'] : [isLight?'rgba(0,0,0,0.02)':'rgba(255,255,255,0.02)', isLight?'rgba(0,0,0,0.02)':'rgba(255,255,255,0.02)', isLight?'rgba(0,0,0,0.05)':'rgba(255,255,255,0.05)'];
 
             if(chartInstances.daily) {
                 chartInstances.daily.data.datasets[0].data = dailyData;
@@ -1224,10 +1319,12 @@
                 chartInstances.weekly.data.labels = weeklyLabels;
                 chartInstances.weekly.data.datasets[0].data = dataLecHours;
                 chartInstances.weekly.data.datasets[1].data = dataStudyHours;
+                chartInstances.weekly.options.scales.y.grid.color = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
                 chartInstances.weekly.update();
             } else {
                 let wOpts = getChartBaseOptions(true);
                 wOpts.plugins.tooltip = weeklyTooltip;
+                wOpts.scales.y.grid.color = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
                 chartInstances.weekly = new Chart(ctxWeekly, {
                     type: 'bar',
                     data: { labels: weeklyLabels, datasets: [
@@ -1261,10 +1358,12 @@
 
             if(chartInstances.monthly) {
                 chartInstances.monthly.data.datasets[0].data = cumulativeDataHours;
+                chartInstances.monthly.options.scales.y.grid.color = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
                 chartInstances.monthly.update();
             } else {
                 let mOpts = getChartBaseOptions(true);
                 mOpts.plugins.tooltip = monthlyTooltip;
+                mOpts.scales.y.grid.color = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
                 chartInstances.monthly = new Chart(ctxMonthly, {
                     type: 'bar',
                     data: { labels: monthlyLabels, datasets: [{ label: '월간 총 학습', data: cumulativeDataHours, backgroundColor: '#bf5af2', borderRadius: 6, barPercentage: 0.5 }] },
@@ -1463,6 +1562,7 @@
             renderHeatmapAndStreak();
             renderMemos();
             renderDdays();
+            renderAdvancedNotesList();
         }
 
         function showUndoToast(message, onUndo = null, onConfirm = null, isUndoMode = true) {
@@ -1548,6 +1648,42 @@
                     }
                     break;
                 }
+                case 'toggleTheme': {
+                    document.body.classList.toggle('light-mode');
+                    const isLight = document.body.classList.contains('light-mode');
+                    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+                    DOM.themeIcon.innerText = isLight ? '🌙 다크 모드' : '☀️ 라이트 모드';
+                    updateChartTheme(isLight);
+                    break;
+                }
+                case 'createNewNote': {
+                    const newId = generateId('AN');
+                    advancedNotes.unshift({ id: newId, title: '', content: '', updatedAt: Date.now() });
+                    saveData();
+                    window.openAdvancedNote(newId);
+                    break;
+                }
+                case 'openAdvancedNote': {
+                    window.openAdvancedNote(target.dataset.id);
+                    break;
+                }
+                case 'deleteActiveNote': {
+                    // Use a custom modal instead of standard confirm to prevent iframe issues if strictly needed,
+                    // but for simplicity here we assume confirm is allowed if not replacing alert/confirm explicitly for notes,
+                    // however, the rules state NEVER use confirm(). We will delete directly or use a modal.
+                    // To follow the rule strictly: we will delete directly for simplicity here or you can implement a custom confirm modal.
+                    // Let's implement a simple direct delete for safety in iframe.
+                    if(activeNoteId) {
+                        advancedNotes = advancedNotes.filter(n => n.id !== activeNoteId);
+                        activeNoteId = null;
+                        DOM.noteActiveArea.classList.remove('flex');
+                        DOM.noteActiveArea.classList.add('hidden');
+                        DOM.emptyNotePlaceholder.classList.remove('hidden');
+                        saveData(); renderAdvancedNotesList();
+                        showUndoToast('메모가 삭제되었습니다.', null, null, false);
+                    }
+                    break;
+                }
                 case 'toggleMasterDbSection': {
                     const sec = target.dataset.section;
                     masterDbFoldState[sec] = !masterDbFoldState[sec];
@@ -1557,9 +1693,6 @@
                     else { wrap.classList.replace('closed', 'open'); icon.classList.remove('rotate-180'); }
                     break;
                 }
-                case 'startPomo': startPomo(); break;
-                case 'pausePomo': pausePomo(); break;
-                case 'resetPomo': resetPomo(); break;
                 case 'addMemo': {
                     const input = document.getElementById('memo-input');
                     const text = input.value.trim();
@@ -1728,7 +1861,7 @@
                 }
                 case 'setLectureTab': {
                     currentSubjectTab = target.dataset.subj;
-                    openTodoCourses.clear(); // 탭 이동 시 열려있던 아코디언 모두 초기화(접힘)
+                    openTodoCourses.clear();
                     renderTodoLectures(); break;
                 }
                 case 'toggleTodoCourse': {
@@ -1852,7 +1985,7 @@
                     break;
                 }
                 case 'exportData': {
-                    const data = { courses, lectures, dailyRecords, memos, ddays };
+                    const data = { courses, lectures, dailyRecords, memos, ddays, advancedNotes };
                     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -1920,7 +2053,9 @@
                             if (data.courses && data.lectures && data.dailyRecords) {
                                 courses = data.courses.map(c => ({ ...c, color: c.color || getStringColor(c.title) })); 
                                 lectures = data.lectures; dailyRecords = data.dailyRecords;
-                                if(data.memos) memos = data.memos; if(data.ddays) ddays = data.ddays;
+                                if(data.memos) memos = data.memos; 
+                                if(data.ddays) ddays = data.ddays;
+                                if(data.advancedNotes) advancedNotes = data.advancedNotes;
                                 saveData(); renderAll();
                                 showUndoToast('데이터가 성공적으로 복원되었습니다.', null, null, false);
                             } else { alert('올바른 백업 파일 형식이 아닙니다.'); }
@@ -1955,8 +2090,8 @@
                             const crs = courses.find(c => c.id === lec.courseId);
                             if (crs) {
                                 badgeColor = crs.color || getStringColor(crs.title);
-                                badgeBg = badgeColor + '1a'; // 10% 투명도 적용
-                                badgeBorder = badgeColor + '33'; // 20% 투명도 적용
+                                badgeBg = badgeColor + '1a'; 
+                                badgeBorder = badgeColor + '33'; 
                             }
                         }
                     }
@@ -1986,7 +2121,18 @@
             `}).join('');
         }
 
-        async function initApp() { initDOM(); loadLocalData(); }
+        async function initApp() { 
+            initDOM(); 
+            const isLight = localStorage.getItem('theme') === 'light';
+            if(isLight) {
+                document.body.classList.add('light-mode');
+                if(DOM.themeIcon) DOM.themeIcon.innerText = '🌙 다크 모드';
+                Chart.defaults.color = '#6b6b70';
+            }
+            loadLocalData(); 
+            if(isLight) updateChartTheme(true);
+        }
+        
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initApp);
         else initApp();
 
