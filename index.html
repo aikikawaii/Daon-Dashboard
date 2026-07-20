@@ -146,7 +146,8 @@
         .markdown-body p { margin-bottom: 1em; }
         .markdown-body a { color: #0a84ff; text-decoration: none; }
         .markdown-body a:hover { text-decoration: underline; }
-        .markdown-body ul, .markdown-body ol { padding-left: 1.5em; margin-bottom: 1em; }
+        .markdown-body ul, .markdown-body ol { padding-left: 1.5em; margin-bottom: 1em; list-style-type: disc; }
+        .markdown-body ol { list-style-type: decimal; }
         .markdown-body li { margin-bottom: 0.25em; }
         .markdown-body blockquote { border-left: 4px solid #0a84ff; padding-left: 1em; color: var(--text-muted); background: var(--hover-bg); padding-top: 0.5em; padding-bottom: 0.5em; border-radius: 0 8px 8px 0; margin-bottom: 1em; }
         .markdown-body code { background-color: var(--hover-bg); padding: 0.2em 0.4em; border-radius: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.85em; color: #ff375f; }
@@ -184,12 +185,10 @@
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg> 김영편입
                 </a>
                 
-                <!-- 테마 토글 버튼 -->
+                <!-- 테마 및 새로고침 토글 -->
                 <button data-action="toggleTheme" class="px-3 py-2 rounded-xl bg-[var(--btn-glass)] border border-[var(--card-border)] hover:bg-[var(--hover-bg)] text-[var(--text-main)] text-sm font-bold transition shadow-sm flex items-center justify-center min-w-[40px]" title="테마 변경">
                     <span id="theme-icon">☀️</span>
                 </button>
-                
-                <!-- 새로고침 아이콘 (축소) -->
                 <button data-action="refreshPage" class="px-3 py-2 rounded-xl bg-[var(--btn-glass)] border border-[var(--card-border)] hover:bg-[var(--hover-bg)] text-[var(--text-main)] text-sm font-bold transition shadow-sm flex items-center justify-center min-w-[40px]" title="새로고침">
                     🔄
                 </button>
@@ -211,11 +210,10 @@
         </div>
 
         <div id="tab-dashboard" class="tab-content space-y-6 block pb-12">
-            
             <div class="flex items-center gap-3 overflow-x-auto hide-scrollbar pb-2 pt-1" id="view-ddays"></div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                <!-- Todo Lectures -->
+                <!-- Todo Lectures (남은 강의) -->
                 <div class="card-squircle p-5 lg:p-7 col-span-1 shadow-sm flex flex-col h-[500px] lg:h-auto lg:max-h-[650px]">
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="text-xl font-bold text-[var(--text-main)] tracking-tight">남은 강의</h2>
@@ -225,7 +223,7 @@
                     <ul id="view-todo-lectures" class="overflow-y-auto pr-2 flex-1 space-y-3 min-h-0 hide-scrollbar"></ul>
                 </div>
 
-                <!-- Study Calendar -->
+                <!-- Study Calendar (학습 캘린더) -->
                 <div class="card-squircle p-5 lg:p-7 col-span-1 lg:col-span-2 shadow-sm flex flex-col">
                     <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
                         <h2 class="text-xl font-bold text-[var(--text-main)] tracking-tight">학습 캘린더</h2>
@@ -311,7 +309,7 @@
 
         <div id="tab-memo" class="tab-content hidden h-[calc(100vh-140px)] min-h-[600px] pb-12">
             <div class="card-squircle h-full flex flex-col overflow-hidden border border-[var(--card-border)] shadow-xl relative">
-                <!-- 뷰어 컨트롤 바 (모바일/아이패드/PC 반응형) -->
+                <!-- 뷰어 컨트롤 바 -->
                 <div class="bg-[var(--card-bg)] border-b border-[var(--card-border)] px-4 py-2.5 flex flex-wrap justify-between items-center z-10 gap-2">
                     <div class="flex items-center space-x-2">
                         <span class="text-sm font-bold text-[var(--text-main)] mr-2">뷰어 설정:</span>
@@ -340,7 +338,6 @@
                     
                     <!-- Editor & Preview Area -->
                     <div class="flex-1 flex flex-col md:flex-row bg-[var(--bg-main)] relative overflow-hidden" id="memo-workspace">
-                        <!-- 안내 오버레이 -->
                         <div id="memo-empty-state" class="absolute inset-0 flex flex-col items-center justify-center bg-[var(--card-bg)] z-20">
                             <div class="text-4xl mb-4">📝</div>
                             <h2 class="text-xl font-bold text-[var(--text-main)] mb-2">선택된 메모가 없습니다</h2>
@@ -512,7 +509,6 @@
             return COURSE_COLORS[Math.abs(hash) % COURSE_COLORS.length];
         }
 
-        // State Variables
         let courses = [], lectures = [], dailyRecords = [], ddays = [];
         let noteFolders = [], advancedNotes = [];
         let pendingDeletes = new Set();
@@ -593,7 +589,6 @@
             }
         }
 
-        // Helper Getters
         const getCourses = () => courses.filter(c => !pendingDeletes.has(c.id));
         const getLectures = () => lectures.filter(l => !pendingDeletes.has(l.id) && !pendingDeletes.has(l.courseId));
         const getDailyRecords = () => [...dailyRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -613,6 +608,14 @@
         const getTheme = (subj) => SUBJECT_THEMES[subj] || SUBJECT_THEMES['기타'];
         const getCourseName = id => getCourses().find(c => c.id === id)?.title || '-';
         
+        function getCourseProgress(lecsMap, courseId) {
+            const courseLecs = lecsMap[courseId] || [];
+            if (courseLecs.length === 0) return 0;
+            let completed = 0;
+            for (let i = 0; i < courseLecs.length; i++) if (courseLecs[i].status === '완료') completed++;
+            return Math.round((completed / courseLecs.length) * 100);
+        }
+
         function formatTime(mins) {
             if (!mins) return '0m';
             const h = Math.floor(mins / 60); const m = mins % 60;
@@ -705,6 +708,12 @@
                                     const targetIdx = targetRecord.tasks.findIndex(t => t.id === targetTaskId);
                                     targetRecord.tasks.splice(targetIdx !== -1 ? targetIdx : targetRecord.tasks.length, 0, taskToMove);
                                 } else { targetRecord.tasks.push(taskToMove); }
+                                updated = true;
+                            } else if (sourceRecord.date === targetDateStr && targetTaskId && payload.taskId !== targetTaskId) {
+                                const taskToMove = sourceRecord.tasks.splice(taskIdx, 1)[0];
+                                const adjustedTargetIdx = sourceRecord.tasks.findIndex(t => t.id === targetTaskId);
+                                if (adjustedTargetIdx > -1) sourceRecord.tasks.splice(adjustedTargetIdx, 0, taskToMove);
+                                else sourceRecord.tasks.push(taskToMove);
                                 updated = true;
                             }
                         }
@@ -928,107 +937,89 @@
                 : `<div class="col-span-full py-10 text-center text-sm font-medium text-[var(--text-muted)]">진행 중인 강좌가 없습니다.</div>`;
         }
 
-        // 차트 인스턴스 보관
-        let chartInstances = { daily: null, weekly: null, monthly: null };
-        function updateChartGlobalColors() {
-            Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim();
-            Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif';
-            Chart.defaults.font.size = 11;
-        }
-
-        function renderCharts() {
-            if (!document.getElementById('tab-dashboard').classList.contains('block')) return; 
-            updateChartGlobalColors();
-
-            const recordsMap = getRecordsMap();
-            const todayRecord = recordsMap[TODAY];
-            const todayStats = getDailyTaskStats(todayRecord);
-            const totalToday = todayStats.total;
-
-            // Daily Chart
-            const ctxDaily = document.getElementById('chartDaily').getContext('2d');
-            DOM.dailyTotalText.innerText = formatTime(totalToday);
+        function renderTodoLectures() {
+            const dataCourses = getCourses();
+            const dataLectures = getLectures();
+            const todoLectures = dataLectures.filter(l => l.status === '미시작');
+            let activeSubjects = [...new Set(dataCourses.map(c => c.subject))];
             
-            const splitTextContainer = document.getElementById('dailySplitText');
-            if (splitTextContainer) {
-                if (totalToday > 0) {
-                    splitTextContainer.innerHTML = `
-                        ${todayStats.lecture > 0 ? `<span class="text-[#bf5af2] bg-[rgba(191,90,242,0.15)] px-1.5 py-0.5 rounded-md">인강 ${formatTime(todayStats.lecture)}</span>` : ''}
-                        ${todayStats.study > 0 ? `<span class="text-[#0a84ff] bg-[rgba(10,132,255,0.15)] px-1.5 py-0.5 rounded-md">자습 ${formatTime(todayStats.study)}</span>` : ''}
+            if (activeSubjects.length > 0 && (!currentSubjectTab || !activeSubjects.includes(currentSubjectTab))) {
+                currentSubjectTab = activeSubjects[0]; 
+            }
+
+            let tabsHtml = '';
+            if (activeSubjects.length > 0) {
+                tabsHtml = `<div class="flex border-b border-[var(--card-border)] w-full overflow-x-auto hide-scrollbar">`;
+                tabsHtml += activeSubjects.map(subj => {
+                    const isActive = currentSubjectTab === subj;
+                    const theme = getTheme(subj);
+                    return `
+                        <button data-action="setLectureTab" data-subj="${esc(subj)}"
+                                class="relative px-3 sm:px-4 py-2.5 text-[11px] sm:text-xs font-bold transition-all uppercase tracking-widest flex-shrink-0 ${isActive ? 'text-[var(--text-main)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}"
+                                style="${isActive ? `color: ${theme.dot};` : ''}">
+                            ${esc(subj)}
+                            ${isActive ? `<div class="absolute bottom-0 left-0 w-full h-[2px] rounded-t-md" style="background-color: ${theme.dot}; box-shadow: 0 -2px 8px ${theme.dot};"></div>` : ''}
+                        </button>
                     `;
-                } else { splitTextContainer.innerHTML = ''; }
+                }).join('');
+                tabsHtml += `</div>`;
             }
+            if(DOM.todoTabsContainer) DOM.todoTabsContainer.innerHTML = tabsHtml;
 
-            const dailyData = totalToday > 0 ? [todayStats.lecture, todayStats.study, 0] : [0, 0, 1];
-            const bgEmpty = getComputedStyle(document.documentElement).getPropertyValue('--card-border').trim();
-            const dailyBg = totalToday > 0 ? ['#bf5af2', '#0a84ff', bgEmpty] : [bgEmpty, bgEmpty, bgEmpty];
-
-            if(chartInstances.daily) {
-                chartInstances.daily.data.datasets[0].data = dailyData;
-                chartInstances.daily.data.datasets[0].backgroundColor = dailyBg;
-                chartInstances.daily.options.plugins.tooltip.enabled = totalToday > 0;
-                chartInstances.daily.update();
-            } else {
-                chartInstances.daily = new Chart(ctxDaily, {
-                    type: 'doughnut',
-                    data: { labels: ['인강 시청', '개인 공부', '미학습'], datasets: [{ data: dailyData, backgroundColor: dailyBg, borderWidth: 0, hoverOffset: 4 }] },
-                    options: { responsive: true, maintainAspectRatio: false, cutout: '82%', plugins: { legend: { display: false } } }
-                });
-            }
-
-            // Weekly & Monthly Charts Setup...
-            // (간결함을 위해 기본 세팅 후 업데이트 로직 유지)
-        }
-
-        // 히트맵
-        function calculateStreak(recordsMap) {
-            let streak = 0; let d = new Date(); 
-            const todayRec = recordsMap[getTodayStr()];
-            const todayTotal = todayRec ? getDailyTaskStats(todayRec).total : 0;
-            if (todayTotal === 0) d.setDate(d.getDate() - 1);
+            const filteredCourses = dataCourses.filter(c => c.subject === currentSubjectTab);
             
-            while(true) {
-                let dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                let rec = recordsMap[dateStr];
-                let total = rec ? getDailyTaskStats(rec).total : 0;
-                if (total > 0) { streak++; d.setDate(d.getDate() - 1); } 
-                else break;
+            if(filteredCourses.length === 0) {
+                if(DOM.viewTodoLectures) DOM.viewTodoLectures.innerHTML = `<div class="py-12 text-center text-sm font-bold text-[var(--text-muted)]">이 과목의 강좌가 없습니다.</div>`;
+                return;
             }
-            return streak;
-        }
 
-        function renderHeatmap() {
-            if(!DOM.heatmapContainer) return;
             let html = '';
-            let d = new Date();
-            d.setDate(d.getDate() - 140); 
-            while(d.getDay() !== 0) d.setDate(d.getDate() - 1);
+            let hasAnyTodo = false;
 
-            const today = new Date();
-            const recordsMap = getRecordsMap();
-            
-            while(d <= today) {
-                let dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                let rec = recordsMap[dateStr];
-                let total = rec ? getDailyTaskStats(rec).total : 0;
-                
-                let colorClass = 'bg-[var(--hover-bg)] border border-[var(--card-border)]';
-                if (total > 0 && total < 60) colorClass = 'bg-[rgba(48,209,88,0.3)] border-transparent';
-                else if (total >= 60 && total < 120) colorClass = 'bg-[rgba(48,209,88,0.6)] border-transparent';
-                else if (total >= 120) colorClass = 'bg-[#30d158] shadow-[0_0_5px_rgba(48,209,88,0.5)] border-transparent';
-                
-                let tooltipText = total > 0 ? `${dateStr} : ${total}m` : `${dateStr}`;
-                html += `<div class="w-[11px] h-[11px] sm:w-[13px] sm:h-[13px] rounded-[3px] ${colorClass} transition-all hover:ring-2 hover:ring-[#0a84ff] cursor-pointer" title="${tooltipText}"></div>`;
-                d.setDate(d.getDate() + 1);
-            }
-            DOM.heatmapContainer.innerHTML = html;
-            DOM.streakCounter.innerText = `🔥 ${calculateStreak(recordsMap)}일째`;
-            
-            requestAnimationFrame(() => {
-                if(DOM.heatmapContainer && DOM.heatmapContainer.parentElement) {
-                    DOM.heatmapContainer.parentElement.scrollLeft = DOM.heatmapContainer.parentElement.scrollWidth;
-                }
+            filteredCourses.forEach((course) => {
+                const courseTodos = todoLectures.filter(l => l.courseId === course.id);
+                if (courseTodos.length === 0) return; 
+                hasAnyTodo = true;
+
+                const isOpen = openTodoCourses.has(course.id);
+                const cColor = course.color || getStringColor(course.title);
+
+                html += `
+                    <li class="mb-3 inner-squircle bg-[var(--btn-glass)] border border-[var(--card-border)] overflow-hidden transition-all shadow-sm">
+                        <div class="flex justify-between items-center p-3.5 cursor-pointer hover:bg-[var(--hover-bg)] transition" data-action="toggleTodoCourse" data-id="${course.id}">
+                            <div class="flex items-center space-x-3 font-bold text-sm text-[var(--text-main)] w-full overflow-hidden pr-2">
+                                <div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${cColor}; box-shadow: 0 0 8px ${cColor};"></div>
+                                <span class="truncate flex-1" title="${esc(course.title)}">${esc(course.title)}</span>
+                                <span class="text-[10px] text-[var(--text-main)] bg-[var(--card-bg)] px-2 py-0.5 rounded-md flex-shrink-0 border border-[var(--card-border)]">${courseTodos.length}강</span>
+                            </div>
+                            <span class="text-[var(--text-muted)] text-[10px] font-bold transform transition-transform ${isOpen ? 'rotate-180' : ''} flex-shrink-0">▼</span>
+                        </div>
+                        <div class="accordion-grid ${isOpen ? 'open' : 'closed'}">
+                            <div class="accordion-inner">
+                                <ul class="p-2 pt-0 space-y-1.5 border-t border-[var(--card-border)] bg-[var(--accent-glow)] max-h-[300px] overflow-y-auto pr-1">
+                                    ${courseTodos.map(l => `
+                                        <li draggable="true" 
+                                            ondragstart="handleDragStart(event, 'todo', '${l.id}')" 
+                                            ondragend="handleDragEnd(event)"
+                                            class="draggable-item flex items-center justify-between text-xs p-3 rounded-xl border border-[var(--card-border)] hover:border-[var(--text-muted)] transition group bg-[var(--card-bg)] hover:bg-[var(--hover-bg)] shadow-sm">
+                                            <div class="flex items-center space-x-3 overflow-hidden flex-1 pointer-events-none">
+                                                <div data-action="toggleLecture" data-id="${l.id}" class="w-4 h-4 rounded-full border-2 border-[var(--text-muted)] flex-shrink-0 group-hover:border-[#0a84ff] transition-colors cursor-pointer pointer-events-auto"></div>
+                                                <span class="text-[var(--text-main)] font-semibold truncate flex-1 pointer-events-none" title="${esc(l.title)}">${esc(l.title)}</span>
+                                                <span class="text-[10px] text-[var(--text-muted)] font-mono font-bold pointer-events-none flex-shrink-0">(${l.duration || 0}m)</span>
+                                            </div>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                `;
             });
+
+            if(!hasAnyTodo) {
+                html = `<div class="py-12 text-center text-sm font-bold text-[var(--text-muted)]">이 과목의 남은 강의가 없습니다 🎉</div>`;
+            }
+            if(DOM.viewTodoLectures) DOM.viewTodoLectures.innerHTML = html;
         }
 
         function renderCalendar() {
@@ -1104,16 +1095,368 @@
             DOM.viewCalendar.innerHTML = calendarHTML;
         }
 
-        // 전체 렌더링 호출
+        function renderCurriculumManager() {
+            if(!DOM.curriculumManager) return;
+            const dataCourses = getCourses();
+            const lecsMap = getLecturesByCourse();
+
+            if (dataCourses.length === 0) {
+                DOM.curriculumManager.innerHTML = `<div class="col-span-full py-16 text-center text-[var(--text-muted)] border border-[var(--card-border)] border-dashed rounded-[32px] text-sm font-medium">등록된 강좌가 없습니다.</div>`;
+                return;
+            }
+
+            let html = '';
+            subjects.forEach(subject => {
+                const subjCourses = dataCourses.filter(c => c.subject === subject);
+                if(subjCourses.length === 0) return; 
+
+                const theme = getTheme(subject);
+
+                html += `
+                    <div class="card-squircle overflow-hidden h-fit border border-[var(--card-border)] shadow-lg">
+                        <div class="bg-[var(--table-header)] px-6 py-5 flex justify-between items-center border-b border-[var(--card-border)]">
+                            <h3 class="text-lg font-extrabold flex items-center space-x-3">
+                                <span class="w-3 h-3 rounded-full shadow-[0_0_8px_${theme.dot}]" style="background-color: ${theme.dot}"></span>
+                                <span style="color: ${theme.text}" class="tracking-wide">${esc(subject)}</span>
+                            </h3>
+                        </div>
+                        
+                        <div class="p-6 space-y-5">
+                            ${subjCourses.map(course => {
+                                const courseLecs = lecsMap[course.id] || [];
+                                const totalLecs = courseLecs.length;
+                                let visibleCount = courseViewCounts[course.id] !== undefined ? Math.min(courseViewCounts[course.id], totalLecs) : Math.min(10, totalLecs);
+                                const displayLecs = courseLecs.slice(0, visibleCount);
+                                const hiddenCount = totalLecs - visibleCount;
+                                const cColor = course.color || getStringColor(course.title);
+
+                                return `
+                                <div class="inner-squircle border border-[var(--card-border)] p-5 transition hover:border-[var(--text-muted)] min-w-0 bg-[var(--btn-glass)]">
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4 border-b border-[var(--card-border)] pb-4">
+                                        <div class="flex items-center space-x-2 flex-1 min-w-0">
+                                            <div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${cColor}; box-shadow: 0 0 8px ${cColor};"></div>
+                                            <div class="font-bold text-[var(--text-main)] text-lg truncate" title="${esc(course.title)}">${esc(course.title)}</div>
+                                        </div>
+                                        <div class="flex space-x-2.5 text-xs flex-shrink-0 mt-1 sm:mt-0 items-center">
+                                            <button data-action="openLectureModal" data-course-id="${course.id}" class="text-[var(--text-main)] bg-[var(--hover-bg)] hover:bg-[var(--card-border)] border border-[var(--card-border)] font-bold px-3 py-1.5 rounded-full transition shadow-sm">+ 추가</button>
+                                            <button data-action="openCourseModal" data-course-id="${course.id}" class="text-[var(--text-muted)] hover:text-[var(--text-main)] font-semibold px-2 py-1 transition">수정</button>
+                                            <button data-action="deleteCourse" data-id="${course.id}" class="text-red-500/80 hover:text-red-500 font-semibold px-1 transition">삭제</button>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        ${displayLecs.length > 0 ? `
+                                        <ul class="ml-1.5 pl-3 border-l-2 border-[var(--card-border)] space-y-2.5">
+                                            ${displayLecs.map(lec => `
+                                                <li class="flex justify-between items-center text-sm group rounded-xl px-2.5 py-1.5 -ml-2.5 hover:bg-[var(--hover-bg)] transition">
+                                                    <div class="flex items-center space-x-3 overflow-hidden flex-1">
+                                                        <input type="checkbox" class="custom-checkbox w-4 h-4 flex-shrink-0" ${lec.status === '완료' ? 'checked' : ''} data-action="toggleLecture" data-id="${lec.id}">
+                                                        <span class="truncate font-semibold ${lec.status === '완료' ? 'text-[var(--text-muted)] line-through' : 'text-[var(--text-main)]'}" title="${esc(lec.title)}">${esc(lec.title)}</span>
+                                                        <span class="text-[11px] text-[var(--text-muted)] font-mono font-bold">(${lec.duration || 0}m)</span>
+                                                    </div>
+                                                    <div class="flex items-center space-x-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex-shrink-0 ml-3">
+                                                        <button data-action="openLectureModal" data-course-id="${course.id}" data-lec-id="${lec.id}" class="text-[10px] font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] px-2.5 py-1 rounded-full hover:bg-[var(--hover-bg)] border border-[var(--card-border)] transition">수정</button>
+                                                        <button data-action="deleteLecture" data-id="${lec.id}" class="text-[10px] font-bold text-red-400 hover:text-white px-2.5 py-1 rounded-full hover:bg-red-500 transition">삭제</button>
+                                                    </div>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                        ` : (totalLecs === 0 ? '<p class="text-xs text-[var(--text-muted)] py-1 font-medium ml-1.5">등록된 강의가 없습니다.</p>' : '')}
+                                    </div>
+                                    ${totalLecs > 0 ? `
+                                        <div class="pt-3.5 flex justify-center items-center gap-2 border-t border-[var(--card-border)] mt-3.5">
+                                            ${hiddenCount > 0 ? `
+                                                <button data-action="courseShowMore" data-id="${course.id}" class="text-xs font-bold text-[var(--text-main)] px-3 py-1.5 rounded-full bg-[var(--hover-bg)] hover:bg-[var(--card-border)] border border-[var(--card-border)] transition shadow-sm">▼ ${Math.min(10, hiddenCount)}개 더보기</button>
+                                            ` : ''}
+                                            ${visibleCount > 0 ? `
+                                                <button data-action="courseFoldLess" data-id="${course.id}" class="text-xs font-bold text-[var(--text-main)] px-3 py-1.5 rounded-full bg-[var(--hover-bg)] hover:bg-[var(--card-border)] border border-[var(--card-border)] transition shadow-sm">▲ ${visibleCount % 10 === 0 ? 10 : visibleCount % 10}개 접기</button>
+                                                <button data-action="courseFoldAll" data-id="${course.id}" class="text-[10px] font-bold text-[var(--text-muted)] px-3 py-1.5 rounded-full bg-[var(--hover-bg)] hover:text-[var(--text-main)] border border-[var(--card-border)] transition shadow-sm">완전히 접기</button>
+                                            ` : ''}
+                                        </div>
+                                    ` : ''}
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            DOM.curriculumManager.innerHTML = html;
+        }
+
+        function renderMasterDB() {
+            if(!DOM.dbCourses || !DOM.dbLecturesContainer || !DOM.dbDaily) return;
+            const dataCourses = getCourses();
+            const lecsMap = getLecturesByCourse();
+
+            DOM.dbCourses.innerHTML = dataCourses.length > 0 ? dataCourses.map(c => {
+                const theme = getTheme(c.subject);
+                return `
+                <tr>
+                    <td><span class="text-[11px] font-extrabold uppercase tracking-widest" style="color: ${theme.text};">${esc(c.subject)}</span></td>
+                    <td class="text-[var(--text-main)] font-bold truncate max-w-[200px] sm:max-w-[400px]" title="${esc(c.title)}">${esc(c.title)}</td>
+                    <td>${renderProgressBar(getCourseProgress(lecsMap, c.id), theme.dot)}</td>
+                </tr>
+            `}).join('') : `<tr><td colspan="3" class="text-center text-[var(--text-muted)] py-8 font-semibold text-sm">데이터가 없습니다.</td></tr>`;
+
+            let lecturesHtml = '';
+            subjects.forEach(subj => {
+                const subjCourses = dataCourses.filter(c => c.subject === subj);
+                if(subjCourses.length === 0) return;
+                
+                const theme = getTheme(subj);
+                lecturesHtml += `<div class="mb-6"><h4 class="text-[11px] font-extrabold mb-3 flex items-center space-x-2 tracking-widest uppercase ml-1" style="color: ${theme.text}"><span class="w-2 h-2 rounded-full shadow-[0_0_8px_${theme.dot}]" style="background-color: ${theme.dot}"></span><span>${esc(subj)}</span></h4>`;
+                
+                subjCourses.forEach(course => {
+                    const courseLecs = lecsMap[course.id] || [];
+                    const isClosed = closedDbCourses.has(course.id); 
+                    
+                    lecturesHtml += `
+                    <div class="inner-squircle border border-[var(--card-border)] mb-3 overflow-hidden bg-[var(--card-bg)] shadow-sm">
+                        <div class="px-5 py-4 flex justify-between items-center cursor-pointer hover:bg-[var(--hover-bg)] transition-colors" data-action="toggleDbCourse" data-id="${course.id}">
+                            <div class="font-bold text-sm text-[var(--text-main)] pointer-events-none">${esc(course.title)} <span class="text-[10px] text-[var(--text-muted)] ml-3 font-semibold bg-[var(--hover-bg)] px-2.5 py-1 rounded-full border border-[var(--card-border)]">${courseLecs.length}강</span></div>
+                            <div class="text-[var(--text-muted)] text-xs transform transition-transform duration-300 font-bold ${isClosed ? '' : 'rotate-180'} pointer-events-none">▼</div>
+                        </div>
+                        <div class="accordion-grid ${isClosed ? 'closed' : 'open'} bg-[var(--btn-glass)]">
+                            <div class="accordion-inner border-t border-[var(--card-border)]">
+                                <table class="w-full text-sm">
+                                    <thead class="text-[var(--text-muted)] text-[10px] font-extrabold uppercase tracking-widest bg-[var(--table-header)]">
+                                        <tr><th class="p-3 pl-5 text-left border-b border-[var(--card-border)]">Title</th><th class="p-3 w-24 text-center border-b border-[var(--card-border)]">Status</th><th class="p-3 w-20 text-center border-b border-[var(--card-border)]">Time</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        ${courseLecs.length > 0 ? courseLecs.map(l => `
+                                        <tr class="border-b border-[var(--card-border)] hover:bg-[var(--hover-bg)] transition-colors last:border-b-0">
+                                            <td class="p-3 pl-5 font-semibold ${l.status === '완료' ? 'text-[var(--text-muted)] line-through' : 'text-[var(--text-main)]'}">${esc(l.title)}</td>
+                                            <td class="p-3 text-center"><span class="text-[10px] px-2.5 py-1 rounded-full font-bold border ${l.status === '완료' ? 'border-[var(--card-border)] bg-[var(--hover-bg)] text-[var(--text-muted)]' : 'border-[#0a84ff] bg-[rgba(10,132,255,0.1)] text-[#0a84ff]'} shadow-sm">${l.status}</span></td>
+                                            <td class="p-3 text-center text-[11px] text-[var(--text-muted)] font-mono font-bold">${l.duration||0}m</td>
+                                        </tr>
+                                        `).join('') : `<tr><td colspan="3" class="p-5 text-center text-[var(--text-muted)] text-xs font-semibold">등록된 강의가 없습니다.</td></tr>`}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                lecturesHtml += `</div>`;
+            });
+            if(Object.keys(lecsMap).length === 0) lecturesHtml = `<div class="text-center text-[var(--text-muted)] py-8 font-semibold text-sm inner-squircle border border-[var(--card-border)]">데이터가 없습니다.</div>`;
+            DOM.dbLecturesContainer.innerHTML = lecturesHtml;
+
+            const records = getDailyRecords();
+            DOM.dbDaily.innerHTML = records.length > 0 ? records.map(d => {
+                const stats = getDailyTaskStats(d);
+                return `
+                <tr class="cursor-pointer hover:bg-[var(--hover-bg)] transition-colors" data-action="openDailyModal" data-date="${d.date}">
+                    <td class="text-[var(--text-muted)] font-mono font-bold text-center text-xs tracking-wider">${d.date.substring(5)}</td>
+                    <td class="text-[var(--text-main)] font-semibold truncate max-w-[150px] sm:max-w-[250px]" title="${esc(stats.goals)}">${esc(stats.goals) || '<span class="text-[var(--text-muted)] italic">목표 없음</span>'}</td>
+                    <td class="text-right text-[var(--text-muted)] font-mono font-semibold text-xs">${stats.lecture > 0 ? stats.lecture + 'm' : '-'}</td>
+                    <td class="text-right text-[var(--text-muted)] font-mono font-semibold text-xs">${stats.study > 0 ? formatTime(stats.study) : '-'}</td>
+                    <td class="text-right text-[#0a84ff] font-bold font-mono text-sm tracking-tight">${formatTime(stats.total)}</td>
+                    <td class="text-center" onclick="event.stopPropagation()">
+                        <input type="checkbox" data-action="toggleDailyAchieved" data-id="${d.id}" ${stats.allCompleted ? 'checked' : ''} class="custom-checkbox mx-auto scale-90">
+                    </td>
+                </tr>
+            `}).join('') : `<tr><td colspan="6" class="text-center text-[var(--text-muted)] py-8 font-semibold text-sm">데이터가 없습니다.</td></tr>`;
+        }
+
+
+        let chartInstances = { daily: null, weekly: null, monthly: null };
+        function updateChartGlobalColors() {
+            Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim();
+            Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif';
+            Chart.defaults.font.size = 11;
+        }
+        
+        const getChartBaseOptions = (isBar) => ({
+            responsive: true, maintainAspectRatio: false,
+            scales: {
+                x: { stacked: isBar, grid: { display: false }, border: { display: false } },
+                y: { stacked: isBar, grid: { color: 'rgba(128,128,128,0.1)' }, border: { display: false }, beginAtZero: true, ticks: { maxTicksLimit: 5, callback: v => v + 'h' } }
+            },
+            plugins: { legend: { display: false } }
+        });
+
+        const getChartTooltip = (customLabelCb, customAfterTitleCb) => ({
+            backgroundColor: 'rgba(28, 28, 30, 0.9)', titleColor: '#fff', bodyColor: '#f5f5f7', padding: 12, cornerRadius: 12,
+            callbacks: { label: customLabelCb, afterTitle: customAfterTitleCb || (() => '') }
+        });
+
+        function renderCharts() {
+            if (!document.getElementById('tab-dashboard').classList.contains('block')) return; 
+            updateChartGlobalColors();
+
+            const recordsMap = getRecordsMap();
+            const todayRecord = recordsMap[TODAY];
+            const todayStats = getDailyTaskStats(todayRecord);
+            const totalToday = todayStats.total;
+
+            // Daily Chart
+            const ctxDaily = document.getElementById('chartDaily').getContext('2d');
+            DOM.dailyTotalText.innerText = formatTime(totalToday);
+            
+            const splitTextContainer = document.getElementById('dailySplitText');
+            if (splitTextContainer) {
+                if (totalToday > 0) {
+                    splitTextContainer.innerHTML = `
+                        ${todayStats.lecture > 0 ? `<span class="text-[#bf5af2] bg-[rgba(191,90,242,0.15)] px-1.5 py-0.5 rounded-md">인강 ${formatTime(todayStats.lecture)}</span>` : ''}
+                        ${todayStats.study > 0 ? `<span class="text-[#0a84ff] bg-[rgba(10,132,255,0.15)] px-1.5 py-0.5 rounded-md">자습 ${formatTime(todayStats.study)}</span>` : ''}
+                    `;
+                } else { splitTextContainer.innerHTML = ''; }
+            }
+
+            const dailyData = totalToday > 0 ? [todayStats.lecture, todayStats.study, 0] : [0, 0, 1];
+            const bgEmpty = getComputedStyle(document.documentElement).getPropertyValue('--card-border').trim();
+            const dailyBg = totalToday > 0 ? ['#bf5af2', '#0a84ff', bgEmpty] : [bgEmpty, bgEmpty, bgEmpty];
+
+            if(chartInstances.daily) {
+                chartInstances.daily.data.datasets[0].data = dailyData;
+                chartInstances.daily.data.datasets[0].backgroundColor = dailyBg;
+                chartInstances.daily.options.plugins.tooltip.enabled = totalToday > 0;
+                chartInstances.daily.update();
+            } else {
+                chartInstances.daily = new Chart(ctxDaily, {
+                    type: 'doughnut',
+                    data: { labels: ['인강 시청', '개인 공부', '미학습'], datasets: [{ data: dailyData, backgroundColor: dailyBg, borderWidth: 0, hoverOffset: 4 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '82%', plugins: { legend: { display: false } } }
+                });
+            }
+
+            // Weekly Chart
+            const ctxWeekly = document.getElementById('chartWeekly').getContext('2d');
+            let weeklyLabels = [], dataLecHours = [], dataStudyHours = [];
+            for(let i = 6; i >= 0; i--) {
+                let d = new Date(); d.setDate(d.getDate() - i);
+                let dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                let rec = recordsMap[dateStr];
+                let stats = getDailyTaskStats(rec);
+                weeklyLabels.push(`${d.getMonth()+1}/${d.getDate()}`);
+                dataLecHours.push(stats.lecture / 60);
+                dataStudyHours.push(stats.study / 60);
+            }
+            
+            const weeklyTooltip = getChartTooltip((c) => {
+                const valMins = Math.round(c.raw * 60);
+                if(valMins === 0) return null; 
+                const idx = c.dataIndex;
+                const lecMins = Math.round(c.chart.data.datasets[0].data[idx] * 60);
+                const studyMins = Math.round(c.chart.data.datasets[1].data[idx] * 60);
+                const tm = lecMins + studyMins;
+                return ` ${c.dataset.label}: ${formatTime(valMins)} (${tm>0 ? Math.round((valMins/tm)*100) : 0}%)`;
+            });
+
+            if(chartInstances.weekly) {
+                chartInstances.weekly.data.labels = weeklyLabels;
+                chartInstances.weekly.data.datasets[0].data = dataLecHours;
+                chartInstances.weekly.data.datasets[1].data = dataStudyHours;
+                chartInstances.weekly.update();
+            } else {
+                let wOpts = getChartBaseOptions(true);
+                wOpts.plugins.tooltip = weeklyTooltip;
+                chartInstances.weekly = new Chart(ctxWeekly, {
+                    type: 'bar',
+                    data: { labels: weeklyLabels, datasets: [
+                        { label: '인강 시청', data: dataLecHours, backgroundColor: '#bf5af2', borderRadius: 6, barPercentage: 0.5 }, 
+                        { label: '개인 공부', data: dataStudyHours, backgroundColor: '#0a84ff', borderRadius: 6, barPercentage: 0.5 }
+                    ]},
+                    options: wOpts
+                });
+            }
+
+            // Monthly Chart
+            const ctxMonthly = document.getElementById('chartMonthly').getContext('2d');
+            const targetYear = currentCalendarDate.getFullYear();
+            if(DOM.monthlyChartTitle) DOM.monthlyChartTitle.innerText = `${targetYear} Monthly Progress`;
+            let monthlyLabels = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+            let monthTotals = new Array(12).fill(0);
+            const isCurrentYear = targetYear === new Date().getFullYear();
+            const currentMonthLimit = isCurrentYear ? new Date().getMonth() : (targetYear > new Date().getFullYear() ? -1 : 11);
+            
+            getDailyRecords().forEach(r => {
+                let d = new Date(r.date);
+                if(d.getFullYear() === targetYear) monthTotals[d.getMonth()] += getDailyTaskStats(r).total;
+            });
+
+            let cumulativeDataHours = [];
+            for(let m = 0; m < 12; m++) {
+                if (m > currentMonthLimit) cumulativeDataHours.push(null); 
+                else cumulativeDataHours.push(monthTotals[m] / 60); 
+            }
+
+            const monthlyTooltip = getChartTooltip(c => ` 월간 학습량: ${formatTime(Math.round(c.raw * 60))}`);
+
+            if(chartInstances.monthly) {
+                chartInstances.monthly.data.datasets[0].data = cumulativeDataHours;
+                chartInstances.monthly.update();
+            } else {
+                let mOpts = getChartBaseOptions(true);
+                mOpts.plugins.tooltip = monthlyTooltip;
+                chartInstances.monthly = new Chart(ctxMonthly, {
+                    type: 'bar',
+                    data: { labels: monthlyLabels, datasets: [{ label: '월간 총 학습', data: cumulativeDataHours, backgroundColor: '#bf5af2', borderRadius: 6, barPercentage: 0.5 }] },
+                    options: mOpts
+                });
+            }
+        }
+
+        function calculateStreak(recordsMap) {
+            let streak = 0; let d = new Date(); 
+            const todayRec = recordsMap[getTodayStr()];
+            const todayTotal = todayRec ? getDailyTaskStats(todayRec).total : 0;
+            if (todayTotal === 0) d.setDate(d.getDate() - 1);
+            
+            while(true) {
+                let dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                let rec = recordsMap[dateStr];
+                let total = rec ? getDailyTaskStats(rec).total : 0;
+                if (total > 0) { streak++; d.setDate(d.getDate() - 1); } 
+                else break;
+            }
+            return streak;
+        }
+
+        function renderHeatmap() {
+            if(!DOM.heatmapContainer) return;
+            let html = '';
+            let d = new Date();
+            d.setDate(d.getDate() - 140); 
+            while(d.getDay() !== 0) d.setDate(d.getDate() - 1);
+
+            const today = new Date();
+            const recordsMap = getRecordsMap();
+            
+            while(d <= today) {
+                let dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                let rec = recordsMap[dateStr];
+                let total = rec ? getDailyTaskStats(rec).total : 0;
+                
+                let colorClass = 'bg-[var(--hover-bg)] border border-[var(--card-border)]';
+                if (total > 0 && total < 60) colorClass = 'bg-[rgba(48,209,88,0.3)] border-transparent';
+                else if (total >= 60 && total < 120) colorClass = 'bg-[rgba(48,209,88,0.6)] border-transparent';
+                else if (total >= 120) colorClass = 'bg-[#30d158] shadow-[0_0_5px_rgba(48,209,88,0.5)] border-transparent';
+                
+                let tooltipText = total > 0 ? `${dateStr} : ${total}m` : `${dateStr}`;
+                html += `<div class="w-[11px] h-[11px] sm:w-[13px] sm:h-[13px] rounded-[3px] ${colorClass} transition-all hover:ring-2 hover:ring-[#0a84ff] cursor-pointer" title="${tooltipText}"></div>`;
+                d.setDate(d.getDate() + 1);
+            }
+            DOM.heatmapContainer.innerHTML = html;
+            DOM.streakCounter.innerText = `🔥 ${calculateStreak(recordsMap)}일째`;
+            
+            requestAnimationFrame(() => {
+                if(DOM.heatmapContainer && DOM.heatmapContainer.parentElement) {
+                    DOM.heatmapContainer.parentElement.scrollLeft = DOM.heatmapContainer.parentElement.scrollWidth;
+                }
+            });
+        }
+
         function renderAll() {
             renderCourseGallery();
+            renderTodoLectures();
             renderCalendar();
             renderCharts();
             renderHeatmap();
             renderDdays();
             renderAdvancedNotesList();
             applyNoteView();
-            // (Curriculum, Todo, DB 렌더링 생략 - 이전 완벽 코드 기반 유지 가정)
+            renderCurriculumManager();
+            renderMasterDB();
         }
 
         function updateThemeIcon() {
@@ -1126,7 +1469,7 @@
             document.documentElement.setAttribute('data-theme', currentTheme);
             localStorage.setItem('theme', currentTheme);
             updateThemeIcon();
-            renderCharts(); // 차트 색상 업데이트
+            renderCharts(); // Update chart text colors
         }
 
         function showUndoToast(message, onUndo = null, onConfirm = null) {
@@ -1164,8 +1507,31 @@
             toastTimers[toastId] = { timer, onUndo, removeToast };
         }
 
+        function openModal(title, bodyHTML, onSave) {
+            DOM.modalTitle.innerText = title; 
+            DOM.modalBody.innerHTML = bodyHTML; 
+            DOM.modalOverlay.classList.remove('hidden');
+            DOM.modalSaveBtn.onclick = () => { onSave(); closeModal(); };
+        }
+        function closeModal() { DOM.modalOverlay.classList.add('hidden'); }
+
         document.addEventListener('click', (e) => {
             const target = e.target.closest('[data-action]');
+            
+            // Color picker logic inside modals
+            const colorOpt = e.target.closest('.color-option');
+            if (colorOpt) {
+                document.querySelectorAll('.color-option').forEach(el => {
+                    el.classList.remove('border-[var(--text-main)]', 'scale-110');
+                    el.classList.add('border-transparent');
+                });
+                colorOpt.classList.remove('border-transparent');
+                colorOpt.classList.add('border-[var(--text-main)]', 'scale-110');
+                const inputColor = document.getElementById('input-ccolor');
+                if (inputColor) inputColor.value = colorOpt.dataset.color;
+                return;
+            }
+
             if(!target) return;
             const action = target.dataset.action;
 
@@ -1189,8 +1555,6 @@
                     }
                     break;
                 }
-                
-                // Memo 뷰어 제어
                 case 'setMemoView': {
                     const view = target.dataset.view;
                     document.querySelectorAll('.memo-view-btn').forEach(btn => {
@@ -1200,8 +1564,6 @@
                     applyNoteView();
                     break;
                 }
-                
-                // 폴더 및 메모 생성/삭제
                 case 'createNewFolder': {
                     const fname = prompt('새 폴더 이름을 입력하세요:', '새 폴더');
                     if(fname && fname.trim()) {
@@ -1215,10 +1577,8 @@
                     const folder = noteFolders.find(f => f.id === fId);
                     if(!folder) return;
                     showUndoToast(`'${folder.name}' 폴더와 메모 삭제 대기 중`, () => {
-                        // Undo (Nothing actually deleted yet)
                         renderAdvancedNotesList();
                     }, () => {
-                        // Confirm Delete
                         noteFolders = noteFolders.filter(f => f.id !== fId);
                         advancedNotes = advancedNotes.filter(n => n.folderId !== fId);
                         if(activeNoteId && !advancedNotes.find(n => n.id === activeNoteId)) activeNoteId = null;
@@ -1250,8 +1610,280 @@
                     });
                     break;
                 }
+                case 'openDdayModal': {
+                    const html = `
+                        <div>
+                            <label class="block text-sm text-[var(--text-muted)] font-semibold mb-2 tracking-wide">디데이 이름</label>
+                            <input type="text" id="input-dday-title" class="input-dark mb-6 !py-3 !text-lg font-bold" placeholder="예: 편입시험, 모의고사 등">
+                            <label class="block text-sm text-[var(--text-muted)] font-semibold mb-2 tracking-wide">목표 날짜</label>
+                            <input type="date" id="input-dday-date" class="input-dark mb-2 !py-3 !text-lg font-bold w-full cursor-pointer hover:bg-[var(--hover-bg)] transition-colors" value="${TODAY}">
+                        </div>
+                    `;
+                    openModal('디데이 추가', html, () => {
+                        const title = document.getElementById('input-dday-title').value.trim() || '목표일';
+                        const dateVal = document.getElementById('input-dday-date').value;
+                        if(dateVal) {
+                            ddays.push({ id: generateId('DD'), title, targetDate: dateVal });
+                            ddays.sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate));
+                            saveData(); renderDdays();
+                        }
+                    });
+                    break;
+                }
+                case 'deleteDday': {
+                    ddays = ddays.filter(d => d.id !== target.dataset.id);
+                    saveData(); renderDdays();
+                    break;
+                }
+                case 'changeMonth': {
+                    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + parseInt(target.dataset.val));
+                    renderCalendar(); renderCharts();
+                    break;
+                }
+                case 'openCourseModal': {
+                    const cId = target.dataset.courseId;
+                    const course = cId ? getCourses().find(c => c.id === cId) : { subject: '수학', title: '', color: '' };
+                    const options = subjects.map(s => `<option value="${s}" ${course.subject === s ? 'selected' : ''}>${s}</option>`).join('');
+                    const colorOptionsHtml = COURSE_COLORS.map(c => `
+                        <div data-color="${c}" class="color-option w-7 h-7 rounded-full cursor-pointer border-2 transition-transform hover:scale-110 ${(course.color || getStringColor(course.title)) === c ? 'border-[var(--text-main)] scale-110' : 'border-transparent'}" style="background-color: ${c}"></div>
+                    `).join('');
 
-                // Toasts
+                    const html = `
+                        <div>
+                            <label class="block text-sm text-[var(--text-muted)] mb-2 font-semibold">과목 분류</label>
+                            <select id="input-subject" class="input-dark">${options}</select>
+                        </div>
+                        <div class="mt-5">
+                            <label class="block text-sm text-[var(--text-muted)] mb-2 font-semibold">강좌 제목</label>
+                            <input type="text" id="input-ctitle" class="input-dark" value="${esc(course.title)}" placeholder="강좌 제목 입력">
+                        </div>
+                        <div class="mt-5">
+                            <label class="block text-sm text-[var(--text-muted)] mb-3 font-semibold">강좌 색상 (캘린더 표시용)</label>
+                            <div class="flex flex-wrap gap-3" id="color-picker-container">
+                                ${colorOptionsHtml}
+                            </div>
+                            <input type="hidden" id="input-ccolor" value="${course.color || ''}">
+                        </div>
+                    `;
+                    openModal(cId ? '강좌 수정' : '새로운 강좌 추가', html, () => {
+                        const subj = document.getElementById('input-subject').value;
+                        const tit = document.getElementById('input-ctitle').value || '제목 없음';
+                        const col = document.getElementById('input-ccolor').value || getStringColor(tit);
+                        if (cId) { 
+                            const idx = courses.findIndex(c => c.id === cId); 
+                            if(idx > -1) courses[idx] = { ...courses[idx], subject: subj, title: tit, color: col }; 
+                        } else { courses.push({ id: generateId('C'), subject: subj, title: tit, color: col }); }
+                        saveData(); renderAll();
+                    });
+                    break;
+                }
+                case 'openLectureModal': {
+                    const cId = target.dataset.courseId;
+                    const lId = target.dataset.lecId;
+                    const lecture = lId ? getLectures().find(l => l.id === lId) : { title: '', status: '미시작', duration: '' };
+                    const statusOptions = ['미시작', '완료'].map(s => `<option value="${s}" ${lecture.status === s ? 'selected' : ''}>${s}</option>`).join('');
+                    const cName = getCourseName(cId);
+                    const html = `
+                        <div class="bg-[var(--btn-glass)] p-4 rounded-[16px] border border-[var(--card-border)] mb-6 text-sm text-[var(--text-main)] flex justify-between items-center">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[var(--text-muted)] font-semibold flex-shrink-0">대상:</span> <span class="truncate-text font-medium max-w-[200px]">${esc(cName)}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-[var(--text-muted)] font-semibold mb-2">강의 제목</label>
+                            <input type="text" id="input-ltitle" class="input-dark mb-2" value="${esc(lecture.title)}" placeholder="강의 제목 입력">
+                        </div>
+                        <div class="grid grid-cols-2 gap-5 mt-5">
+                            <div>
+                                <label class="block text-sm text-[var(--text-muted)] mb-2 font-semibold">시간 (분)</label>
+                                <input type="number" id="input-lduration" class="input-dark" value="${lecture.duration}" min="0" step="5">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-[var(--text-muted)] mb-2 font-semibold">상태</label>
+                                <select id="input-lstatus" class="input-dark">${statusOptions}</select>
+                            </div>
+                        </div>
+                    `;
+                    openModal(lId ? '강의 수정' : '새 강의 추가', html, () => {
+                        const tit = document.getElementById('input-ltitle').value || '제목 없음';
+                        const dur = parseInt(document.getElementById('input-lduration').value) || 0;
+                        const stat = document.getElementById('input-lstatus').value;
+                        if (lId) { 
+                            const idx = lectures.findIndex(l => l.id === lId); 
+                            if(idx > -1) lectures[idx] = { ...lectures[idx], title: tit, duration: dur, status: stat }; 
+                        } else { lectures.push({ id: generateId('L'), courseId: cId, title: tit, duration: dur, status: stat }); }
+                        saveData(); renderAll();
+                    });
+                    break;
+                }
+                case 'deleteCourse': {
+                    const cId = target.dataset.id;
+                    pendingDeletes.add(cId); renderAll(); 
+                    showUndoToast('강좌가 삭제 대기 중입니다.', () => { pendingDeletes.delete(cId); renderAll(); }, () => { pendingDeletes.delete(cId); courses = courses.filter(c => c.id !== cId); lectures = lectures.filter(l => l.courseId !== cId); saveData(); renderAll(); });
+                    break;
+                }
+                case 'deleteLecture': {
+                    const lId = target.dataset.id;
+                    pendingDeletes.add(lId); renderAll();
+                    showUndoToast('강의가 삭제 대기 중입니다.', () => { pendingDeletes.delete(lId); renderAll(); }, () => { pendingDeletes.delete(lId); lectures = lectures.filter(l => l.id !== lId); saveData(); renderAll(); });
+                    break;
+                }
+                case 'courseShowMore': {
+                    const cId = target.dataset.id;
+                    const lecsMap = getLecturesByCourse();
+                    const total = (lecsMap[cId] || []).length;
+                    let current = courseViewCounts[cId] !== undefined ? courseViewCounts[cId] : Math.min(10, total);
+                    current = Math.min(current, total);
+                    courseViewCounts[cId] = Math.min(total, current + 10);
+                    renderCurriculumManager(); break;
+                }
+                case 'courseFoldLess': {
+                    const cId = target.dataset.id;
+                    const lecsMap = getLecturesByCourse();
+                    const total = (lecsMap[cId] || []).length;
+                    let current = courseViewCounts[cId] !== undefined ? courseViewCounts[cId] : Math.min(10, total);
+                    current = Math.min(current, total);
+                    const foldCount = current % 10 === 0 ? 10 : current % 10;
+                    courseViewCounts[cId] = Math.max(0, current - foldCount);
+                    renderCurriculumManager(); break;
+                }
+                case 'courseFoldAll': {
+                    courseViewCounts[target.dataset.id] = 0;
+                    renderCurriculumManager(); break;
+                }
+                case 'setLectureTab': {
+                    currentSubjectTab = target.dataset.subj;
+                    openTodoCourses.clear();
+                    renderTodoLectures(); break;
+                }
+                case 'toggleTodoCourse': {
+                    const cId = target.dataset.id;
+                    if(openTodoCourses.has(cId)) openTodoCourses.delete(cId); else openTodoCourses.add(cId);
+                    renderTodoLectures(); break;
+                }
+                case 'toggleDbCourse': {
+                    const cId = target.dataset.id;
+                    if(closedDbCourses.has(cId)) closedDbCourses.delete(cId); else closedDbCourses.add(cId);
+                    renderMasterDB(); break;
+                }
+                case 'toggleMasterDbSection': {
+                    const sec = target.dataset.section;
+                    masterDbFoldState[sec] = !masterDbFoldState[sec];
+                    const wrap = document.getElementById(`wrap-db-${sec}`);
+                    const icon = document.getElementById(`icon-db-${sec}`);
+                    if(masterDbFoldState[sec]) { wrap.classList.replace('open', 'closed'); icon.classList.add('rotate-180'); } 
+                    else { wrap.classList.replace('closed', 'open'); icon.classList.remove('rotate-180'); }
+                    break;
+                }
+                case 'openDailyModal': {
+                    const dateStr = target.dataset.date;
+                    currentModalDate = dateStr;
+                    const record = getDailyRecords().find(d => d.date === dateStr);
+                    currentModalTasks = record ? JSON.parse(JSON.stringify(record.tasks)) : []; 
+                    
+                    const allLectures = getLectures();
+                    const lecOptions = allLectures.map(l => `<option value="${l.id}">[${esc(getCourseName(l.courseId))}] ${esc(l.title)} (${l.duration||0}m)</option>`).join('');
+
+                    const html = `
+                        <div class="flex justify-between items-center mb-6 border-b border-[var(--card-border)] pb-4">
+                            <label class="block text-sm text-[var(--text-muted)] font-bold uppercase tracking-widest">학습 날짜</label>
+                            <div class="text-[var(--text-main)] font-mono text-xl font-bold tracking-tight">${dateStr}</div>
+                        </div>
+                        <div class="bg-[var(--card-bg)] p-5 rounded-[20px] border border-[var(--card-border)] mb-8 space-y-5 shadow-inner">
+                            <div>
+                                <label class="block text-[11px] text-[#bf5af2] mb-2.5 font-bold uppercase tracking-widest">인강 추가</label>
+                                <div class="flex space-x-2">
+                                    <select id="modal-lecture-select" class="input-dark flex-1 py-2.5 text-sm bg-[var(--input-bg)]"><option value=""></option>${lecOptions}</select>
+                                    <button data-action="addModalLecTask" class="px-5 py-2.5 bg-[#bf5af2] hover:bg-purple-500 text-white font-bold rounded-xl transition whitespace-nowrap text-sm shadow-[0_0_10px_rgba(191,90,242,0.3)]">추가</button>
+                                </div>
+                            </div>
+                            <div class="pt-5 border-t border-[var(--card-border)]">
+                                <label class="block text-[11px] text-[#0a84ff] mb-2.5 font-bold uppercase tracking-widest">직접 입력 (자습)</label>
+                                <div class="flex flex-col space-y-2.5">
+                                    <input type="text" id="modal-study-title" class="input-dark py-2.5 text-sm bg-[var(--input-bg)]" placeholder="항목 입력 (예: 복습)">
+                                    <div class="flex space-x-2">
+                                        <div class="flex-1 flex items-center space-x-2 bg-[var(--input-bg)] rounded-xl p-2 border border-[var(--card-border)] focus-within:border-[#0a84ff] transition">
+                                            <input type="number" id="modal-study-h" class="bg-transparent w-full outline-none text-right font-mono text-sm text-[var(--text-main)]" min="0">
+                                            <span class="text-xs text-[var(--text-muted)] pr-2 font-medium">h</span>
+                                        </div>
+                                        <div class="flex-1 flex items-center space-x-2 bg-[var(--input-bg)] rounded-xl p-2 border border-[var(--card-border)] focus-within:border-[#0a84ff] transition">
+                                            <input type="number" id="modal-study-m" class="bg-transparent w-full outline-none text-right font-mono text-sm text-[var(--text-main)]" min="0" max="59">
+                                            <span class="text-xs text-[var(--text-muted)] pr-2 font-medium">m</span>
+                                        </div>
+                                        <button data-action="addModalStudyTask" class="px-5 py-2.5 bg-[#0a84ff] hover:bg-blue-500 text-white font-bold rounded-xl transition whitespace-nowrap text-sm shadow-[0_0_10px_rgba(10,132,255,0.3)]">추가</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-end justify-between mb-3">
+                                <label class="block text-sm text-[var(--text-main)] font-bold tracking-wide">학습 항목 목록</label>
+                                <span class="text-[10px] font-medium text-[var(--text-muted)]">체크해야 시간에 합산됩니다</span>
+                            </div>
+                            <div id="modal-task-list" class="space-y-1 max-h-[280px] overflow-y-auto pr-2"></div>
+                        </div>
+                    `;
+                    openModal(`학습 기록`, html, () => {
+                        const idx = dailyRecords.findIndex(d => d.date === currentModalDate);
+                        if(idx > -1) dailyRecords[idx].tasks = currentModalTasks;
+                        else dailyRecords.push({ id: generateId('D'), date: currentModalDate, tasks: currentModalTasks }); 
+                        
+                        currentModalTasks.forEach(t => {
+                            if (t.type === 'lecture' && t.refId) {
+                                const originalLecture = lectures.find(l => l.id === t.refId);
+                                if (originalLecture) originalLecture.status = t.completed ? '완료' : '미시작';
+                            }
+                        });
+                        saveData(); renderAll();
+                    });
+                    renderModalTaskList();
+                    break;
+                }
+                case 'addModalLecTask': {
+                    const sel = document.getElementById('modal-lecture-select');
+                    if(!sel.value) return;
+                    const lec = getLectures().find(l => l.id === sel.value);
+                    if(lec) {
+                        currentModalTasks.push({ id: generateId('T'), type: 'lecture', title: getShortLectureName(lec), time: lec.duration || 0, completed: false, refId: lec.id });
+                        sel.value = ''; renderModalTaskList();
+                    }
+                    break;
+                }
+                case 'addModalStudyTask': {
+                    const titleEl = document.getElementById('modal-study-title');
+                    const hEl = document.getElementById('modal-study-h');
+                    const mEl = document.getElementById('modal-study-m');
+                    const title = titleEl.value.trim() || '개인 공부';
+                    const h = parseInt(hEl.value) || 0;
+                    const m = parseInt(mEl.value) || 0;
+                    currentModalTasks.push({ id: generateId('T'), type: 'study', title: title, time: (h*60)+m, completed: false });
+                    titleEl.value = ''; hEl.value = ''; mEl.value = ''; renderModalTaskList();
+                    break;
+                }
+                case 'removeModalTask': {
+                    currentModalTasks = currentModalTasks.filter(t => t.id !== target.dataset.id);
+                    renderModalTaskList(); break;
+                }
+                case 'toggleModalTask': {
+                    const task = currentModalTasks.find(t => t.id === target.dataset.id);
+                    if(task) { task.completed = !task.completed; renderModalTaskList(); }
+                    break;
+                }
+                case 'toggleTask': {
+                    const record = dailyRecords.find(d => d.id === target.dataset.recId);
+                    if(record && record.tasks) {
+                        const task = record.tasks.find(t => t.id === target.dataset.taskId);
+                        if(task) { 
+                            task.completed = !task.completed; 
+                            if (task.type === 'lecture' && task.refId) {
+                                const originalLecture = lectures.find(l => l.id === task.refId);
+                                if (originalLecture) originalLecture.status = task.completed ? '완료' : '미시작';
+                            }
+                            saveData(); renderAll();
+                        }
+                    }
+                    break;
+                }
                 case 'undoToast': {
                     const tId = target.dataset.toastId;
                     if(toastTimers[tId]) { clearTimeout(toastTimers[tId].timer); if(toastTimers[tId].onUndo) toastTimers[tId].onUndo(); toastTimers[tId].removeToast(); }
@@ -1262,8 +1894,136 @@
                     if(toastTimers[tId]) { clearTimeout(toastTimers[tId].timer); toastTimers[tId].removeToast(); }
                     break;
                 }
+                case 'exportData': {
+                    const data = { courses, lectures, dailyRecords, ddays, noteFolders, advancedNotes };
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = `data.json`; a.click();
+                    URL.revokeObjectURL(url);
+                    showUndoToast('data.json 파일 다운로드가 완료되었습니다.', null, null);
+                    break;
+                }
+                case 'closeModal': closeModal(); break;
             }
         });
+
+        document.addEventListener('change', (e) => {
+            const target = e.target;
+            if(!target.dataset.action) return;
+            const action = target.dataset.action;
+
+            switch(action) {
+                case 'updateTaskTime': {
+                    const task = currentModalTasks.find(t => t.id === target.dataset.id);
+                    if(task) {
+                        task.time = parseInt(target.value) || 0;
+                        const idx = dailyRecords.findIndex(d => d.date === currentModalDate);
+                        if(idx > -1) dailyRecords[idx].tasks = currentModalTasks;
+                        else dailyRecords.push({ id: generateId('D'), date: currentModalDate, tasks: currentModalTasks });
+                        saveData(); renderAll(); renderModalTaskList();
+                    }
+                    break;
+                }
+                case 'toggleLecture': {
+                    const idx = lectures.findIndex(l => l.id === target.dataset.id);
+                    if(idx > -1) { 
+                        lectures[idx].status = lectures[idx].status === '완료' ? '미시작' : '완료'; 
+                        saveData(); renderAll();
+                    }
+                    break;
+                }
+                case 'toggleDailyAchieved': {
+                    const record = dailyRecords.find(d => d.id === target.dataset.id);
+                    if (record && record.tasks) {
+                        const targetStatus = !getDailyTaskStats(record).allCompleted;
+                        record.tasks.forEach(t => {
+                            t.completed = targetStatus;
+                            if (t.type === 'lecture' && t.refId) {
+                                const originalLecture = lectures.find(l => l.id === t.refId);
+                                if (originalLecture) originalLecture.status = t.completed ? '완료' : '미시작';
+                            }
+                        }); 
+                        saveData(); renderAll();
+                    }
+                    break;
+                }
+                case 'importData': {
+                    const file = target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        try {
+                            const data = JSON.parse(ev.target.result);
+                            if (data.courses && data.lectures && data.dailyRecords) {
+                                courses = data.courses; lectures = data.lectures; dailyRecords = data.dailyRecords;
+                                if(data.noteFolders) noteFolders = data.noteFolders;
+                                if(data.advancedNotes) advancedNotes = data.advancedNotes;
+                                if(data.ddays) ddays = data.ddays;
+                                saveData(); renderAll();
+                                showUndoToast('데이터가 성공적으로 복원되었습니다.', null, null);
+                            } else { alert('올바른 백업 파일 형식이 아닙니다.'); }
+                        } catch(err) { alert('파일을 읽는 중 오류가 발생했습니다.'); }
+                    };
+                    reader.readAsText(file);
+                    target.value = ''; 
+                    break;
+                }
+            }
+        });
+
+        function renderModalTaskList() {
+            const container = document.getElementById('modal-task-list');
+            if (!container) return;
+            if (currentModalTasks.length === 0) {
+                container.innerHTML = '<div class="text-sm text-[var(--text-muted)] text-center py-8 inner-squircle border border-[var(--card-border)] border-dashed font-medium">등록된 학습 항목이 없습니다.</div>';
+                return;
+            }
+            container.innerHTML = currentModalTasks.map(t => {
+                let badgeColor = '#0a84ff';
+                let badgeBg = 'rgba(10,132,255,0.1)';
+                let badgeBorder = 'rgba(10,132,255,0.2)';
+                
+                if (t.type === 'lecture') {
+                    badgeColor = '#bf5af2';
+                    badgeBg = 'rgba(191,90,242,0.1)';
+                    badgeBorder = 'rgba(191,90,242,0.2)';
+                    if (t.refId) {
+                        const lec = lectures.find(l => l.id === t.refId);
+                        if (lec) {
+                            const crs = courses.find(c => c.id === lec.courseId);
+                            if (crs) {
+                                badgeColor = crs.color || getStringColor(crs.title);
+                                badgeBg = badgeColor + '1a';
+                                badgeBorder = badgeColor + '33';
+                            }
+                        }
+                    }
+                }
+
+                return `
+                <div class="flex items-center justify-between p-3.5 inner-squircle border border-[var(--card-border)] transition hover:bg-[var(--hover-bg)] mb-2 shadow-sm bg-[var(--btn-glass)]">
+                    <div class="flex items-center space-x-3.5 flex-1 min-w-0">
+                        <input type="checkbox" class="custom-checkbox w-5 h-5 flex-shrink-0" ${t.completed ? 'checked' : ''} data-action="toggleModalTask" data-id="${t.id}">
+                        <div class="flex-1 truncate flex items-center min-w-0">
+                            <span class="text-[10px] px-2.5 py-0.5 rounded-full border mr-3 flex-shrink-0 font-bold" style="color: ${badgeColor}; background-color: ${badgeBg}; border-color: ${badgeBorder};">${t.type === 'lecture' ? '인강' : '자습'}</span>
+                            <span class="text-[var(--text-main)] text-sm font-medium truncate min-w-0 ${t.completed ? 'line-through text-[var(--text-muted)]' : ''}" title="${esc(t.title)}">${esc(t.title)}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 ml-3 flex-shrink-0">
+                        ${t.type === 'study' ?
+                            `<div class="flex items-center space-x-1">
+                                <input type="number" data-action="updateTaskTime" data-id="${t.id}" value="${t.time}" min="0" class="w-12 bg-[var(--input-bg)] border border-[var(--input-border)] rounded px-1 py-1 text-xs text-[var(--text-main)] font-mono font-bold text-right outline-none focus:border-[#0a84ff] transition-colors shadow-inner">
+                                <span class="text-xs text-[var(--text-muted)] font-mono font-bold">m</span>
+                            </div>`
+                        :
+                            `<span class="text-xs text-[var(--text-muted)] font-mono font-bold w-10 text-right">${t.time}m</span>`
+                        }
+                        <button data-action="removeModalTask" data-id="${t.id}" class="text-red-500 hover:text-white font-bold px-3 py-1.5 rounded-full bg-[rgba(255,59,48,0.1)] hover:bg-red-500 transition text-[11px]">삭제</button>
+                    </div>
+                </div>
+            `}).join('');
+        }
 
         async function initApp() { 
             initDOM(); 
@@ -1277,7 +2037,6 @@
         }
     </script>
     
-    <!-- Firebase Sync -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
