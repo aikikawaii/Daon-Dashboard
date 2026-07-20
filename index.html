@@ -698,13 +698,33 @@
         window.renderMarkdownPreview = function() {
             if(!DOM.notePreviewContent) return;
             const raw = DOM.noteEditContent.value;
-            // 1. Markdown 렌더링
-            let parsedHTML = marked.parse(raw, { breaks: true });
-            // 2. DOMPurify로 XSS 방어 (수식을 위해 필요한 기본 태그 허용)
+            
+            // 1. 수식 추출 및 보호 (마크다운 파싱 중 \ 나 _ 가 사라지는 것 방지)
+            const mathBlocks = [];
+            let processedRaw = raw.replace(/\$\$([\s\S]+?)\$\$/g, (match) => {
+                mathBlocks.push(match);
+                return `%%%MATH_BLOCK_${mathBlocks.length - 1}%%%`;
+            });
+            
+            // 인라인 수식 처리 ($ 수식 $)
+            processedRaw = processedRaw.replace(/\$([^$\n]+?)\$/g, (match) => {
+                mathBlocks.push(match);
+                return `%%%MATH_INLINE_${mathBlocks.length - 1}%%%`;
+            });
+
+            // 2. Markdown 렌더링
+            let parsedHTML = marked.parse(processedRaw, { breaks: true });
+            
+            // 3. DOMPurify로 XSS 방어
             parsedHTML = DOMPurify.sanitize(parsedHTML, { ADD_ATTR: ['target'] });
+            
+            // 4. 수식 원복 (HTML Escape 처리하여 XSS 방지)
+            parsedHTML = parsedHTML.replace(/%%%MATH_BLOCK_(\d+)%%%/g, (match, i) => esc(mathBlocks[i]));
+            parsedHTML = parsedHTML.replace(/%%%MATH_INLINE_(\d+)%%%/g, (match, i) => esc(mathBlocks[i]));
+            
             DOM.notePreviewContent.innerHTML = parsedHTML;
             
-            // 3. KaTeX 수식 적용
+            // 5. KaTeX 수식 적용
             if (typeof renderMathInElement !== 'undefined') {
                 renderMathInElement(DOM.notePreviewContent, {
                     delimiters: [
