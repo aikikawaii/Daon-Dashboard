@@ -523,7 +523,6 @@
         let activeNoteId = null;
         let currentTheme = localStorage.getItem('theme') || 'dark';
 
-        // Initialize Theme
         document.documentElement.setAttribute('data-theme', currentTheme);
 
         window.showSyncIndicator = function(isLoading, isError = false) {
@@ -550,7 +549,6 @@
             noteFolders = JSON.parse(localStorage.getItem('noteFolders')) || [{ id: 'root', name: '기본 폴더' }];
             advancedNotes = JSON.parse(localStorage.getItem('advancedNotes')) || [{ id: generateId('AN'), folderId: 'root', title: '환영합니다! 🚀', content: '# Notion Style Memo\n\n- 마크다운(Markdown)을 완벽 지원합니다.\n- 수식 입력 테스트:\n$$ E = mc^2 $$\n- 우측 상단 뷰 모드(에디터/분할/렌더링)를 바꿔보세요.', updatedAt: Date.now() }];
             
-            // Clean up orphan notes or fix folder IDs
             advancedNotes.forEach(n => { if(!n.folderId) n.folderId = 'root'; });
 
             const activeSubjects = [...new Set(courses.map(c => c.subject))];
@@ -569,13 +567,14 @@
                 if(data.noteFolders) noteFolders = data.noteFolders;
                 if(data.advancedNotes) advancedNotes = data.advancedNotes;
                 
-                saveData(false); // Don't trigger cloud save loop
+                saveData(false); 
                 renderAll();
             }
         };
 
         window.getExportData = () => ({ courses, lectures, dailyRecords, ddays, noteFolders, advancedNotes });
 
+        let cloudSaveTimer = null;
         function saveData(syncToCloud = true) {
             localStorage.setItem('courses', JSON.stringify(courses));
             localStorage.setItem('lectures', JSON.stringify(lectures));
@@ -584,8 +583,12 @@
             localStorage.setItem('noteFolders', JSON.stringify(noteFolders));
             localStorage.setItem('advancedNotes', JSON.stringify(advancedNotes));
 
+            // 실시간 동기화 지연(디바운싱): 입력 중 과도한 네트워크 요청 및 UI 덮어씌움 방지
             if (syncToCloud && typeof window.triggerCloudSave === 'function') {
-                window.triggerCloudSave(window.getExportData());
+                clearTimeout(cloudSaveTimer);
+                cloudSaveTimer = setTimeout(() => {
+                    window.triggerCloudSave(window.getExportData());
+                }, 1500); 
             }
         }
 
@@ -777,8 +780,15 @@
             } else {
                 DOM.memoEmptyState.classList.add('hidden');
                 const note = advancedNotes.find(n => n.id === activeNoteId);
-                DOM.memoTitleInput.value = note.title;
-                DOM.memoContentInput.value = note.content || '';
+                
+                // 입력 중일 때(포커스 상태) 값이 덮어씌워져 커서가 풀리거나 중복 입력되는 현상 방지
+                if (document.activeElement !== DOM.memoTitleInput) {
+                    DOM.memoTitleInput.value = note.title;
+                }
+                if (document.activeElement !== DOM.memoContentInput) {
+                    DOM.memoContentInput.value = note.content || '';
+                }
+                
                 DOM.memoPreviewTitle.innerText = note.title || '제목 없음';
                 
                 // Get current view mode
@@ -824,14 +834,12 @@
             }
         };
 
-        // 완벽한 Markdown + KaTeX 혼합 파싱 로직
         window.renderMarkdownPreview = function() {
             if(!DOM.memoPreviewContent || !activeNoteId) return;
             const note = advancedNotes.find(n => n.id === activeNoteId);
             if(!note) return;
             let content = note.content || '';
 
-            // 1단계: 수식(Math) 블록을 고유 식별자로 치환하여 Markdown 파싱 충돌 방지
             const mathBlocks = [];
             // 블록 수식 $$ ... $$
             content = content.replace(/\$\$(.*?)\$\$/gs, (match, math) => {
@@ -844,10 +852,10 @@
                 return `%%%MATH_${mathBlocks.length - 1}%%%`;
             });
 
-            // 2단계: Marked.js를 사용하여 Markdown 변환
+            // 마크다운 렌더링
             let html = marked.parse(content);
 
-            // 3단계: 치환해둔 고유 식별자를 KaTeX 렌더링 결과로 복원
+            // 보호했던 수식 렌더링 후 복원
             mathBlocks.forEach((block, i) => {
                 try {
                     const renderedMath = katex.renderToString(block.text, {
@@ -860,10 +868,8 @@
                 }
             });
 
-            // 4단계: DOMPurify로 XSS 방어 후 출력
             DOM.memoPreviewContent.innerHTML = DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
         };
-
 
         function calculateDday(targetDateStr) {
             const today = new Date(TODAY); const target = new Date(targetDateStr);
@@ -1257,7 +1263,6 @@
             `}).join('') : `<tr><td colspan="6" class="text-center text-[var(--text-muted)] py-8 font-semibold text-sm">데이터가 없습니다.</td></tr>`;
         }
 
-
         let chartInstances = { daily: null, weekly: null, monthly: null };
         function updateChartGlobalColors() {
             Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim();
@@ -1469,7 +1474,7 @@
             document.documentElement.setAttribute('data-theme', currentTheme);
             localStorage.setItem('theme', currentTheme);
             updateThemeIcon();
-            renderCharts(); // Update chart text colors
+            renderCharts(); 
         }
 
         function showUndoToast(message, onUndo = null, onConfirm = null) {
@@ -1518,7 +1523,6 @@
         document.addEventListener('click', (e) => {
             const target = e.target.closest('[data-action]');
             
-            // Color picker logic inside modals
             const colorOpt = e.target.closest('.color-option');
             if (colorOpt) {
                 document.querySelectorAll('.color-option').forEach(el => {
@@ -1573,17 +1577,15 @@
                     break;
                 }
                 case 'deleteFolder': {
+                    // 기다림 없이 바로 삭제
                     const fId = target.dataset.id;
                     const folder = noteFolders.find(f => f.id === fId);
                     if(!folder) return;
-                    showUndoToast(`'${folder.name}' 폴더와 메모 삭제 대기 중`, () => {
-                        renderAdvancedNotesList();
-                    }, () => {
-                        noteFolders = noteFolders.filter(f => f.id !== fId);
-                        advancedNotes = advancedNotes.filter(n => n.folderId !== fId);
-                        if(activeNoteId && !advancedNotes.find(n => n.id === activeNoteId)) activeNoteId = null;
-                        saveData(); renderAdvancedNotesList(); applyNoteView();
-                    });
+                    noteFolders = noteFolders.filter(f => f.id !== fId);
+                    advancedNotes = advancedNotes.filter(n => n.folderId !== fId);
+                    if(activeNoteId && !advancedNotes.find(n => n.id === activeNoteId)) activeNoteId = null;
+                    saveData(); renderAdvancedNotesList(); applyNoteView();
+                    showUndoToast('폴더와 메모가 삭제되었습니다.', null, null, false);
                     break;
                 }
                 case 'createNewNote': {
@@ -1602,12 +1604,11 @@
                 }
                 case 'deleteNote': {
                     e.stopPropagation();
+                    // 대기 없이 즉시 삭제
                     const nId = target.dataset.id;
-                    showUndoToast('메모 삭제 대기 중', null, () => {
-                        advancedNotes = advancedNotes.filter(n => n.id !== nId);
-                        if(activeNoteId === nId) activeNoteId = null;
-                        saveData(); renderAdvancedNotesList(); applyNoteView();
-                    });
+                    advancedNotes = advancedNotes.filter(n => n.id !== nId);
+                    if(activeNoteId === nId) activeNoteId = null;
+                    saveData(); renderAdvancedNotesList(); applyNoteView();
                     break;
                 }
                 case 'openDdayModal': {
