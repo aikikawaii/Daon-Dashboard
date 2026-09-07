@@ -11,7 +11,7 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Typography: Anti-AI Curated Stack (Unbounded + Spline Sans + Azeret Mono) + IBM Plex Sans KR -->
+    <!-- Typography: Curated Stack (Unbounded + Spline Sans + Azeret Mono) + IBM Plex Sans KR -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@600;700;800&family=IBM+Plex+Sans+KR:wght@500;600;700;800&family=Spline+Sans:wght@500;600;700;800&family=Unbounded:wght@700;800;900&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
 
     <style>
-        /* Neo-Brutalism Design System Tokens (Streamlined Light Canvas) */
+        /* Neo-Brutalism Design System Tokens (Classic Streamlined Canvas) */
         :root {
             --bg-main: #f5f5f2;
             --bg-canvas: #ffffff;
@@ -85,6 +85,7 @@
             border-radius: 14px;
             box-shadow: var(--card-shadow-sm);
         }
+
         .nb-btn {
             background-color: var(--card-bg);
             color: var(--text-main);
@@ -235,12 +236,11 @@
         .draggable-item { cursor: grab; touch-action: pan-y; }
         .draggable-item:active { cursor: grabbing; transform: scale(0.98); }
 
-        /* Multi-Task Lasso Selection Styles */
         .calendar-task-item {
             transition: all 0.1s ease;
         }
         .calendar-task-item.task-selected {
-            background-color: #fef08a !important; /* Neo-Brutalist Vivid Yellow Highlight */
+            background-color: #fef08a !important;
             color: #000000 !important;
             border-color: #000000 !important;
             outline: 2px solid #000000 !important;
@@ -360,7 +360,7 @@
                     <ul id="view-todo-lectures" class="overflow-y-auto p-3 flex-1 space-y-2.5 min-h-0 hide-scrollbar bg-[var(--card-bg)]"></ul>
                 </div>
 
-                <!-- Academic Timetable with Lasso Box and Multi-select toolbar -->
+                <!-- Academic Timetable -->
                 <div class="lg:col-span-8 nb-card flex flex-col h-auto overflow-hidden">
                     <div class="p-4 sm:p-5 border-b-2 border-[var(--card-border)] bg-[var(--table-header)] flex flex-wrap justify-between items-center gap-3">
                         <div class="flex items-center gap-3 flex-wrap">
@@ -369,7 +369,6 @@
                                 <h2 class="text-lg font-extrabold text-[var(--text-main)] uppercase">Academic Timetable</h2>
                             </div>
                             
-                            <!-- Dynamic Multi-Select Toolbar Badge -->
                             <div id="calendar-select-toolbar" class="hidden items-center gap-2">
                                 <span id="calendar-select-count" class="px-2.5 py-1 text-[11px] font-extrabold font-mono-num bg-[var(--text-main)] text-[var(--bg-main)] rounded-lg border-2 border-[var(--card-border)] shadow-[1.5px_1.5px_0px_var(--card-border)]">0 SELECTED</span>
                                 <button type="button" data-action="clearTaskSelection" class="nb-btn px-2.5 py-1 text-[10px] font-extrabold font-mono-num">CLEAR [ESC]</button>
@@ -384,21 +383,17 @@
                     </div>
                     
                     <div class="p-4 sm:p-5 flex-1 flex flex-col">
-                        <!-- Quick Guide Banner -->
                         <div class="flex flex-wrap justify-between items-center mb-2.5 text-[10px] font-extrabold font-mono-num text-[var(--text-muted)] gap-2">
                             <span>💡 TIP: DRAG EMPTY CELL TO BOX-SELECT // CTRL+CLICK TO PICK // DRAG ANY SELECTED TO BATCH-MOVE</span>
-                            <span class="border border-[var(--card-border)] px-2 py-0.5 rounded bg-[var(--table-header)] text-[var(--text-main)]">NOTION-STYLE BATCH READY</span>
+                            <span class="border border-[var(--card-border)] px-2 py-0.5 rounded bg-[var(--table-header)] text-[var(--text-main)]">COUNT-BASED TRACKING ACTIVE</span>
                         </div>
 
-                        <!-- Weekday Headers -->
                         <div class="grid grid-cols-7 border-2 border-[var(--card-border)] border-b-0 rounded-t-xl bg-[var(--table-header)] text-center text-xs font-extrabold text-[var(--text-main)] uppercase tracking-wider py-2">
                             <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
                         </div>
                         
-                        <!-- Month Grid wrapped in interactive container with Lasso selection element -->
                         <div id="calendar-board-container" class="relative select-none flex-1">
                             <div id="view-calendar" class="calendar-wrapper flex-1 rounded-t-none"></div>
-                            <!-- Interactive Selection Box -->
                             <div id="lasso-selection-box"></div>
                         </div>
                     </div>
@@ -406,40 +401,40 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Today's Focus Ratio -->
+                <!-- Today's Lecture Goal Ratio -->
                 <div class="nb-card p-5 flex flex-col justify-between">
                     <div class="border-b-2 border-[var(--card-border)] pb-2 mb-3">
                         <span class="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-muted)] block">FIGURE 1.0</span>
-                        <h3 class="text-base font-extrabold text-[var(--text-main)] uppercase">Today's Focus Ratio</h3>
+                        <h3 class="text-base font-extrabold text-[var(--text-main)] uppercase">Today's Lecture Record</h3>
                     </div>
                     <div class="relative w-full aspect-square max-h-[175px] flex justify-center items-center my-2">
                         <canvas id="chartDaily"></canvas>
                         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span id="dailyTotalText" class="text-3xl font-extrabold font-mono-num text-[var(--text-main)] tracking-tight">0m</span>
+                            <span id="dailyTotalText" class="text-3xl font-extrabold font-mono-num text-[var(--text-main)] tracking-tight">0강</span>
                             <div id="dailySplitText" class="flex items-center space-x-1.5 text-[10px] font-mono-num mt-1 font-bold"></div>
                         </div>
                     </div>
-                    <div class="text-[10px] font-extrabold font-mono-num text-[var(--text-muted)] text-center border-t-2 border-[var(--card-border)] pt-2 uppercase">LECTURE VS. SELF-STUDY</div>
+                    <div class="text-[10px] font-extrabold font-mono-num text-[var(--text-muted)] text-center border-t-2 border-[var(--card-border)] pt-2 uppercase">COMPLETED VS. SCHEDULED LECTURES</div>
                 </div>
 
-                <!-- Weekly Study Dispersion -->
+                <!-- Weekly Study Dispersion (Lecture Count) -->
                 <div class="nb-card p-5 flex flex-col justify-between">
                     <div class="border-b-2 border-[var(--card-border)] pb-2 mb-3">
                         <span class="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-muted)] block">FIGURE 2.0</span>
-                        <h3 class="text-base font-extrabold text-[var(--text-main)] uppercase">7-Day Study Dispersion</h3>
+                        <h3 class="text-base font-extrabold text-[var(--text-main)] uppercase">7-Day Lecture Count</h3>
                     </div>
                     <div class="w-full flex-1 min-h-[160px]"><canvas id="chartWeekly"></canvas></div>
-                    <div class="text-[10px] font-extrabold font-mono-num text-[var(--text-muted)] text-center border-t-2 border-[var(--card-border)] pt-2 uppercase">DAILY LOGGED HOURS (STACKED)</div>
+                    <div class="text-[10px] font-extrabold font-mono-num text-[var(--text-muted)] text-center border-t-2 border-[var(--card-border)] pt-2 uppercase">DAILY COMPLETED LECTURES (일별 수강 완료 수)</div>
                 </div>
 
-                <!-- Monthly Progression -->
+                <!-- Monthly Progression (Lecture Count) -->
                 <div class="nb-card p-5 flex flex-col justify-between">
                     <div class="border-b-2 border-[var(--card-border)] pb-2 mb-3">
                         <span class="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-muted)] block">FIGURE 3.0</span>
-                        <h3 class="text-base font-extrabold text-[var(--text-main)] uppercase" id="monthly-chart-title">Annual Monthly Progress</h3>
+                        <h3 class="text-base font-extrabold text-[var(--text-main)] uppercase" id="monthly-chart-title">Annual Lecture Progress</h3>
                     </div>
                     <div class="w-full flex-1 min-h-[160px]"><canvas id="chartMonthly"></canvas></div>
-                    <div class="text-[10px] font-extrabold font-mono-num text-[var(--text-muted)] text-center border-t-2 border-[var(--card-border)] pt-2 uppercase">CUMULATIVE MONTHLY TIME EXPENDITURE</div>
+                    <div class="text-[10px] font-extrabold font-mono-num text-[var(--text-muted)] text-center border-t-2 border-[var(--card-border)] pt-2 uppercase">MONTHLY COMPLETED LECTURES (월별 완강 수)</div>
                 </div>
             </div>
 
@@ -462,12 +457,12 @@
                 <div class="flex justify-between items-center mt-4 pt-3 border-t-2 border-[var(--card-border)] text-[11px] font-extrabold font-mono-num text-[var(--text-muted)]">
                     <span>PAST 20 WEEKS RECORD ARCHIVE</span>
                     <div class="flex items-center space-x-2">
-                        <span>LESS</span>
+                        <span>0강</span>
                         <div class="w-3.5 h-3.5 border-2 border-[var(--card-border)] bg-[var(--hover-bg)] rounded-[3px]"></div>
                         <div class="w-3.5 h-3.5 border-2 border-[var(--card-border)] bg-[rgba(37,99,235,0.3)] rounded-[3px]"></div>
                         <div class="w-3.5 h-3.5 border-2 border-[var(--card-border)] bg-[rgba(37,99,235,0.65)] rounded-[3px]"></div>
                         <div class="w-3.5 h-3.5 border-2 border-[var(--card-border)] bg-[#2563eb] rounded-[3px]"></div>
-                        <span>MORE</span>
+                        <span>4강+</span>
                     </div>
                 </div>
             </div>
@@ -490,7 +485,7 @@
                         <span class="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-muted)] block">CURRICULUM REGISTER</span>
                         <h2 class="text-2xl sm:text-3xl font-extrabold text-[var(--text-main)] uppercase">Curriculum & Lecture Ledger</h2>
                     </div>
-                    <p class="text-xs font-mono-num font-bold text-[var(--text-muted)]">Course breakdown and itemized lecture inventory</p>
+                    <p class="text-xs font-mono-num font-bold text-[var(--text-muted)]">Fixed-height lecture inventories // 100% completed courses automatically collapsed</p>
                 </div>
                 
                 <div id="curriculum-manager" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
@@ -525,7 +520,7 @@
                             <div class="accordion-inner">
                                 <div class="overflow-x-auto nb-card overflow-hidden">
                                     <table class="db-table">
-                                        <thead><tr><th class="w-24">Subject</th><th>Course Title</th><th class="w-48 sm:w-64">Completion Progress</th></tr></thead>
+                                        <thead><tr><th class="w-32">Subject</th><th>Course Title</th><th class="w-48 sm:w-64">Completion Progress</th></tr></thead>
                                         <tbody id="db-courses" class="bg-[var(--card-bg)]"></tbody>
                                     </table>
                                 </div>
@@ -562,8 +557,11 @@
                                     <table class="db-table font-mono-num text-xs">
                                         <thead>
                                             <tr>
-                                                <th class="w-24 text-center">Date</th><th>Key Goals & Tasks</th><th class="w-20 text-right">Lec (m)</th>
-                                                <th class="w-24 text-right">Study</th><th class="w-28 text-right text-[var(--text-main)]">Total</th><th class="w-20 text-center">Achieved</th>
+                                                <th class="w-24 text-center">Date</th>
+                                                <th>Key Goals & Tasks</th>
+                                                <th class="w-28 text-right text-[var(--text-main)]">Completed Lecs</th>
+                                                <th class="w-28 text-right">Total Tasks</th>
+                                                <th class="w-20 text-center">Achieved</th>
                                             </tr>
                                         </thead>
                                         <tbody id="db-daily" class="bg-[var(--card-bg)]"></tbody>
@@ -577,7 +575,6 @@
         </div>
     </div>
 
-    <!-- UI Overlays (Toasts, Modals) -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 font-mono-num"></div>
 
     <div id="modal-overlay" class="hidden fixed inset-0 bg-black/60 z-[100] flex justify-center items-center p-4">
@@ -645,17 +642,13 @@
         const TODAY = getTodayStr();
         let currentCalendarDate = new Date(); 
 
+        /* Normalized subject themes: 수학 is strictly unified to Mathematics */
         const SUBJECT_THEMES = {
             'Mathematics': { bg: 'transparent', text: 'var(--sub-math)', border: 'var(--card-border)', dot: '#2563eb' },
             'Physics': { bg: 'transparent', text: 'var(--sub-phys)', border: 'var(--card-border)', dot: '#0d9488' },
             'English': { bg: 'transparent', text: 'var(--sub-eng)', border: 'var(--card-border)', dot: '#d97706' },
             'Chemistry': { bg: 'transparent', text: 'var(--sub-chem)', border: 'var(--card-border)', dot: '#dc2626' },
-            'General': { bg: 'transparent', text: 'var(--sub-etc)', border: 'var(--card-border)', dot: '#4b5563' },
-            '수학': { bg: 'transparent', text: 'var(--sub-math)', border: 'var(--card-border)', dot: '#2563eb' },
-            '물리': { bg: 'transparent', text: 'var(--sub-phys)', border: 'var(--card-border)', dot: '#0d9488' },
-            '영어': { bg: 'transparent', text: 'var(--sub-eng)', border: 'var(--card-border)', dot: '#d97706' },
-            '화학': { bg: 'transparent', text: 'var(--sub-chem)', border: 'var(--card-border)', dot: '#dc2626' },
-            '기타': { bg: 'transparent', text: 'var(--sub-etc)', border: 'var(--card-border)', dot: '#4b5563' }
+            'General': { bg: 'transparent', text: 'var(--sub-etc)', border: 'var(--card-border)', dot: '#4b5563' }
         };
         const subjects = ['Mathematics', 'Physics', 'English', 'Chemistry', 'General'];
 
@@ -674,11 +667,11 @@
         let toastTimers = {};
         let closedDbCourses = new Set(); 
         let masterDbFoldState = { courses: false, lectures: false, daily: false };
+        let courseCollapsedState = {}; // Tracks manual expand/collapse for completed courses
         let currentModalDate = null;
         let currentModalTasks = []; 
         let currentSubjectTab = null; 
         let openTodoCourses = new Set(); 
-        let courseViewCounts = {};
 
         // Multi-Task Selection Set: stores "recordId:taskId"
         let selectedTaskKeys = new Set();
@@ -687,6 +680,17 @@
         let justFinishedLasso = false;
 
         document.documentElement.setAttribute('data-theme', 'light');
+
+        function normalizeData() {
+            courses.forEach(c => {
+                if (c.subject === '수학' || c.subject === '수학 (Mathematics)') c.subject = 'Mathematics';
+                if (c.subject === '물리') c.subject = 'Physics';
+                if (c.subject === '영어') c.subject = 'English';
+                if (c.subject === '화학') c.subject = 'Chemistry';
+                if (c.subject === '기타') c.subject = 'General';
+                if (!subjects.includes(c.subject)) c.subject = 'Mathematics';
+            });
+        }
 
         window.showSyncIndicator = function(isLoading, isError = false) {
             if(!DOM.syncIndicator) return;
@@ -703,10 +707,16 @@
         };
 
         function loadLocalData() {
-            courses = JSON.parse(localStorage.getItem('courses')) || [];
-            lectures = JSON.parse(localStorage.getItem('lectures')) || [];
-            dailyRecords = JSON.parse(localStorage.getItem('dailyRecords')) || [];
-            ddays = JSON.parse(localStorage.getItem('ddays')) || [];
+            try {
+                courses = JSON.parse(localStorage.getItem('courses')) || [];
+                lectures = JSON.parse(localStorage.getItem('lectures')) || [];
+                dailyRecords = JSON.parse(localStorage.getItem('dailyRecords')) || [];
+                ddays = JSON.parse(localStorage.getItem('ddays')) || [];
+            } catch (e) {
+                courses = []; lectures = []; dailyRecords = []; ddays = [];
+            }
+
+            normalizeData();
 
             const activeSubjects = [...new Set(courses.map(c => c.subject))];
             if (activeSubjects.length > 0 && !currentSubjectTab) currentSubjectTab = activeSubjects[0];
@@ -721,6 +731,7 @@
                 if(data.dailyRecords) dailyRecords = data.dailyRecords;
                 if(data.ddays) ddays = data.ddays;
                 
+                normalizeData();
                 saveData(false); 
                 renderAll();
             }
@@ -730,6 +741,7 @@
 
         let cloudSaveTimer = null;
         function saveData(syncToCloud = true) {
+            normalizeData();
             localStorage.setItem('courses', JSON.stringify(courses));
             localStorage.setItem('lectures', JSON.stringify(lectures));
             localStorage.setItem('dailyRecords', JSON.stringify(dailyRecords));
@@ -772,14 +784,6 @@
             return Math.round((completed / courseLecs.length) * 100);
         }
 
-        function formatTime(mins) {
-            if (!mins) return '0m';
-            const h = Math.floor(mins / 60); const m = mins % 60;
-            if (h > 0 && m > 0) return `${h}h ${m}m`;
-            if (h > 0) return `${h}h`;
-            return `${m}m`;
-        }
-
         function getShortLectureName(lecture) {
             const course = getCourses().find(c => c.id === lecture.courseId);
             const subjChar = course && course.subject ? course.subject.charAt(0) : '';
@@ -788,24 +792,23 @@
             return subjChar ? `[${subjChar}] ${lecPart}` : lecPart;
         }
 
+        /* Simplified task stats: strictly counts lectures and tasks instead of minutes */
         function getDailyTaskStats(record) {
-            if (!record || !record.tasks) return { lecture: 0, study: 0, total: 0, allCompleted: false, goals: '' };
-            let lec = 0, stu = 0, allCompleted = true, goalsArr = [];
+            if (!record || !record.tasks) return { totalLecs: 0, completedLecs: 0, totalTasks: 0, completedTasks: 0, allCompleted: false, goals: '' };
+            let totalLecs = 0, completedLecs = 0, totalTasks = record.tasks.length, completedTasks = 0;
+            let goalsArr = [];
             
-            if (record.tasks.length === 0) allCompleted = false;
-            else {
-                for (let i = 0; i < record.tasks.length; i++) {
-                    const t = record.tasks[i];
-                    goalsArr.push(t.title);
-                    if (t.completed) {
-                        if (t.type === 'lecture') lec += (t.time || 0);
-                        else if (t.type === 'study') stu += (t.time || 0);
-                    } else { 
-                        allCompleted = false; 
-                    }
+            for (let i = 0; i < record.tasks.length; i++) {
+                const t = record.tasks[i];
+                goalsArr.push(t.title);
+                if (t.type === 'lecture') {
+                    totalLecs++;
+                    if (t.completed) completedLecs++;
                 }
+                if (t.completed) completedTasks++;
             }
-            return { lecture: lec, study: stu, total: lec + stu, allCompleted, goals: goalsArr.join(', ') };
+            const allCompleted = totalTasks > 0 && completedTasks === totalTasks;
+            return { totalLecs, completedLecs, totalTasks, completedTasks, allCompleted, goals: goalsArr.join(', ') };
         }
 
         function updateSelectionUI() {
@@ -839,7 +842,6 @@
             let payload;
             const taskKey = `${sourceId}:${taskId}`;
 
-            // If dragging a selected item and there are multiple selected tasks -> Batch Drag
             if (type === 'calendar' && selectedTaskKeys.has(taskKey) && selectedTaskKeys.size > 1) {
                 const batch = [];
                 selectedTaskKeys.forEach(k => {
@@ -885,7 +887,6 @@
                 const payload = JSON.parse(payloadJson);
                 let updated = false;
 
-                // Case 1: Batch Drag of Multiple Tasks
                 if (payload.type === 'calendar-batch') {
                     let targetRecord = dailyRecords.find(d => d.date === targetDateStr);
                     if (!targetRecord) {
@@ -916,13 +917,12 @@
                         showUndoToast(`Moved ${movedTasks.length} tasks to ${targetDateStr}.`);
                     }
                 } 
-                // Case 2: Drag from Todo Syllabus Inventory
                 else if (payload.type === 'todo') {
                     const lecture = getLectures().find(l => l.id === payload.sourceId);
                     if (lecture) {
                         let record = dailyRecords.find(d => d.date === targetDateStr);
                         const shortName = getShortLectureName(lecture);
-                        const newTask = { id: generateId('T'), type: 'lecture', title: shortName, time: lecture.duration || 0, completed: false, refId: lecture.id };
+                        const newTask = { id: generateId('T'), type: 'lecture', title: shortName, completed: false, refId: lecture.id };
                         if (!record) {
                             record = { id: generateId('D'), date: targetDateStr, tasks: [] };
                             dailyRecords.push(record);
@@ -935,7 +935,6 @@
                         updated = true;
                     }
                 } 
-                // Case 3: Single Item Drag from Calendar
                 else if (payload.type === 'calendar') {
                     const sourceRecord = dailyRecords.find(d => d.id === payload.sourceId);
                     if (sourceRecord) {
@@ -1128,7 +1127,6 @@
                                             <div class="flex items-center space-x-2 overflow-hidden flex-1 pointer-events-none">
                                                 <div data-action="toggleLecture" data-id="${l.id}" class="w-4 h-4 rounded-md border-2 border-[var(--card-border)] flex-shrink-0 hover:bg-[var(--text-main)] cursor-pointer pointer-events-auto flex items-center justify-center text-[9px]"></div>
                                                 <span class="text-[var(--text-main)] font-bold truncate flex-1" title="${esc(l.title)}">${esc(l.title)}</span>
-                                                <span class="text-[10px] text-[var(--text-muted)] font-extrabold flex-shrink-0 font-mono-num">[${l.duration || 0}m]</span>
                                             </div>
                                         </li>
                                     `).join('')}
@@ -1180,10 +1178,11 @@
                         const isSelected = selectedTaskKeys.has(`${record.id}:${task.id}`);
                         
                         let dotColor = '#4b5563';
-                        let timeLabel = task.time > 0 ? `${task.time}m` : 'EVT';
+                        let typeTag = 'EVT';
 
                         if (task.type === 'lecture') {
                             dotColor = '#0d9488';
+                            typeTag = 'LEC';
                             if (task.refId) {
                                 const lec = lectures.find(l => l.id === task.refId);
                                 if (lec) {
@@ -1193,25 +1192,26 @@
                             }
                         } else if (task.type === 'study') {
                             dotColor = '#2563eb';
+                            typeTag = 'STUDY';
                         }
                         
                         cellContent += `
                             <div class="calendar-task-item border-2 border-[var(--card-border)] rounded-md pl-1.5 pr-1 py-0.5 mb-1 text-[10px] font-mono-num font-bold flex justify-between items-center bg-[var(--card-bg)] shadow-[1px_1px_0px_var(--card-border)] draggable-item ${isSelected ? 'task-selected' : ''}" 
                                  data-action="toggleTask" data-rec-id="${record.id}" data-task-id="${task.id}" title="${esc(task.title)}"
                                  draggable="true" ondragstart="handleDragStart(event, 'calendar', '${record.id}', '${task.id}')" ondragend="handleDragEnd(event)">
-                                 <div class="flex items-center space-x-1 overflow-hidden min-w-0 pointer-events-none">
+                                 <div class="flex items-center space-x-1.5 overflow-hidden min-w-0 pointer-events-none">
                                      <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background-color: ${dotColor};"></span>
                                      <span class="truncate flex-1 ${textStyle}">${isCompleted ? '✓ ' : ''}${esc(task.title)}</span>
                                  </div>
-                                 <span class="text-[9px] text-[var(--text-muted)] ml-1 flex-shrink-0 font-mono-num">${timeLabel}</span>
+                                 <span class="text-[9px] text-[var(--text-muted)] ml-1 flex-shrink-0 font-mono-num font-extrabold">[${typeTag}]</span>
                             </div>
                         `;
                     });
                     
-                    if(stats.total > 0) {
+                    if(stats.totalTasks > 0) {
                         cellContent += `<div class="mt-auto pt-1 flex justify-between items-center text-[9px] font-mono-num font-extrabold text-[var(--text-muted)] border-t border-[var(--card-border)]">`;
-                        cellContent += `<span>${stats.lecture > 0 ? 'L:' + stats.lecture + 'm' : ''}</span>`;
-                        cellContent += `<span class="text-[var(--text-main)]">Σ ${formatTime(stats.total)}</span>`;
+                        cellContent += `<span>${stats.completedLecs > 0 ? '✓ ' + stats.completedLecs + '강 완강' : (stats.totalLecs > 0 ? stats.totalLecs + '강 예정' : '')}</span>`;
+                        cellContent += `<span class="text-[var(--text-main)]">${stats.completedTasks}/${stats.totalTasks}</span>`;
                         cellContent += `</div>`;
                     }
                 }
@@ -1243,17 +1243,26 @@
             return {
                 responsive: true, maintainAspectRatio: false,
                 scales: {
-                    x: { stacked: isBar, grid: { display: false }, border: { color: axisColor, width: 2 } },
-                    y: { stacked: isBar, grid: { color: gridColor }, border: { color: axisColor, width: 2 }, beginAtZero: true, ticks: { maxTicksLimit: 5, callback: v => v + 'h' } }
+                    x: { grid: { display: false }, border: { color: axisColor, width: 2 } },
+                    y: { 
+                        grid: { color: gridColor }, 
+                        border: { color: axisColor, width: 2 }, 
+                        beginAtZero: true, 
+                        ticks: { 
+                            stepSize: 1,
+                            precision: 0,
+                            callback: v => Number.isInteger(v) ? v + '강' : '' 
+                        } 
+                    }
                 },
                 plugins: { legend: { display: false } }
             };
         };
 
-        const getChartTooltip = (customLabelCb, customAfterTitleCb) => ({
+        const getChartTooltip = (customLabelCb) => ({
             backgroundColor: '#000000', titleColor: '#ffffff', bodyColor: '#ffffff', padding: 8, cornerRadius: 8,
             borderWidth: 2, borderColor: '#ffffff',
-            callbacks: { label: customLabelCb, afterTitle: customAfterTitleCb || (() => '') }
+            callbacks: { label: customLabelCb }
         });
 
         function renderCharts() {
@@ -1263,84 +1272,86 @@
             const recordsMap = getRecordsMap();
             const todayRecord = recordsMap[TODAY];
             const todayStats = getDailyTaskStats(todayRecord);
-            const totalToday = todayStats.total;
 
-            // Daily Chart
+            // 1. Daily Chart: Completed Lectures vs Scheduled Lectures
             const ctxDaily = document.getElementById('chartDaily').getContext('2d');
-            DOM.dailyTotalText.innerText = formatTime(totalToday);
+            DOM.dailyTotalText.innerText = `${todayStats.completedLecs}강`;
             
             const splitTextContainer = document.getElementById('dailySplitText');
             if (splitTextContainer) {
-                if (totalToday > 0) {
+                if (todayStats.totalLecs > 0) {
                     splitTextContainer.innerHTML = `
-                        ${todayStats.lecture > 0 ? `<span class="border border-[var(--card-border)] rounded-md px-1 bg-[var(--table-header)]">LEC ${formatTime(todayStats.lecture)}</span>` : ''}
-                        ${todayStats.study > 0 ? `<span class="border border-[var(--card-border)] rounded-md px-1 bg-[var(--table-header)]">STUDY ${formatTime(todayStats.study)}</span>` : ''}
+                        <span class="border border-[var(--card-border)] rounded-md px-1 bg-[var(--table-header)]">${todayStats.completedLecs}/${todayStats.totalLecs} 완강</span>
                     `;
-                } else { splitTextContainer.innerHTML = ''; }
+                } else { 
+                    splitTextContainer.innerHTML = `<span class="text-[var(--text-muted)]">강의 일정 없음</span>`; 
+                }
             }
 
-            const dailyData = totalToday > 0 ? [todayStats.lecture, todayStats.study, 0] : [0, 0, 1];
+            const dailyCompleted = todayStats.completedLecs;
+            const dailyRemaining = Math.max(0, todayStats.totalLecs - todayStats.completedLecs);
+            const dailyData = todayStats.totalLecs > 0 ? [dailyCompleted, dailyRemaining] : [0, 1];
             const bgEmpty = getComputedStyle(document.documentElement).getPropertyValue('--table-header').trim();
-            const dailyBg = totalToday > 0 ? ['#0d9488', '#2563eb', bgEmpty] : [bgEmpty, bgEmpty, bgEmpty];
+            const dailyBg = todayStats.totalLecs > 0 ? ['#0d9488', bgEmpty] : [bgEmpty, bgEmpty];
 
             if(chartInstances.daily) {
                 chartInstances.daily.data.datasets[0].data = dailyData;
                 chartInstances.daily.data.datasets[0].backgroundColor = dailyBg;
-                chartInstances.daily.options.plugins.tooltip.enabled = totalToday > 0;
+                chartInstances.daily.options.plugins.tooltip.enabled = todayStats.totalLecs > 0;
                 chartInstances.daily.update();
             } else {
                 chartInstances.daily = new Chart(ctxDaily, {
                     type: 'doughnut',
-                    data: { labels: ['Lecture', 'Self-Study', 'Remaining'], datasets: [{ data: dailyData, backgroundColor: dailyBg, borderWidth: 2, borderColor: 'var(--card-border)', hoverOffset: 2 }] },
-                    options: { responsive: true, maintainAspectRatio: false, cutout: '78%', plugins: { legend: { display: false } } }
+                    data: { labels: ['수강 완료', '미완료/대기'], datasets: [{ data: dailyData, backgroundColor: dailyBg, borderWidth: 2, borderColor: 'var(--card-border)', hoverOffset: 2 }] },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        cutout: '78%', 
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: getChartTooltip(c => ` ${c.label}: ${c.raw}강`)
+                        } 
+                    }
                 });
             }
 
-            // Weekly Chart
+            // 2. Weekly Chart: Completed Lectures in Past 7 Days
             const ctxWeekly = document.getElementById('chartWeekly').getContext('2d');
-            let weeklyLabels = [], dataLecHours = [], dataStudyHours = [];
+            let weeklyLabels = [], dataWeeklyLecs = [];
             for(let i = 6; i >= 0; i--) {
                 let d = new Date(); d.setDate(d.getDate() - i);
                 let dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                 let rec = recordsMap[dateStr];
                 let stats = getDailyTaskStats(rec);
                 weeklyLabels.push(`${d.getMonth()+1}/${d.getDate()}`);
-                dataLecHours.push(stats.lecture / 60);
-                dataStudyHours.push(stats.study / 60);
+                dataWeeklyLecs.push(stats.completedLecs);
             }
             
-            const weeklyTooltip = getChartTooltip((c) => {
-                const valMins = Math.round(c.raw * 60);
-                if(valMins === 0) return null; 
-                const idx = c.dataIndex;
-                const lecMins = Math.round(c.chart.data.datasets[0].data[idx] * 60);
-                const studyMins = Math.round(c.chart.data.datasets[1].data[idx] * 60);
-                const tm = lecMins + studyMins;
-                return ` ${c.dataset.label}: ${formatTime(valMins)} (${tm>0 ? Math.round((valMins/tm)*100) : 0}%)`;
-            });
+            const weeklyTooltip = getChartTooltip(c => ` 수강 완료: ${c.raw}강`);
 
             if(chartInstances.weekly) {
                 chartInstances.weekly.data.labels = weeklyLabels;
-                chartInstances.weekly.data.datasets[0].data = dataLecHours;
-                chartInstances.weekly.data.datasets[1].data = dataStudyHours;
+                chartInstances.weekly.data.datasets[0].data = dataWeeklyLecs;
                 chartInstances.weekly.update();
             } else {
-                let wOpts = getChartBaseOptions(true);
+                let wOpts = getChartBaseOptions(false);
                 wOpts.plugins.tooltip = weeklyTooltip;
                 chartInstances.weekly = new Chart(ctxWeekly, {
                     type: 'bar',
-                    data: { labels: weeklyLabels, datasets: [
-                        { label: 'Lecture', data: dataLecHours, backgroundColor: '#0d9488', borderWidth: 2, borderColor: 'var(--card-border)', borderRadius: 4, barPercentage: 0.6 }, 
-                        { label: 'Self-Study', data: dataStudyHours, backgroundColor: '#2563eb', borderWidth: 2, borderColor: 'var(--card-border)', borderRadius: 4, barPercentage: 0.6 }
-                    ]},
+                    data: { 
+                        labels: weeklyLabels, 
+                        datasets: [
+                            { label: 'Completed Lectures', data: dataWeeklyLecs, backgroundColor: '#2563eb', borderWidth: 2, borderColor: 'var(--card-border)', borderRadius: 4, barPercentage: 0.6 }
+                        ]
+                    },
                     options: wOpts
                 });
             }
 
-            // Monthly Chart
+            // 3. Monthly Chart: Completed Lectures in Current Year
             const ctxMonthly = document.getElementById('chartMonthly').getContext('2d');
             const targetYear = currentCalendarDate.getFullYear();
-            if(DOM.monthlyChartTitle) DOM.monthlyChartTitle.innerText = `${targetYear} Academic Year Progress`;
+            if(DOM.monthlyChartTitle) DOM.monthlyChartTitle.innerText = `${targetYear} Academic Lecture Progress`;
             let monthlyLabels = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
             let monthTotals = new Array(12).fill(0);
             const isCurrentYear = targetYear === new Date().getFullYear();
@@ -1348,26 +1359,31 @@
             
             getDailyRecords().forEach(r => {
                 let d = parseLocalDate(r.date);
-                if(d.getFullYear() === targetYear) monthTotals[d.getMonth()] += getDailyTaskStats(r).total;
+                if(d.getFullYear() === targetYear) monthTotals[d.getMonth()] += getDailyTaskStats(r).completedLecs;
             });
 
-            let cumulativeDataHours = [];
+            let cumulativeDataLecs = [];
             for(let m = 0; m < 12; m++) {
-                if (m > currentMonthLimit) cumulativeDataHours.push(null); 
-                else cumulativeDataHours.push(monthTotals[m] / 60); 
+                if (m > currentMonthLimit) cumulativeDataLecs.push(null); 
+                else cumulativeDataLecs.push(monthTotals[m]); 
             }
 
-            const monthlyTooltip = getChartTooltip(c => ` Monthly Total: ${formatTime(Math.round(c.raw * 60))}`);
+            const monthlyTooltip = getChartTooltip(c => ` 월간 완강: ${c.raw}강`);
 
             if(chartInstances.monthly) {
-                chartInstances.monthly.data.datasets[0].data = cumulativeDataHours;
+                chartInstances.monthly.data.datasets[0].data = cumulativeDataLecs;
                 chartInstances.monthly.update();
             } else {
-                let mOpts = getChartBaseOptions(true);
+                let mOpts = getChartBaseOptions(false);
                 mOpts.plugins.tooltip = monthlyTooltip;
                 chartInstances.monthly = new Chart(ctxMonthly, {
                     type: 'bar',
-                    data: { labels: monthlyLabels, datasets: [{ label: 'Monthly Volume', data: cumulativeDataHours, backgroundColor: 'var(--text-main)', borderWidth: 2, borderColor: 'var(--card-border)', borderRadius: 4, barPercentage: 0.6 }] },
+                    data: { 
+                        labels: monthlyLabels, 
+                        datasets: [
+                            { label: 'Monthly Lectures', data: cumulativeDataLecs, backgroundColor: 'var(--text-main)', borderWidth: 2, borderColor: 'var(--card-border)', borderRadius: 4, barPercentage: 0.6 }
+                        ] 
+                    },
                     options: mOpts
                 });
             }
@@ -1377,14 +1393,14 @@
             let streak = 0; 
             let d = parseLocalDate(getTodayStr()); 
             const todayRec = recordsMap[getTodayStr()];
-            const todayTotal = todayRec ? getDailyTaskStats(todayRec).total : 0;
-            if (todayTotal === 0) d.setDate(d.getDate() - 1);
+            const todayLecs = todayRec ? getDailyTaskStats(todayRec).completedLecs : 0;
+            if (todayLecs === 0) d.setDate(d.getDate() - 1);
             
             while(true) {
                 let dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                 let rec = recordsMap[dateStr];
-                let total = rec ? getDailyTaskStats(rec).total : 0;
-                if (total > 0) { streak++; d.setDate(d.getDate() - 1); } 
+                let lecs = rec ? getDailyTaskStats(rec).completedLecs : 0;
+                if (lecs > 0) { streak++; d.setDate(d.getDate() - 1); } 
                 else break;
             }
             return streak;
@@ -1403,14 +1419,14 @@
             while(d <= today) {
                 let dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                 let rec = recordsMap[dateStr];
-                let total = rec ? getDailyTaskStats(rec).total : 0;
+                let completedLecs = rec ? getDailyTaskStats(rec).completedLecs : 0;
                 
                 let colorClass = 'bg-[var(--table-header)] border-2 border-[var(--card-border)]';
-                if (total > 0 && total < 60) colorClass = 'bg-[rgba(37,99,235,0.3)] border-2 border-[var(--card-border)]';
-                else if (total >= 60 && total < 120) colorClass = 'bg-[rgba(37,99,235,0.65)] border-2 border-[var(--card-border)]';
-                else if (total >= 120) colorClass = 'bg-[#2563eb] border-2 border-[var(--card-border)]';
+                if (completedLecs >= 1 && completedLecs < 3) colorClass = 'bg-[rgba(37,99,235,0.3)] border-2 border-[var(--card-border)]';
+                else if (completedLecs >= 3 && completedLecs < 5) colorClass = 'bg-[rgba(37,99,235,0.65)] border-2 border-[var(--card-border)]';
+                else if (completedLecs >= 5) colorClass = 'bg-[#2563eb] border-2 border-[var(--card-border)]';
                 
-                let tooltipText = total > 0 ? `${dateStr} : ${total}m` : `${dateStr}`;
+                let tooltipText = `${dateStr} : ${completedLecs}강 완강`;
                 html += `<div class="w-[13px] h-[13px] rounded-[3px] ${colorClass} transition-all cursor-pointer hover:translate-x-[-1px] hover:translate-y-[-1px]" title="${tooltipText}"></div>`;
                 d.setDate(d.getDate() + 1);
             }
@@ -1456,10 +1472,16 @@
                             ${subjCourses.map(course => {
                                 const courseLecs = lecsMap[course.id] || [];
                                 const totalLecs = courseLecs.length;
-                                let visibleCount = courseViewCounts[course.id] !== undefined ? Math.min(courseViewCounts[course.id], totalLecs) : Math.min(10, totalLecs);
-                                const displayLecs = courseLecs.slice(0, visibleCount);
-                                const hiddenCount = totalLecs - visibleCount;
+                                const completedLecs = courseLecs.filter(l => l.status === '완료' || l.status === 'Completed').length;
+                                const percent = totalLecs === 0 ? 0 : Math.round((completedLecs / totalLecs) * 100);
+                                const isAllDone = totalLecs > 0 && percent === 100;
                                 const cColor = course.color || getStringColor(course.title);
+
+                                // If course is 100% completed, auto-collapse by default unless explicitly toggled
+                                if (courseCollapsedState[course.id] === undefined) {
+                                    courseCollapsedState[course.id] = isAllDone;
+                                }
+                                const isCollapsed = courseCollapsedState[course.id];
 
                                 return `
                                 <div class="border-2 border-[var(--card-border)] rounded-xl p-4 bg-[var(--card-bg)] shadow-[2px_2px_0px_var(--card-border)]">
@@ -1467,48 +1489,51 @@
                                         <div class="flex items-center space-x-2 flex-1 min-w-0">
                                             <span class="w-3 h-3 rounded-full border border-[var(--card-border)] flex-shrink-0" style="background-color: ${cColor};"></span>
                                             <div class="font-extrabold text-[var(--text-main)] text-base truncate" title="${esc(course.title)}">${esc(course.title)}</div>
+                                            ${isAllDone ? `<span class="ml-1 text-[10px] font-mono-num font-extrabold px-1.5 py-0.5 border border-[var(--card-border)] rounded-md bg-emerald-100 text-emerald-800">100% COMPLETED</span>` : ''}
                                         </div>
                                         <div class="flex space-x-1.5 text-xs font-mono-num flex-shrink-0">
+                                            <button data-action="toggleCourseFold" data-id="${course.id}" class="nb-btn px-2.5 py-1 text-[11px] font-extrabold">
+                                                ${isCollapsed ? '▼ EXPAND' : '▲ FOLD'}
+                                            </button>
                                             <button data-action="openLectureModal" data-course-id="${course.id}" class="nb-btn px-2.5 py-1 text-[11px]">+ ADD</button>
                                             <button data-action="openCourseModal" data-course-id="${course.id}" class="nb-btn px-2.5 py-1 text-[11px]">EDIT</button>
                                             <button data-action="deleteCourse" data-id="${course.id}" class="nb-btn px-2.5 py-1 text-[11px] text-red-500 hover:text-red-700">DEL</button>
                                         </div>
                                     </div>
-                                    <div>
-                                        ${displayLecs.length > 0 ? `
-                                        <ul class="border-l-2 border-[var(--card-border)] ml-1 pl-3 space-y-1.5 font-mono-num text-xs">
-                                            ${displayLecs.map(lec => {
-                                                const isCompleted = lec.status === '완료' || lec.status === 'Completed';
-                                                return `
-                                                <li class="flex justify-between items-center py-1.5 px-2 rounded-lg hover:bg-[var(--hover-bg)] transition group border border-transparent hover:border-[var(--card-border)]">
-                                                    <div class="flex items-center space-x-2.5 overflow-hidden flex-1">
-                                                        <input type="checkbox" class="custom-checkbox" ${isCompleted ? 'checked' : ''} data-action="toggleLecture" data-id="${lec.id}">
-                                                        <span class="truncate font-bold ${isCompleted ? 'text-[var(--text-faint)] line-through' : 'text-[var(--text-main)]'}" title="${esc(lec.title)}">${esc(lec.title)}</span>
-                                                        <span class="text-[10px] text-[var(--text-muted)] font-extrabold">[${lec.duration || 0}m]</span>
-                                                    </div>
-                                                    <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2">
-                                                        <button data-action="openLectureModal" data-course-id="${course.id}" data-lec-id="${lec.id}" class="nb-btn text-[10px] px-2 py-0.5">EDIT</button>
-                                                        <button data-action="deleteLecture" data-id="${lec.id}" class="nb-btn text-[10px] px-2 py-0.5 text-red-500">DEL</button>
-                                                    </div>
-                                                </li>
-                                            `}).join('')}
-                                        </ul>
-                                        ` : (totalLecs === 0 ? '<p class="text-xs font-mono-num font-bold text-[var(--text-muted)] py-1">No lectures registered.</p>' : '')}
+
+                                    <div class="mb-3">
+                                        ${renderProgressBar(percent, theme.dot)}
                                     </div>
-                                    ${totalLecs > 0 ? `
-                                        <div class="pt-3 flex justify-between items-center border-t-2 border-[var(--card-border)] mt-3 text-[11px] font-mono-num font-bold">
-                                            <span class="text-[var(--text-muted)]">SHOWING ${visibleCount} OF ${totalLecs}</span>
-                                            <div class="flex space-x-1.5">
-                                                ${hiddenCount > 0 ? `
-                                                    <button data-action="courseShowMore" data-id="${course.id}" class="nb-btn px-2.5 py-1">+ ${Math.min(10, hiddenCount)} MORE</button>
-                                                ` : ''}
-                                                ${visibleCount > 0 ? `
-                                                    <button data-action="courseFoldLess" data-id="${course.id}" class="nb-btn px-2.5 py-1">- LESS</button>
-                                                    <button data-action="courseFoldAll" data-id="${course.id}" class="nb-btn px-2.5 py-1 text-[var(--text-muted)]">COLLAPSE</button>
-                                                ` : ''}
+
+                                    <!-- Collapsible body: Fixed-height scrollable list -->
+                                    <div class="accordion-grid ${isCollapsed ? 'closed' : 'open'}">
+                                        <div class="accordion-inner">
+                                            ${courseLecs.length > 0 ? `
+                                            <div class="border-2 border-[var(--card-border)] rounded-xl p-2.5 bg-[var(--table-header)] shadow-[1px_1px_0px_var(--card-border)]">
+                                                <div class="flex justify-between items-center px-1 pb-1.5 mb-1.5 border-b border-[var(--card-border)] text-[10px] font-mono-num font-extrabold text-[var(--text-muted)]">
+                                                    <span>LECTURES INVENTORY (${completedLecs}/${totalLecs})</span>
+                                                    <span>FIXED SCROLL BOX</span>
+                                                </div>
+                                                <ul class="max-h-[220px] overflow-y-auto space-y-1.5 font-mono-num text-xs pr-1">
+                                                    ${courseLecs.map(lec => {
+                                                        const isCompleted = lec.status === '완료' || lec.status === 'Completed';
+                                                        return `
+                                                        <li class="flex justify-between items-center py-1.5 px-2.5 rounded-lg bg-[var(--card-bg)] border-2 border-[var(--card-border)] shadow-[1px_1px_0px_var(--card-border)] hover:bg-[var(--hover-bg)] transition group">
+                                                            <div class="flex items-center space-x-2.5 overflow-hidden flex-1">
+                                                                <input type="checkbox" class="custom-checkbox" ${isCompleted ? 'checked' : ''} data-action="toggleLecture" data-id="${lec.id}">
+                                                                <span class="truncate font-bold ${isCompleted ? 'text-[var(--text-faint)] line-through' : 'text-[var(--text-main)]'}" title="${esc(lec.title)}">${esc(lec.title)}</span>
+                                                            </div>
+                                                            <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2">
+                                                                <button data-action="openLectureModal" data-course-id="${course.id}" data-lec-id="${lec.id}" class="nb-btn text-[10px] px-2 py-0.5">EDIT</button>
+                                                                <button data-action="deleteLecture" data-id="${lec.id}" class="nb-btn text-[10px] px-2 py-0.5 text-red-500">DEL</button>
+                                                            </div>
+                                                        </li>
+                                                    `}).join('')}
+                                                </ul>
                                             </div>
+                                            ` : '<p class="text-xs font-mono-num font-bold text-[var(--text-muted)] py-2 border-2 border-dashed border-[var(--card-border)] text-center rounded-xl">No lectures registered in this course.</p>'}
                                         </div>
-                                    ` : ''}
+                                    </div>
                                 </div>`;
                             }).join('')}
                         </div>
@@ -1556,7 +1581,7 @@
                             <div class="accordion-inner border-t-2 border-[var(--card-border)]">
                                 <table class="w-full text-xs font-mono-num font-bold">
                                     <thead class="text-[var(--text-muted)] text-[10px] uppercase tracking-wider bg-[var(--table-header)] border-b-2 border-[var(--card-border)]">
-                                        <tr><th class="p-2.5 pl-4 text-left">Lecture Title</th><th class="p-2.5 w-28 text-center">Status</th><th class="p-2.5 w-20 text-center">Duration</th></tr>
+                                        <tr><th class="p-2.5 pl-4 text-left">Lecture Title</th><th class="p-2.5 w-32 text-center">Status</th></tr>
                                     </thead>
                                     <tbody class="bg-[var(--card-bg)]">
                                         ${courseLecs.length > 0 ? courseLecs.map(l => {
@@ -1565,9 +1590,8 @@
                                             <tr class="border-b border-[var(--card-border)] hover:bg-[var(--hover-bg)] last:border-b-0">
                                                 <td class="p-2.5 pl-4 ${isCompleted ? 'text-[var(--text-faint)] line-through' : 'text-[var(--text-main)]'}">${esc(l.title)}</td>
                                                 <td class="p-2.5 text-center"><span class="text-[10px] px-2 py-0.5 border-2 border-[var(--card-border)] rounded-md ${isCompleted ? 'bg-[var(--table-header)] text-[var(--text-muted)]' : 'bg-[var(--text-main)] text-[var(--bg-main)] font-extrabold'}">${isCompleted ? 'COMPLETED' : 'TODO'}</span></td>
-                                                <td class="p-2.5 text-center text-[10px] text-[var(--text-muted)]">${l.duration||0}m</td>
                                             </tr>
-                                        `}).join('') : `<tr><td colspan="3" class="p-4 text-center text-[var(--text-muted)] text-xs font-bold">NO LECTURES REGISTERED.</td></tr>`}
+                                        `}).join('') : `<tr><td colspan="2" class="p-4 text-center text-[var(--text-muted)] text-xs font-bold">NO LECTURES REGISTERED.</td></tr>`}
                                     </tbody>
                                 </table>
                             </div>
@@ -1586,14 +1610,13 @@
                 <tr class="cursor-pointer hover:bg-[var(--hover-bg)] transition-colors" data-action="openDailyModal" data-date="${d.date}">
                     <td class="text-[var(--text-muted)] font-extrabold text-center text-xs tracking-wider">${d.date.substring(5)}</td>
                     <td class="text-[var(--text-main)] font-bold truncate max-w-[150px] sm:max-w-[250px]" title="${esc(stats.goals)}">${esc(stats.goals) || '<span class="text-[var(--text-faint)] italic">No goals logged</span>'}</td>
-                    <td class="text-right text-[var(--text-muted)] text-xs">${stats.lecture > 0 ? stats.lecture + 'm' : '—'}</td>
-                    <td class="text-right text-[var(--text-muted)] text-xs">${stats.study > 0 ? formatTime(stats.study) : '—'}</td>
-                    <td class="text-right text-[var(--text-main)] font-extrabold text-xs">${formatTime(stats.total)}</td>
+                    <td class="text-right text-[var(--text-main)] font-extrabold text-xs">${stats.completedLecs}강 완강</td>
+                    <td class="text-right text-[var(--text-muted)] text-xs">${stats.totalTasks} 태스크</td>
                     <td class="text-center" onclick="event.stopPropagation()">
                         <input type="checkbox" data-action="toggleDailyAchieved" data-id="${d.id}" ${stats.allCompleted ? 'checked' : ''} class="custom-checkbox mx-auto">
                     </td>
                 </tr>
-            `}).join('') : `<tr><td colspan="6" class="text-center font-mono-num text-[var(--text-muted)] py-6 text-xs font-bold">NO LOGGED RECORDS.</td></tr>`;
+            `}).join('') : `<tr><td colspan="5" class="text-center font-mono-num text-[var(--text-muted)] py-6 text-xs font-bold">NO LOGGED RECORDS.</td></tr>`;
         }
 
         function renderAll() {
@@ -1691,7 +1714,7 @@
                 }
                 lecSel.innerHTML = filteredLecs.map(l => {
                     const isDone = l.status === '완료' || l.status === 'Completed';
-                    return `<option value="${l.id}">${isDone ? '[✓] ' : '[ ] '}${esc(l.title)} (${l.duration || 0}m)</option>`;
+                    return `<option value="${l.id}">${isDone ? '[✓] ' : '[ ] '}${esc(l.title)}</option>`;
                 }).join('');
             }
 
@@ -1742,12 +1765,18 @@
                     updateSelectionUI();
                     break;
                 }
+                case 'toggleCourseFold': {
+                    const cId = target.dataset.id;
+                    courseCollapsedState[cId] = !courseCollapsedState[cId];
+                    renderCurriculumManager();
+                    break;
+                }
                 case 'openDdayModal': {
                     const html = `
                         <div class="space-y-4 font-mono-num text-xs font-bold">
                             <div>
                                 <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1 tracking-wider">EVENT / EXAM TITLE</label>
-                                <input type="text" id="input-dday-title" class="input-dark font-sans" placeholder="e.g. Transfer Exam, Finals, TOEIC">
+                                <input type="text" id="input-dday-title" class="input-dark font-sans" placeholder="e.g. 편입 시험, TOEIC, Finals">
                             </div>
                             <div>
                                 <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1 tracking-wider">TARGET DATE</label>
@@ -1818,7 +1847,7 @@
                 case 'openLectureModal': {
                     const cId = target.dataset.courseId;
                     const lId = target.dataset.lecId;
-                    const lecture = lId ? getLectures().find(l => l.id === lId) : { title: '', status: '미시작', duration: '' };
+                    const lecture = lId ? getLectures().find(l => l.id === lId) : { title: '', status: '미시작' };
                     const isCompleted = lecture.status === '완료' || lecture.status === 'Completed';
                     const statusOptions = `
                         <option value="미시작" ${!isCompleted ? 'selected' : ''}>TODO / UNWATCHED</option>
@@ -1832,28 +1861,21 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1 tracking-wider">LECTURE TITLE</label>
-                                <input type="text" id="input-ltitle" class="input-dark font-sans" value="${esc(lecture.title)}" placeholder="Enter lecture title">
+                                <input type="text" id="input-ltitle" class="input-dark font-sans" value="${esc(lecture.title)}" placeholder="Enter lecture title (e.g. 01강 미분방정식 개론)">
                             </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1 tracking-wider">DURATION (MINUTES)</label>
-                                    <input type="number" id="input-lduration" class="input-dark" value="${lecture.duration}" min="0" step="5">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1 tracking-wider">STATUS</label>
-                                    <select id="input-lstatus" class="input-dark">${statusOptions}</select>
-                                </div>
+                            <div>
+                                <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1 tracking-wider">STATUS</label>
+                                <select id="input-lstatus" class="input-dark">${statusOptions}</select>
                             </div>
                         </div>
                     `;
                     openModal(lId ? 'EDIT LECTURE' : 'ADD NEW LECTURE', html, () => {
                         const tit = document.getElementById('input-ltitle').value || 'Untitled Lecture';
-                        const dur = parseInt(document.getElementById('input-lduration').value) || 0;
                         const stat = document.getElementById('input-lstatus').value;
                         if (lId) { 
                             const idx = lectures.findIndex(l => l.id === lId); 
-                            if(idx > -1) lectures[idx] = { ...lectures[idx], title: tit, duration: dur, status: stat }; 
-                        } else { lectures.push({ id: generateId('L'), courseId: cId, title: tit, duration: dur, status: stat }); }
+                            if(idx > -1) lectures[idx] = { ...lectures[idx], title: tit, status: stat }; 
+                        } else { lectures.push({ id: generateId('L'), courseId: cId, title: tit, status: stat }); }
                         saveData(); renderAll();
                     });
                     break;
@@ -1889,29 +1911,6 @@
                     });
                     break;
                 }
-                case 'courseShowMore': {
-                    const cId = target.dataset.id;
-                    const lecsMap = getLecturesByCourse();
-                    const total = (lecsMap[cId] || []).length;
-                    let current = courseViewCounts[cId] !== undefined ? courseViewCounts[cId] : Math.min(10, total);
-                    current = Math.min(current, total);
-                    courseViewCounts[cId] = Math.min(total, current + 10);
-                    renderCurriculumManager(); break;
-                }
-                case 'courseFoldLess': {
-                    const cId = target.dataset.id;
-                    const lecsMap = getLecturesByCourse();
-                    const total = (lecsMap[cId] || []).length;
-                    let current = courseViewCounts[cId] !== undefined ? courseViewCounts[cId] : Math.min(10, total);
-                    current = Math.min(current, total);
-                    const foldCount = current % 10 === 0 ? 10 : current % 10;
-                    courseViewCounts[cId] = Math.max(0, current - foldCount);
-                    renderCurriculumManager(); break;
-                }
-                case 'courseFoldAll': {
-                    courseViewCounts[target.dataset.id] = 0;
-                    renderCurriculumManager(); break;
-                }
                 case 'setLectureTab': {
                     currentSubjectTab = target.dataset.subj;
                     openTodoCourses.clear();
@@ -1941,7 +1940,6 @@
                     }
                     break;
                 }
-
                 case 'openDailyModal': {
                     if (justFinishedLasso) return;
                     const dateStr = target.dataset.date;
@@ -1985,20 +1983,10 @@
 
                             <!-- 2. Direct Study Log (Self-Study) -->
                             <div class="border-2 border-[var(--card-border)] rounded-xl p-3.5 bg-[var(--table-header)] space-y-2">
-                                <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold tracking-wider">2. DIRECT STUDY LOG (SELF-STUDY)</label>
-                                <div class="flex flex-col space-y-2">
-                                    <input type="text" id="modal-study-title" class="input-dark py-1.5 text-xs bg-[var(--card-bg)] font-sans" placeholder="Task name (e.g. Mock test review, Problem set)">
-                                    <div class="flex space-x-2">
-                                        <div class="flex-1 flex items-center bg-[var(--card-bg)] border-2 border-[var(--card-border)] rounded-xl px-2.5 py-1 shadow-[1.5px_1.5px_0px_var(--card-border)]">
-                                            <input type="number" id="modal-study-h" class="bg-transparent w-full outline-none text-right font-mono-num text-xs font-extrabold text-[var(--text-main)]" min="0" placeholder="0">
-                                            <span class="text-[10px] text-[var(--text-muted)] ml-1 font-bold">h</span>
-                                        </div>
-                                        <div class="flex-1 flex items-center bg-[var(--card-bg)] border-2 border-[var(--card-border)] rounded-xl px-2.5 py-1 shadow-[1.5px_1.5px_0px_var(--card-border)]">
-                                            <input type="number" id="modal-study-m" class="bg-transparent w-full outline-none text-right font-mono-num text-xs font-extrabold text-[var(--text-main)]" min="0" max="59" placeholder="0">
-                                            <span class="text-[10px] text-[var(--text-muted)] ml-1 font-bold">m</span>
-                                        </div>
-                                        <button data-action="addModalStudyTask" class="nb-btn px-3.5 py-1.5 text-xs flex-shrink-0">ADD</button>
-                                    </div>
+                                <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold tracking-wider">2. SELF-STUDY & PROBLEM SOLVING</label>
+                                <div class="flex space-x-2">
+                                    <input type="text" id="modal-study-title" class="input-dark flex-1 py-1.5 text-xs bg-[var(--card-bg)] font-sans" placeholder="Task name (e.g. 오답노트 정리, 기출 3회독)">
+                                    <button data-action="addModalStudyTask" class="nb-btn px-3.5 py-1.5 text-xs flex-shrink-0">ADD STUDY</button>
                                 </div>
                             </div>
 
@@ -2043,20 +2031,16 @@
                     if(!sel || !sel.value) return;
                     const lec = getLectures().find(l => l.id === sel.value);
                     if(lec) {
-                        currentModalTasks.push({ id: generateId('T'), type: 'lecture', title: getShortLectureName(lec), time: lec.duration || 0, completed: false, refId: lec.id });
+                        currentModalTasks.push({ id: generateId('T'), type: 'lecture', title: getShortLectureName(lec), completed: false, refId: lec.id });
                         renderModalTaskList();
                     }
                     break;
                 }
                 case 'addModalStudyTask': {
                     const titleEl = document.getElementById('modal-study-title');
-                    const hEl = document.getElementById('modal-study-h');
-                    const mEl = document.getElementById('modal-study-m');
                     const title = titleEl.value.trim() || 'Self-Study';
-                    const h = parseInt(hEl.value) || 0;
-                    const m = parseInt(mEl.value) || 0;
-                    currentModalTasks.push({ id: generateId('T'), type: 'study', title: title, time: (h*60)+m, completed: false });
-                    titleEl.value = ''; hEl.value = ''; mEl.value = ''; renderModalTaskList();
+                    currentModalTasks.push({ id: generateId('T'), type: 'study', title: title, completed: false });
+                    titleEl.value = ''; renderModalTaskList();
                     break;
                 }
                 case 'addModalEventTask': {
@@ -2064,7 +2048,7 @@
                     if (!titleEl) return;
                     const title = titleEl.value.trim();
                     if (!title) return;
-                    currentModalTasks.push({ id: generateId('T'), type: 'general', title: title, time: 0, completed: false });
+                    currentModalTasks.push({ id: generateId('T'), type: 'general', title: title, completed: false });
                     titleEl.value = '';
                     renderModalTaskList();
                     break;
@@ -2079,7 +2063,6 @@
                     break;
                 }
                 case 'toggleTask': {
-                    // Handled inside task click check or lasso handler
                     const record = dailyRecords.find(d => d.id === target.dataset.recId);
                     if(record && record.tasks) {
                         const task = record.tasks.find(t => t.id === target.dataset.taskId);
@@ -2119,22 +2102,6 @@
                     break;
                 }
                 case 'closeModal': closeModal(); break;
-            }
-        });
-
-        // Retain focus while dynamically updating task durations
-        document.addEventListener('input', (e) => {
-            const target = e.target;
-            if (target.dataset.action === 'updateTaskTime') {
-                const task = currentModalTasks.find(t => t.id === target.dataset.id);
-                if(task) {
-                    task.time = parseInt(target.value) || 0;
-                    const idx = dailyRecords.findIndex(d => d.date === currentModalDate);
-                    if(idx > -1) dailyRecords[idx].tasks = currentModalTasks;
-                    else dailyRecords.push({ id: generateId('D'), date: currentModalDate, tasks: currentModalTasks });
-                    saveData();
-                    renderCalendar(); renderCharts(); renderMasterDB(); renderHeatmap();
-                }
             }
         });
 
@@ -2178,6 +2145,7 @@
                             if (data.courses && data.lectures && data.dailyRecords) {
                                 courses = data.courses; lectures = data.lectures; dailyRecords = data.dailyRecords;
                                 if(data.ddays) ddays = data.ddays;
+                                normalizeData();
                                 saveData(); renderAll();
                                 showUndoToast('Data restored successfully.', null);
                             } else { showUndoToast('Invalid backup file format.', null); }
@@ -2228,16 +2196,6 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-2 ml-2 flex-shrink-0">
-                        ${t.type === 'study' ?
-                            `<div class="flex items-center space-x-1">
-                                <input type="number" data-action="updateTaskTime" data-id="${t.id}" value="${t.time}" min="0" class="w-12 bg-[var(--card-bg)] border-2 border-[var(--card-border)] rounded-md px-1 py-0.5 text-xs text-[var(--text-main)] font-mono-num font-extrabold text-right outline-none">
-                                <span class="text-[10px] text-[var(--text-muted)] font-bold">m</span>
-                            </div>`
-                        : (t.type === 'lecture' ?
-                            `<span class="text-[11px] text-[var(--text-muted)] font-extrabold w-8 text-right">${t.time > 0 ? t.time + 'm' : '—'}</span>`
-                        :
-                            `<span class="text-[10px] text-[var(--text-muted)] font-extrabold px-1 text-right">EVENT</span>`
-                        )}
                         <button data-action="removeModalTask" data-id="${t.id}" class="nb-btn text-red-500 hover:text-red-700 px-2 py-0.5 text-[10px]">DEL</button>
                     </div>
                 </div>
@@ -2252,11 +2210,9 @@
             board.addEventListener('mousedown', (e) => {
                 if (e.target.closest('button, input, select, a')) return;
 
-                // If user clicks directly on a task item
                 const taskItem = e.target.closest('.calendar-task-item');
                 if (taskItem) {
                     const key = `${taskItem.dataset.recId}:${taskItem.dataset.taskId}`;
-                    // If holding Ctrl or Cmd or Shift: toggle multi-selection
                     if (e.ctrlKey || e.metaKey || e.shiftKey) {
                         e.preventDefault();
                         e.stopPropagation();
@@ -2268,14 +2224,12 @@
                         updateSelectionUI();
                         return;
                     }
-                    // If task is already selected, let dragstart happen with batch!
                     if (selectedTaskKeys.has(key)) {
                         return;
                     }
                     return;
                 }
 
-                // If clicked on empty space of cell or calendar background -> start lasso
                 isLassoSelecting = true;
                 startLassoX = e.clientX;
                 startLassoY = e.clientY;
@@ -2300,7 +2254,6 @@
                 const diffX = currentX - startLassoX;
                 const diffY = currentY - startLassoY;
 
-                // Threshold to differentiate drag from simple click
                 if (Math.hypot(diffX, diffY) > 5) {
                     justFinishedLasso = true;
                     const boardRect = board.getBoundingClientRect();
