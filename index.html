@@ -8,19 +8,16 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js (Dual CDN with fallback for sandbox environments) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js'"></script>
 
-    <!-- Typography: Curated Stack (Unbounded + Spline Sans + Azeret Mono) + IBM Plex Sans KR -->
+    <!-- Typography: Neo-Brutalist curated fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@600;700;800&family=IBM+Plex+Sans+KR:wght@500;600;700;800&family=Spline+Sans:wght@500;600;700;800&family=Unbounded:wght@700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Bespoke Korean Typography: SUIT Variable -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
 
     <style>
-        /* Neo-Brutalism Design System Tokens (Classic Streamlined Canvas) */
         :root {
             --bg-main: #f5f5f2;
             --bg-canvas: #ffffff;
@@ -85,7 +82,6 @@
             border-radius: 14px;
             box-shadow: var(--card-shadow-sm);
         }
-
         .nb-btn {
             background-color: var(--card-bg);
             color: var(--text-main);
@@ -252,6 +248,40 @@
             color: #000000 !important;
         }
 
+        /* Precision Drop Insertion Indicators */
+        .calendar-task-item.drag-insert-before {
+            position: relative;
+        }
+        .calendar-task-item.drag-insert-before::before {
+            content: '';
+            position: absolute;
+            top: -3.5px;
+            left: -2px;
+            right: -2px;
+            height: 4px;
+            background-color: var(--text-main);
+            border-radius: 2px;
+            z-index: 30;
+            pointer-events: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .calendar-task-item.drag-insert-after {
+            position: relative;
+        }
+        .calendar-task-item.drag-insert-after::after {
+            content: '';
+            position: absolute;
+            bottom: -3.5px;
+            left: -2px;
+            right: -2px;
+            height: 4px;
+            background-color: var(--text-main);
+            border-radius: 2px;
+            z-index: 30;
+            pointer-events: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
         #lasso-selection-box {
             position: absolute;
             pointer-events: none;
@@ -334,7 +364,6 @@
             </button>
         </div>
 
-        <!-- Tab 1: Dashboard -->
         <div id="tab-dashboard" class="tab-content space-y-6 block pb-12">
             
             <!-- D-Days Ticker -->
@@ -371,6 +400,7 @@
                             
                             <div id="calendar-select-toolbar" class="hidden items-center gap-2">
                                 <span id="calendar-select-count" class="px-2.5 py-1 text-[11px] font-extrabold font-mono-num bg-[var(--text-main)] text-[var(--bg-main)] rounded-lg border-2 border-[var(--card-border)] shadow-[1.5px_1.5px_0px_var(--card-border)]">0 SELECTED</span>
+                                <button type="button" data-action="deleteSelectedTasksAction" class="nb-btn px-2.5 py-1 text-[10px] font-extrabold font-mono-num text-red-600 hover:text-red-700 hover:border-red-600" title="Delete selected tasks [Del]">[DEL] DELETE</button>
                                 <button type="button" data-action="clearTaskSelection" class="nb-btn px-2.5 py-1 text-[10px] font-extrabold font-mono-num">CLEAR [ESC]</button>
                             </div>
                         </div>
@@ -384,7 +414,7 @@
                     
                     <div class="p-4 sm:p-5 flex-1 flex flex-col">
                         <div class="flex flex-wrap justify-between items-center mb-2.5 text-[10px] font-extrabold font-mono-num text-[var(--text-muted)] gap-2">
-                            <span>💡 TIP: DRAG EMPTY CELL TO BOX-SELECT // CTRL+CLICK TO PICK // DRAG ANY SELECTED TO BATCH-MOVE</span>
+                            <span>💡 TIP: HOVER BETWEEN TASKS TO INSERT // PRESS [DEL] TO REMOVE // BATCH DRAG PRESERVES ORIGINAL ORDER</span>
                             <span class="border border-[var(--card-border)] px-2 py-0.5 rounded bg-[var(--table-header)] text-[var(--text-main)]">COUNT-BASED TRACKING ACTIVE</span>
                         </div>
 
@@ -417,28 +447,27 @@
                     <div class="text-[10px] font-extrabold font-mono-num text-[var(--text-muted)] text-center border-t-2 border-[var(--card-border)] pt-2 uppercase">COMPLETED VS. SCHEDULED LECTURES</div>
                 </div>
 
-                <!-- Weekly Study Dispersion (Lecture Count) -->
+                <!-- Weekly Study Dispersion -->
                 <div class="nb-card p-5 flex flex-col justify-between">
                     <div class="border-b-2 border-[var(--card-border)] pb-2 mb-3">
                         <span class="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-muted)] block">FIGURE 2.0</span>
                         <h3 class="text-base font-extrabold text-[var(--text-main)] uppercase">7-Day Lecture Count</h3>
                     </div>
                     <div class="w-full flex-1 min-h-[160px]"><canvas id="chartWeekly"></canvas></div>
-                    <div class="text-[10px] font-extrabold font-mono-num text-[var(--text-muted)] text-center border-t-2 border-[var(--card-border)] pt-2 uppercase">DAILY COMPLETED LECTURES (일별 수강 완료 수)</div>
+                    <div class="text-[10px] font-extrabold font-mono-num text-[var(--text-muted)] text-center border-t-2 border-[var(--card-border)] pt-2 uppercase">DAILY COMPLETED LECTURES (PAST 7 DAYS)</div>
                 </div>
 
-                <!-- Monthly Progression (Lecture Count) -->
+                <!-- Monthly Progression -->
                 <div class="nb-card p-5 flex flex-col justify-between">
                     <div class="border-b-2 border-[var(--card-border)] pb-2 mb-3">
                         <span class="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-muted)] block">FIGURE 3.0</span>
                         <h3 class="text-base font-extrabold text-[var(--text-main)] uppercase" id="monthly-chart-title">Annual Lecture Progress</h3>
                     </div>
                     <div class="w-full flex-1 min-h-[160px]"><canvas id="chartMonthly"></canvas></div>
-                    <div class="text-[10px] font-extrabold font-mono-num text-[var(--text-muted)] text-center border-t-2 border-[var(--card-border)] pt-2 uppercase">MONTHLY COMPLETED LECTURES (월별 완강 수)</div>
+                    <div class="text-[10px] font-extrabold font-mono-num text-[var(--text-muted)] text-center border-t-2 border-[var(--card-border)] pt-2 uppercase">MONTHLY COMPLETED LECTURES (YEAR-TO-DATE)</div>
                 </div>
             </div>
 
-            <!-- Continuous Register Streak Log -->
             <div class="nb-card p-5 sm:p-6">
                 <div class="flex flex-wrap justify-between items-center border-b-2 border-[var(--card-border)] pb-3 mb-4 gap-2">
                     <div>
@@ -457,17 +486,16 @@
                 <div class="flex justify-between items-center mt-4 pt-3 border-t-2 border-[var(--card-border)] text-[11px] font-extrabold font-mono-num text-[var(--text-muted)]">
                     <span>PAST 20 WEEKS RECORD ARCHIVE</span>
                     <div class="flex items-center space-x-2">
-                        <span>0강</span>
+                        <span>0 LEC</span>
                         <div class="w-3.5 h-3.5 border-2 border-[var(--card-border)] bg-[var(--hover-bg)] rounded-[3px]"></div>
                         <div class="w-3.5 h-3.5 border-2 border-[var(--card-border)] bg-[rgba(37,99,235,0.3)] rounded-[3px]"></div>
                         <div class="w-3.5 h-3.5 border-2 border-[var(--card-border)] bg-[rgba(37,99,235,0.65)] rounded-[3px]"></div>
                         <div class="w-3.5 h-3.5 border-2 border-[var(--card-border)] bg-[#2563eb] rounded-[3px]"></div>
-                        <span>4강+</span>
+                        <span>4+ LEC</span>
                     </div>
                 </div>
             </div>
             
-            <!-- Course Gallery -->
             <div class="nb-card p-5 sm:p-6">
                 <div class="border-b-2 border-[var(--card-border)] pb-3 mb-5">
                     <span class="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-muted)] block">SYLLABUS PROGRESS</span>
@@ -477,7 +505,6 @@
             </div>
         </div>
 
-        <!-- Tab 2: Curriculum Manager -->
         <div id="tab-curriculum" class="tab-content hidden pb-24">
             <section class="space-y-6 pt-2">
                 <div class="flex flex-wrap justify-between items-end gap-2 border-b-2 border-[var(--card-border)] pb-4">
@@ -499,7 +526,6 @@
             </section>
         </div>
 
-        <!-- Tab 3: Master DB -->
         <div id="tab-database" class="tab-content hidden pb-24">
             <section class="space-y-8 pt-2">
                 <div class="border-b-2 border-[var(--card-border)] pb-4">
@@ -667,17 +693,17 @@
         let toastTimers = {};
         let closedDbCourses = new Set(); 
         let masterDbFoldState = { courses: false, lectures: false, daily: false };
-        let courseCollapsedState = {}; // Tracks manual expand/collapse for completed courses
+        let courseCollapsedState = {};
         let currentModalDate = null;
         let currentModalTasks = []; 
         let currentSubjectTab = null; 
         let openTodoCourses = new Set(); 
 
-        // Multi-Task Selection Set: stores "recordId:taskId"
         let selectedTaskKeys = new Set();
         let isLassoSelecting = false;
         let startLassoX = 0, startLassoY = 0;
         let justFinishedLasso = false;
+        let currentDragTargetInfo = null;
 
         document.documentElement.setAttribute('data-theme', 'light');
 
@@ -792,7 +818,6 @@
             return subjChar ? `[${subjChar}] ${lecPart}` : lecPart;
         }
 
-        /* Simplified task stats: strictly counts lectures and tasks instead of minutes */
         function getDailyTaskStats(record) {
             if (!record || !record.tasks) return { totalLecs: 0, completedLecs: 0, totalTasks: 0, completedTasks: 0, allCompleted: false, goals: '' };
             let totalLecs = 0, completedLecs = 0, totalTasks = record.tasks.length, completedTasks = 0;
@@ -846,8 +871,17 @@
                 const batch = [];
                 selectedTaskKeys.forEach(k => {
                     const [recId, tId] = k.split(':');
-                    batch.push({ recId, taskId: tId });
+                    const srcRec = dailyRecords.find(d => d.id === recId);
+                    const idx = srcRec && srcRec.tasks ? srcRec.tasks.findIndex(t => t.id === tId) : -1;
+                    batch.push({ recId, taskId: tId, date: srcRec ? srcRec.date : '', idx });
                 });
+
+                // Preserve original chronological and vertical ordering
+                batch.sort((a, b) => {
+                    if (a.date !== b.date) return a.date.localeCompare(b.date);
+                    return a.idx - b.idx;
+                });
+
                 payload = JSON.stringify({ type: 'calendar-batch', items: batch });
                 
                 document.querySelectorAll('.calendar-task-item.task-selected').forEach(el => {
@@ -865,7 +899,40 @@
         window.handleDragEnd = function(event) {
             document.querySelectorAll('.calendar-task-item').forEach(el => {
                 el.style.opacity = "1";
+                el.classList.remove('drag-insert-before', 'drag-insert-after');
             });
+            currentDragTargetInfo = null;
+        };
+
+        window.handleTaskDragOver = function(event, taskId) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const item = event.currentTarget;
+            const rect = item.getBoundingClientRect();
+            const relY = event.clientY - rect.top;
+            const isBefore = relY < rect.height / 2;
+
+            document.querySelectorAll('.calendar-task-item').forEach(el => {
+                if (el !== item) el.classList.remove('drag-insert-before', 'drag-insert-after');
+            });
+
+            if (isBefore) {
+                item.classList.add('drag-insert-before');
+                item.classList.remove('drag-insert-after');
+                currentDragTargetInfo = { taskId, position: 'before' };
+            } else {
+                item.classList.add('drag-insert-after');
+                item.classList.remove('drag-insert-before');
+                currentDragTargetInfo = { taskId, position: 'after' };
+            }
+
+            event.dataTransfer.dropEffect = 'copy';
+        };
+
+        window.handleTaskDragLeave = function(event) {
+            const item = event.currentTarget;
+            item.classList.remove('drag-insert-before', 'drag-insert-after');
         };
 
         window.handleDragOver = function(event) {
@@ -882,7 +949,7 @@
             if (target.classList.contains('calendar-cell')) target.classList.remove('drag-over'); 
         };
         
-        window.processDrop = function(payloadJson, targetDateStr, targetTaskId = null) {
+        window.processDrop = function(payloadJson, targetDateStr, targetTaskId = null, insertPosition = 'after') {
             try {
                 const payload = JSON.parse(payloadJson);
                 let updated = false;
@@ -893,6 +960,7 @@
                         targetRecord = { id: generateId('D'), date: targetDateStr, tasks: [] };
                         dailyRecords.push(targetRecord);
                     }
+
                     const movedTasks = [];
                     payload.items.forEach(item => {
                         const srcRec = dailyRecords.find(d => d.id === item.recId);
@@ -908,13 +976,18 @@
                     if (movedTasks.length > 0) {
                         if (targetTaskId) {
                             const tIdx = targetRecord.tasks.findIndex(t => t.id === targetTaskId);
-                            targetRecord.tasks.splice(tIdx !== -1 ? tIdx : targetRecord.tasks.length, 0, ...movedTasks);
+                            if (tIdx > -1) {
+                                const insertIdx = insertPosition === 'before' ? tIdx : tIdx + 1;
+                                targetRecord.tasks.splice(insertIdx, 0, ...movedTasks);
+                            } else {
+                                targetRecord.tasks.push(...movedTasks);
+                            }
                         } else {
                             targetRecord.tasks.push(...movedTasks);
                         }
                         selectedTaskKeys.clear();
                         updated = true;
-                        showUndoToast(`Moved ${movedTasks.length} tasks to ${targetDateStr}.`);
+                        showUndoToast(`Moved ${movedTasks.length} tasks in order to ${targetDateStr}.`);
                     }
                 } 
                 else if (payload.type === 'todo') {
@@ -930,8 +1003,15 @@
                         
                         if (targetTaskId) {
                             const targetIdx = record.tasks.findIndex(t => t.id === targetTaskId);
-                            record.tasks.splice(targetIdx !== -1 ? targetIdx : record.tasks.length, 0, newTask);
-                        } else { record.tasks.push(newTask); }
+                            if (targetIdx > -1) {
+                                const insertIdx = insertPosition === 'before' ? targetIdx : targetIdx + 1;
+                                record.tasks.splice(insertIdx, 0, newTask);
+                            } else {
+                                record.tasks.push(newTask);
+                            }
+                        } else {
+                            record.tasks.push(newTask);
+                        }
                         updated = true;
                     }
                 } 
@@ -940,25 +1020,25 @@
                     if (sourceRecord) {
                         const taskIdx = sourceRecord.tasks.findIndex(t => t.id === payload.taskId);
                         if (taskIdx > -1) {
-                            if (sourceRecord.date !== targetDateStr) {
-                                const taskToMove = sourceRecord.tasks.splice(taskIdx, 1)[0];
-                                let targetRecord = dailyRecords.find(d => d.date === targetDateStr);
-                                if (!targetRecord) {
-                                    targetRecord = { id: generateId('D'), date: targetDateStr, tasks: [] };
-                                    dailyRecords.push(targetRecord);
-                                }
-                                if (targetTaskId) {
-                                    const targetIdx = targetRecord.tasks.findIndex(t => t.id === targetTaskId);
-                                    targetRecord.tasks.splice(targetIdx !== -1 ? targetIdx : targetRecord.tasks.length, 0, taskToMove);
-                                } else { targetRecord.tasks.push(taskToMove); }
-                                updated = true;
-                            } else if (sourceRecord.date === targetDateStr && targetTaskId && payload.taskId !== targetTaskId) {
-                                const taskToMove = sourceRecord.tasks.splice(taskIdx, 1)[0];
-                                const adjustedTargetIdx = sourceRecord.tasks.findIndex(t => t.id === targetTaskId);
-                                if (adjustedTargetIdx > -1) sourceRecord.tasks.splice(adjustedTargetIdx, 0, taskToMove);
-                                else sourceRecord.tasks.push(taskToMove);
-                                updated = true;
+                            const [taskToMove] = sourceRecord.tasks.splice(taskIdx, 1);
+                            let targetRecord = dailyRecords.find(d => d.date === targetDateStr);
+                            if (!targetRecord) {
+                                targetRecord = { id: generateId('D'), date: targetDateStr, tasks: [] };
+                                dailyRecords.push(targetRecord);
                             }
+
+                            if (targetTaskId) {
+                                const targetIdx = targetRecord.tasks.findIndex(t => t.id === targetTaskId);
+                                if (targetIdx > -1) {
+                                    const insertIdx = insertPosition === 'before' ? targetIdx : targetIdx + 1;
+                                    targetRecord.tasks.splice(insertIdx, 0, taskToMove);
+                                } else {
+                                    targetRecord.tasks.push(taskToMove);
+                                }
+                            } else {
+                                targetRecord.tasks.push(taskToMove);
+                            }
+                            updated = true;
                         }
                     }
                 }
@@ -977,14 +1057,32 @@
         window.handleDrop = function(event, dateStr) {
             event.preventDefault();
             const cell = event.currentTarget.closest('.calendar-cell');
-            if(cell) cell.classList.remove('drag-over');
+            if (cell) cell.classList.remove('drag-over');
             
+            document.querySelectorAll('.calendar-task-item').forEach(el => {
+                el.classList.remove('drag-insert-before', 'drag-insert-after');
+            });
+
             const payload = event.dataTransfer.getData('text/plain');
             if (!payload) return;
-            const targetItem = event.target.closest('.draggable-item');
-            const targetTaskId = targetItem ? targetItem.dataset.taskId : null;
+
+            let targetTaskId = null;
+            let insertPos = 'after';
+
+            if (currentDragTargetInfo) {
+                targetTaskId = currentDragTargetInfo.taskId;
+                insertPos = currentDragTargetInfo.position;
+                currentDragTargetInfo = null;
+            } else {
+                const targetItem = event.target.closest('.draggable-item');
+                if (targetItem) {
+                    targetTaskId = targetItem.dataset.taskId;
+                    const rect = targetItem.getBoundingClientRect();
+                    insertPos = (event.clientY - rect.top < rect.height / 2) ? 'before' : 'after';
+                }
+            }
             
-            window.processDrop(payload, dateStr, targetTaskId);
+            window.processDrop(payload, dateStr, targetTaskId, insertPos);
         };
 
         function calculateDday(targetDateStr) {
@@ -1198,7 +1296,11 @@
                         cellContent += `
                             <div class="calendar-task-item border-2 border-[var(--card-border)] rounded-md pl-1.5 pr-1 py-0.5 mb-1 text-[10px] font-mono-num font-bold flex justify-between items-center bg-[var(--card-bg)] shadow-[1px_1px_0px_var(--card-border)] draggable-item ${isSelected ? 'task-selected' : ''}" 
                                  data-action="toggleTask" data-rec-id="${record.id}" data-task-id="${task.id}" title="${esc(task.title)}"
-                                 draggable="true" ondragstart="handleDragStart(event, 'calendar', '${record.id}', '${task.id}')" ondragend="handleDragEnd(event)">
+                                 draggable="true" 
+                                 ondragstart="handleDragStart(event, 'calendar', '${record.id}', '${task.id}')" 
+                                 ondragend="handleDragEnd(event)"
+                                 ondragover="handleTaskDragOver(event, '${task.id}')"
+                                 ondragleave="handleTaskDragLeave(event)">
                                  <div class="flex items-center space-x-1.5 overflow-hidden min-w-0 pointer-events-none">
                                      <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background-color: ${dotColor};"></span>
                                      <span class="truncate flex-1 ${textStyle}">${isCompleted ? '✓ ' : ''}${esc(task.title)}</span>
@@ -1210,7 +1312,7 @@
                     
                     if(stats.totalTasks > 0) {
                         cellContent += `<div class="mt-auto pt-1 flex justify-between items-center text-[9px] font-mono-num font-extrabold text-[var(--text-muted)] border-t border-[var(--card-border)]">`;
-                        cellContent += `<span>${stats.completedLecs > 0 ? '✓ ' + stats.completedLecs + '강 완강' : (stats.totalLecs > 0 ? stats.totalLecs + '강 예정' : '')}</span>`;
+                        cellContent += `<span>${stats.completedLecs > 0 ? '✓ ' + stats.completedLecs + ' done' : (stats.totalLecs > 0 ? stats.totalLecs + ' scheduled' : '')}</span>`;
                         cellContent += `<span class="text-[var(--text-main)]">${stats.completedTasks}/${stats.totalTasks}</span>`;
                         cellContent += `</div>`;
                     }
@@ -1228,13 +1330,16 @@
         }
 
         let chartInstances = { daily: null, weekly: null, monthly: null };
+        let chartRetryTimer = null;
+
         function updateChartGlobalColors() {
+            if (typeof window.Chart === 'undefined') return;
             const styles = getComputedStyle(document.documentElement);
-            Chart.defaults.color = styles.getPropertyValue('--text-main').trim() || '#000000';
-            Chart.defaults.borderColor = styles.getPropertyValue('--card-border').trim() || '#000000';
-            Chart.defaults.font.family = '"Spline Sans", "SUIT Variable", sans-serif';
-            Chart.defaults.font.size = 11;
-            Chart.defaults.font.weight = 'bold';
+            window.Chart.defaults.color = styles.getPropertyValue('--text-main').trim() || '#000000';
+            window.Chart.defaults.borderColor = styles.getPropertyValue('--card-border').trim() || '#000000';
+            window.Chart.defaults.font.family = '"Spline Sans", "SUIT Variable", sans-serif';
+            window.Chart.defaults.font.size = 11;
+            window.Chart.defaults.font.weight = 'bold';
         }
         
         const getChartBaseOptions = (isBar) => {
@@ -1251,7 +1356,7 @@
                         ticks: { 
                             stepSize: 1,
                             precision: 0,
-                            callback: v => Number.isInteger(v) ? v + '강' : '' 
+                            callback: v => Number.isInteger(v) ? v + ' lec' : '' 
                         } 
                     }
                 },
@@ -1266,126 +1371,152 @@
         });
 
         function renderCharts() {
-            if (!document.getElementById('tab-dashboard').classList.contains('block')) return; 
-            updateChartGlobalColors();
+            const dashTab = document.getElementById('tab-dashboard');
+            if (!dashTab || !dashTab.classList.contains('block')) return; 
 
-            const recordsMap = getRecordsMap();
-            const todayRecord = recordsMap[TODAY];
-            const todayStats = getDailyTaskStats(todayRecord);
-
-            // 1. Daily Chart: Completed Lectures vs Scheduled Lectures
-            const ctxDaily = document.getElementById('chartDaily').getContext('2d');
-            DOM.dailyTotalText.innerText = `${todayStats.completedLecs}강`;
-            
-            const splitTextContainer = document.getElementById('dailySplitText');
-            if (splitTextContainer) {
-                if (todayStats.totalLecs > 0) {
-                    splitTextContainer.innerHTML = `
-                        <span class="border border-[var(--card-border)] rounded-md px-1 bg-[var(--table-header)]">${todayStats.completedLecs}/${todayStats.totalLecs} 완강</span>
-                    `;
-                } else { 
-                    splitTextContainer.innerHTML = `<span class="text-[var(--text-muted)]">강의 일정 없음</span>`; 
+            // Safeguard: Wait for Chart.js if CDN script is still downloading in the sandbox iframe
+            if (typeof window.Chart === 'undefined') {
+                if (!window._chartRetryCount) window._chartRetryCount = 0;
+                if (window._chartRetryCount < 25) {
+                    window._chartRetryCount++;
+                    clearTimeout(chartRetryTimer);
+                    chartRetryTimer = setTimeout(renderCharts, 150);
                 }
+                return;
             }
 
-            const dailyCompleted = todayStats.completedLecs;
-            const dailyRemaining = Math.max(0, todayStats.totalLecs - todayStats.completedLecs);
-            const dailyData = todayStats.totalLecs > 0 ? [dailyCompleted, dailyRemaining] : [0, 1];
-            const bgEmpty = getComputedStyle(document.documentElement).getPropertyValue('--table-header').trim();
-            const dailyBg = todayStats.totalLecs > 0 ? ['#0d9488', bgEmpty] : [bgEmpty, bgEmpty];
+            try {
+                updateChartGlobalColors();
 
-            if(chartInstances.daily) {
-                chartInstances.daily.data.datasets[0].data = dailyData;
-                chartInstances.daily.data.datasets[0].backgroundColor = dailyBg;
-                chartInstances.daily.options.plugins.tooltip.enabled = todayStats.totalLecs > 0;
-                chartInstances.daily.update();
-            } else {
-                chartInstances.daily = new Chart(ctxDaily, {
-                    type: 'doughnut',
-                    data: { labels: ['수강 완료', '미완료/대기'], datasets: [{ data: dailyData, backgroundColor: dailyBg, borderWidth: 2, borderColor: 'var(--card-border)', hoverOffset: 2 }] },
-                    options: { 
-                        responsive: true, 
-                        maintainAspectRatio: false, 
-                        cutout: '78%', 
-                        plugins: { 
-                            legend: { display: false },
-                            tooltip: getChartTooltip(c => ` ${c.label}: ${c.raw}강`)
-                        } 
+                const recordsMap = getRecordsMap();
+                const todayRecord = recordsMap[TODAY];
+                const todayStats = getDailyTaskStats(todayRecord);
+
+                // 1. Daily Chart: Completed Lectures vs Scheduled Lectures
+                const dailyCanvas = document.getElementById('chartDaily');
+                if (dailyCanvas) {
+                    const ctxDaily = dailyCanvas.getContext('2d');
+                    DOM.dailyTotalText.innerText = `${todayStats.completedLecs} LEC`;
+                    
+                    const splitTextContainer = document.getElementById('dailySplitText');
+                    if (splitTextContainer) {
+                        if (todayStats.totalLecs > 0) {
+                            splitTextContainer.innerHTML = `
+                                <span class="border border-[var(--card-border)] rounded-md px-1 bg-[var(--table-header)]">${todayStats.completedLecs}/${todayStats.totalLecs} COMPLETED</span>
+                            `;
+                        } else { 
+                            splitTextContainer.innerHTML = `<span class="text-[var(--text-muted)]">NO SCHEDULED LECTURES</span>`; 
+                        }
                     }
-                });
-            }
 
-            // 2. Weekly Chart: Completed Lectures in Past 7 Days
-            const ctxWeekly = document.getElementById('chartWeekly').getContext('2d');
-            let weeklyLabels = [], dataWeeklyLecs = [];
-            for(let i = 6; i >= 0; i--) {
-                let d = new Date(); d.setDate(d.getDate() - i);
-                let dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                let rec = recordsMap[dateStr];
-                let stats = getDailyTaskStats(rec);
-                weeklyLabels.push(`${d.getMonth()+1}/${d.getDate()}`);
-                dataWeeklyLecs.push(stats.completedLecs);
-            }
-            
-            const weeklyTooltip = getChartTooltip(c => ` 수강 완료: ${c.raw}강`);
+                    const dailyCompleted = todayStats.completedLecs;
+                    const dailyRemaining = Math.max(0, todayStats.totalLecs - todayStats.completedLecs);
+                    const dailyData = todayStats.totalLecs > 0 ? [dailyCompleted, dailyRemaining] : [0, 1];
+                    const bgEmpty = getComputedStyle(document.documentElement).getPropertyValue('--table-header').trim() || '#ebebe6';
+                    const dailyBg = todayStats.totalLecs > 0 ? ['#0d9488', bgEmpty] : [bgEmpty, bgEmpty];
 
-            if(chartInstances.weekly) {
-                chartInstances.weekly.data.labels = weeklyLabels;
-                chartInstances.weekly.data.datasets[0].data = dataWeeklyLecs;
-                chartInstances.weekly.update();
-            } else {
-                let wOpts = getChartBaseOptions(false);
-                wOpts.plugins.tooltip = weeklyTooltip;
-                chartInstances.weekly = new Chart(ctxWeekly, {
-                    type: 'bar',
-                    data: { 
-                        labels: weeklyLabels, 
-                        datasets: [
-                            { label: 'Completed Lectures', data: dataWeeklyLecs, backgroundColor: '#2563eb', borderWidth: 2, borderColor: 'var(--card-border)', borderRadius: 4, barPercentage: 0.6 }
-                        ]
-                    },
-                    options: wOpts
-                });
-            }
+                    if(chartInstances.daily) {
+                        chartInstances.daily.data.datasets[0].data = dailyData;
+                        chartInstances.daily.data.datasets[0].backgroundColor = dailyBg;
+                        chartInstances.daily.options.plugins.tooltip.enabled = todayStats.totalLecs > 0;
+                        chartInstances.daily.update();
+                    } else {
+                        chartInstances.daily = new window.Chart(ctxDaily, {
+                            type: 'doughnut',
+                            data: { labels: ['Completed', 'Pending / Unfinished'], datasets: [{ data: dailyData, backgroundColor: dailyBg, borderWidth: 2, borderColor: 'var(--card-border)', hoverOffset: 2 }] },
+                            options: { 
+                                responsive: true, 
+                                maintainAspectRatio: false, 
+                                cutout: '78%', 
+                                plugins: { 
+                                    legend: { display: false },
+                                    tooltip: getChartTooltip(c => ` ${c.label}: ${c.raw} lecs`)
+                                } 
+                            }
+                        });
+                    }
+                }
 
-            // 3. Monthly Chart: Completed Lectures in Current Year
-            const ctxMonthly = document.getElementById('chartMonthly').getContext('2d');
-            const targetYear = currentCalendarDate.getFullYear();
-            if(DOM.monthlyChartTitle) DOM.monthlyChartTitle.innerText = `${targetYear} Academic Lecture Progress`;
-            let monthlyLabels = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
-            let monthTotals = new Array(12).fill(0);
-            const isCurrentYear = targetYear === new Date().getFullYear();
-            const currentMonthLimit = isCurrentYear ? new Date().getMonth() : (targetYear > new Date().getFullYear() ? -1 : 11);
-            
-            getDailyRecords().forEach(r => {
-                let d = parseLocalDate(r.date);
-                if(d.getFullYear() === targetYear) monthTotals[d.getMonth()] += getDailyTaskStats(r).completedLecs;
-            });
+                // 2. Weekly Chart: Completed Lectures in Past 7 Days
+                const weeklyCanvas = document.getElementById('chartWeekly');
+                if (weeklyCanvas) {
+                    const ctxWeekly = weeklyCanvas.getContext('2d');
+                    let weeklyLabels = [], dataWeeklyLecs = [];
+                    for(let i = 6; i >= 0; i--) {
+                        let d = new Date(); d.setDate(d.getDate() - i);
+                        let dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                        let rec = recordsMap[dateStr];
+                        let stats = getDailyTaskStats(rec);
+                        weeklyLabels.push(`${d.getMonth()+1}/${d.getDate()}`);
+                        dataWeeklyLecs.push(stats.completedLecs);
+                    }
+                    
+                    const weeklyTooltip = getChartTooltip(c => ` Completed: ${c.raw} lecs`);
 
-            let cumulativeDataLecs = [];
-            for(let m = 0; m < 12; m++) {
-                if (m > currentMonthLimit) cumulativeDataLecs.push(null); 
-                else cumulativeDataLecs.push(monthTotals[m]); 
-            }
+                    if(chartInstances.weekly) {
+                        chartInstances.weekly.data.labels = weeklyLabels;
+                        chartInstances.weekly.data.datasets[0].data = dataWeeklyLecs;
+                        chartInstances.weekly.update();
+                    } else {
+                        let wOpts = getChartBaseOptions(false);
+                        wOpts.plugins.tooltip = weeklyTooltip;
+                        chartInstances.weekly = new window.Chart(ctxWeekly, {
+                            type: 'bar',
+                            data: { 
+                                labels: weeklyLabels, 
+                                datasets: [
+                                    { label: 'Completed Lectures', data: dataWeeklyLecs, backgroundColor: '#2563eb', borderWidth: 2, borderColor: 'var(--card-border)', borderRadius: 4, barPercentage: 0.6 }
+                                ]
+                            },
+                            options: wOpts
+                        });
+                    }
+                }
 
-            const monthlyTooltip = getChartTooltip(c => ` 월간 완강: ${c.raw}강`);
+                // 3. Monthly Chart: Completed Lectures in Current Year
+                const monthlyCanvas = document.getElementById('chartMonthly');
+                if (monthlyCanvas) {
+                    const ctxMonthly = monthlyCanvas.getContext('2d');
+                    const targetYear = currentCalendarDate.getFullYear();
+                    if(DOM.monthlyChartTitle) DOM.monthlyChartTitle.innerText = `${targetYear} Academic Lecture Progress`;
+                    let monthlyLabels = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+                    let monthTotals = new Array(12).fill(0);
+                    const isCurrentYear = targetYear === new Date().getFullYear();
+                    const currentMonthLimit = isCurrentYear ? new Date().getMonth() : (targetYear > new Date().getFullYear() ? -1 : 11);
+                    
+                    getDailyRecords().forEach(r => {
+                        let d = parseLocalDate(r.date);
+                        if(d.getFullYear() === targetYear) monthTotals[d.getMonth()] += getDailyTaskStats(r).completedLecs;
+                    });
 
-            if(chartInstances.monthly) {
-                chartInstances.monthly.data.datasets[0].data = cumulativeDataLecs;
-                chartInstances.monthly.update();
-            } else {
-                let mOpts = getChartBaseOptions(false);
-                mOpts.plugins.tooltip = monthlyTooltip;
-                chartInstances.monthly = new Chart(ctxMonthly, {
-                    type: 'bar',
-                    data: { 
-                        labels: monthlyLabels, 
-                        datasets: [
-                            { label: 'Monthly Lectures', data: cumulativeDataLecs, backgroundColor: 'var(--text-main)', borderWidth: 2, borderColor: 'var(--card-border)', borderRadius: 4, barPercentage: 0.6 }
-                        ] 
-                    },
-                    options: mOpts
-                });
+                    let cumulativeDataLecs = [];
+                    for(let m = 0; m < 12; m++) {
+                        if (m > currentMonthLimit) cumulativeDataLecs.push(null); 
+                        else cumulativeDataLecs.push(monthTotals[m]); 
+                    }
+
+                    const monthlyTooltip = getChartTooltip(c => ` Monthly Completed: ${c.raw} lecs`);
+
+                    if(chartInstances.monthly) {
+                        chartInstances.monthly.data.datasets[0].data = cumulativeDataLecs;
+                        chartInstances.monthly.update();
+                    } else {
+                        let mOpts = getChartBaseOptions(false);
+                        mOpts.plugins.tooltip = monthlyTooltip;
+                        chartInstances.monthly = new window.Chart(ctxMonthly, {
+                            type: 'bar',
+                            data: { 
+                                labels: monthlyLabels, 
+                                datasets: [
+                                    { label: 'Monthly Lectures', data: cumulativeDataLecs, backgroundColor: 'var(--text-main)', borderWidth: 2, borderColor: 'var(--card-border)', borderRadius: 4, barPercentage: 0.6 }
+                                ] 
+                            },
+                            options: mOpts
+                        });
+                    }
+                }
+            } catch (err) {
+                console.warn('Chart render exception caught safely:', err);
             }
         }
 
@@ -1426,7 +1557,7 @@
                 else if (completedLecs >= 3 && completedLecs < 5) colorClass = 'bg-[rgba(37,99,235,0.65)] border-2 border-[var(--card-border)]';
                 else if (completedLecs >= 5) colorClass = 'bg-[#2563eb] border-2 border-[var(--card-border)]';
                 
-                let tooltipText = `${dateStr} : ${completedLecs}강 완강`;
+                let tooltipText = `${dateStr} : ${completedLecs} lecs completed`;
                 html += `<div class="w-[13px] h-[13px] rounded-[3px] ${colorClass} transition-all cursor-pointer hover:translate-x-[-1px] hover:translate-y-[-1px]" title="${tooltipText}"></div>`;
                 d.setDate(d.getDate() + 1);
             }
@@ -1477,7 +1608,6 @@
                                 const isAllDone = totalLecs > 0 && percent === 100;
                                 const cColor = course.color || getStringColor(course.title);
 
-                                // If course is 100% completed, auto-collapse by default unless explicitly toggled
                                 if (courseCollapsedState[course.id] === undefined) {
                                     courseCollapsedState[course.id] = isAllDone;
                                 }
@@ -1505,7 +1635,6 @@
                                         ${renderProgressBar(percent, theme.dot)}
                                     </div>
 
-                                    <!-- Collapsible body: Fixed-height scrollable list -->
                                     <div class="accordion-grid ${isCollapsed ? 'closed' : 'open'}">
                                         <div class="accordion-inner">
                                             ${courseLecs.length > 0 ? `
@@ -1610,8 +1739,8 @@
                 <tr class="cursor-pointer hover:bg-[var(--hover-bg)] transition-colors" data-action="openDailyModal" data-date="${d.date}">
                     <td class="text-[var(--text-muted)] font-extrabold text-center text-xs tracking-wider">${d.date.substring(5)}</td>
                     <td class="text-[var(--text-main)] font-bold truncate max-w-[150px] sm:max-w-[250px]" title="${esc(stats.goals)}">${esc(stats.goals) || '<span class="text-[var(--text-faint)] italic">No goals logged</span>'}</td>
-                    <td class="text-right text-[var(--text-main)] font-extrabold text-xs">${stats.completedLecs}강 완강</td>
-                    <td class="text-right text-[var(--text-muted)] text-xs">${stats.totalTasks} 태스크</td>
+                    <td class="text-right text-[var(--text-main)] font-extrabold text-xs">${stats.completedLecs} lecs done</td>
+                    <td class="text-right text-[var(--text-muted)] text-xs">${stats.totalTasks} tasks</td>
                     <td class="text-center" onclick="event.stopPropagation()">
                         <input type="checkbox" data-action="toggleDailyAchieved" data-id="${d.id}" ${stats.allCompleted ? 'checked' : ''} class="custom-checkbox mx-auto">
                     </td>
@@ -1674,6 +1803,57 @@
         }
         function closeModal() { DOM.modalOverlay.classList.add('hidden'); }
 
+        function deleteSelectedTasks() {
+            if (selectedTaskKeys.size === 0) return;
+
+            const backup = [];
+            selectedTaskKeys.forEach(key => {
+                const [recId, taskId] = key.split(':');
+                const rec = dailyRecords.find(d => d.id === recId);
+                if (rec && rec.tasks) {
+                    const task = rec.tasks.find(t => t.id === taskId);
+                    const idx = rec.tasks.findIndex(t => t.id === taskId);
+                    if (task) {
+                        backup.push({ recId, task: JSON.parse(JSON.stringify(task)), idx });
+                    }
+                }
+            });
+
+            const deletedCount = backup.length;
+            if (deletedCount === 0) return;
+
+            selectedTaskKeys.forEach(key => {
+                const [recId, taskId] = key.split(':');
+                const rec = dailyRecords.find(d => d.id === recId);
+                if (rec && rec.tasks) {
+                    rec.tasks = rec.tasks.filter(t => t.id !== taskId);
+                }
+            });
+
+            selectedTaskKeys.clear();
+            saveData();
+            renderCalendar();
+            renderCharts();
+            renderMasterDB();
+            renderHeatmap();
+            updateSelectionUI();
+
+            showUndoToast(`${deletedCount} tasks deleted from timetable.`, () => {
+                backup.forEach(item => {
+                    const rec = dailyRecords.find(d => d.id === item.recId);
+                    if (rec) {
+                        rec.tasks.splice(Math.min(item.idx, rec.tasks.length), 0, item.task);
+                    }
+                });
+                saveData();
+                renderCalendar();
+                renderCharts();
+                renderMasterDB();
+                renderHeatmap();
+                updateSelectionUI();
+            });
+        }
+
         function setupModalCurriculumCascade() {
             const subjSel = document.getElementById('modal-subject-select');
             const courseSel = document.getElementById('modal-course-select');
@@ -1685,9 +1865,9 @@
             const distinctSubjs = [...new Set(dataCourses.map(c => c.subject))];
 
             if (distinctSubjs.length === 0) {
-                subjSel.innerHTML = `<option value="">과목 없음</option>`;
-                courseSel.innerHTML = `<option value="">강좌 없음</option>`;
-                lecSel.innerHTML = `<option value="">강의 없음</option>`;
+                subjSel.innerHTML = `<option value="">No Subjects</option>`;
+                courseSel.innerHTML = `<option value="">No Courses</option>`;
+                lecSel.innerHTML = `<option value="">No Lectures</option>`;
                 return;
             }
 
@@ -1697,8 +1877,8 @@
                 const selectedSubj = subjSel.value;
                 const filteredCourses = dataCourses.filter(c => c.subject === selectedSubj);
                 if (filteredCourses.length === 0) {
-                    courseSel.innerHTML = `<option value="">강좌 없음</option>`;
-                    lecSel.innerHTML = `<option value="">강의 없음</option>`;
+                    courseSel.innerHTML = `<option value="">No Courses</option>`;
+                    lecSel.innerHTML = `<option value="">No Lectures</option>`;
                     return;
                 }
                 courseSel.innerHTML = filteredCourses.map(c => `<option value="${c.id}">${esc(c.title)}</option>`).join('');
@@ -1709,7 +1889,7 @@
                 const selectedCourseId = courseSel.value;
                 const filteredLecs = dataLectures.filter(l => l.courseId === selectedCourseId);
                 if (filteredLecs.length === 0) {
-                    lecSel.innerHTML = `<option value="">강의 없음</option>`;
+                    lecSel.innerHTML = `<option value="">No Lectures</option>`;
                     return;
                 }
                 lecSel.innerHTML = filteredLecs.map(l => {
@@ -1763,6 +1943,10 @@
                 case 'clearTaskSelection': {
                     selectedTaskKeys.clear();
                     updateSelectionUI();
+                    break;
+                }
+                case 'deleteSelectedTasksAction': {
+                    deleteSelectedTasks();
                     break;
                 }
                 case 'toggleCourseFold': {
@@ -1861,7 +2045,7 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1 tracking-wider">LECTURE TITLE</label>
-                                <input type="text" id="input-ltitle" class="input-dark font-sans" value="${esc(lecture.title)}" placeholder="Enter lecture title (e.g. 01강 미분방정식 개론)">
+                                <input type="text" id="input-ltitle" class="input-dark font-sans" value="${esc(lecture.title)}" placeholder="Enter lecture title (e.g. Lecture 01 - Differential Equations)">
                             </div>
                             <div>
                                 <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1 tracking-wider">STATUS</label>
@@ -1958,22 +2142,22 @@
                             <div class="border-2 border-[var(--card-border)] rounded-xl p-3.5 bg-[var(--table-header)] space-y-2.5">
                                 <div class="flex justify-between items-center">
                                     <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold tracking-wider">1. INSERT FROM CURRICULUM</label>
-                                    <span class="text-[9px] text-[var(--text-muted)] font-extrabold">과목 → 강좌 → 강의</span>
+                                    <span class="text-[9px] text-[var(--text-muted)] font-extrabold">SUBJECT → COURSE → LECTURE</span>
                                 </div>
                                 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     <div>
-                                        <label class="block text-[9px] uppercase text-[var(--text-muted)] mb-1 font-extrabold">과목 (SUBJECT)</label>
+                                        <label class="block text-[9px] uppercase text-[var(--text-muted)] mb-1 font-extrabold">SUBJECT</label>
                                         <select id="modal-subject-select" class="input-dark py-1.5 text-xs bg-[var(--card-bg)]"></select>
                                     </div>
                                     <div>
-                                        <label class="block text-[9px] uppercase text-[var(--text-muted)] mb-1 font-extrabold">강좌 (COURSE)</label>
+                                        <label class="block text-[9px] uppercase text-[var(--text-muted)] mb-1 font-extrabold">COURSE</label>
                                         <select id="modal-course-select" class="input-dark py-1.5 text-xs bg-[var(--card-bg)]"></select>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label class="block text-[9px] uppercase text-[var(--text-muted)] mb-1 font-extrabold">강의 (LECTURE)</label>
+                                    <label class="block text-[9px] uppercase text-[var(--text-muted)] mb-1 font-extrabold">LECTURE</label>
                                     <div class="flex space-x-2">
                                         <select id="modal-lecture-select" class="input-dark flex-1 py-1.5 text-xs bg-[var(--card-bg)]"></select>
                                         <button data-action="addModalLecTask" class="nb-btn-solid px-3.5 py-1.5 text-xs flex-shrink-0">ADD</button>
@@ -1985,16 +2169,16 @@
                             <div class="border-2 border-[var(--card-border)] rounded-xl p-3.5 bg-[var(--table-header)] space-y-2">
                                 <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold tracking-wider">2. SELF-STUDY & PROBLEM SOLVING</label>
                                 <div class="flex space-x-2">
-                                    <input type="text" id="modal-study-title" class="input-dark flex-1 py-1.5 text-xs bg-[var(--card-bg)] font-sans" placeholder="Task name (e.g. 오답노트 정리, 기출 3회독)">
+                                    <input type="text" id="modal-study-title" class="input-dark flex-1 py-1.5 text-xs bg-[var(--card-bg)] font-sans" placeholder="Task name (e.g. Problem set review, Practice exam)">
                                     <button data-action="addModalStudyTask" class="nb-btn px-3.5 py-1.5 text-xs flex-shrink-0">ADD STUDY</button>
                                 </div>
                             </div>
 
                             <!-- 3. General Schedule / Event -->
                             <div class="border-2 border-[var(--card-border)] rounded-xl p-3.5 bg-[var(--table-header)] space-y-2">
-                                <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold tracking-wider">3. GENERAL SCHEDULE / EVENT (일정 추가)</label>
+                                <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold tracking-wider">3. GENERAL SCHEDULE & EVENTS</label>
                                 <div class="flex space-x-2">
-                                    <input type="text" id="modal-event-title" class="input-dark flex-1 py-1.5 text-xs bg-[var(--card-bg)] font-sans" placeholder="Event / Task (e.g. 편입 모의고사, 원서접수, 학원 상담)">
+                                    <input type="text" id="modal-event-title" class="input-dark flex-1 py-1.5 text-xs bg-[var(--card-bg)] font-sans" placeholder="Event / Task (e.g. Mock test, Application deadline, Advising)">
                                     <button data-action="addModalEventTask" class="nb-btn-solid px-3.5 py-1.5 text-xs flex-shrink-0">ADD EVENT</button>
                                 </div>
                             </div>
@@ -2298,9 +2482,14 @@
             });
 
             window.addEventListener('keydown', (e) => {
+                if (e.target.closest('input, textarea, select')) return;
+
                 if (e.key === 'Escape' && selectedTaskKeys.size > 0) {
                     selectedTaskKeys.clear();
                     updateSelectionUI();
+                } else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedTaskKeys.size > 0) {
+                    e.preventDefault();
+                    deleteSelectedTasks();
                 }
             });
         }
