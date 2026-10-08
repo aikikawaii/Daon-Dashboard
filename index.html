@@ -672,7 +672,9 @@
         </div>
     </div>
 
+    <script src="dashboard-core.js"></script>
     <script>
+        const Core = DashboardCore;
         const DOM = {
             viewCourseGallery: null, todoTabsContainer: null, viewTodoLectures: null, calendarMonthLabel: null, viewCalendar: null,
             curriculumManager: null, dbCourses: null, dbLecturesContainer: null, dbDaily: null, heatmapContainer: null,
@@ -744,6 +746,11 @@
         }
 
         let courses = [], lectures = [], dailyRecords = [], ddays = [];
+        let extraData = {};
+        const LOCAL_DATA_KEY = 'daon-dashboard-v2';
+        let cloudBase = null, pendingCloudSave = false, cloudRevision = 0;
+        let currentModalBaseData = null;
+        let currentModalOriginalTasks = [];
         let toastTimers = {};
         let closedDbCourses = new Set(); 
         let masterDbFoldState = { courses: false, lectures: false, daily: false };
@@ -761,14 +768,24 @@
 
         document.documentElement.setAttribute('data-theme', 'light');
 
+        function applyData(data) {
+            ({ courses, lectures, dailyRecords, ddays } = data);
+            extraData = Object.fromEntries(Object.entries(data).filter(([key]) => !['courses', 'lectures', 'dailyRecords', 'ddays'].includes(key)));
+        }
+
         function normalizeData() {
-            courses.forEach(c => {
-                if (c.subject === '수학' || c.subject === '수학 (Mathematics)') c.subject = 'Mathematics';
-                if (c.subject === '물리') c.subject = 'Physics';
-                if (c.subject === '영어') c.subject = 'English';
-                if (c.subject === '화학') c.subject = 'Chemistry';
-                if (c.subject === '기타') c.subject = 'General';
-                if (!subjects.includes(c.subject)) c.subject = 'Mathematics';
+            applyData(Core.normalizeData(window.getExportData()));
+        }
+
+        function setLectureCompletion(id, completed) {
+            const lecture = lectures.find(item => item.id === id);
+            if (!lecture) return;
+            lecture.status = completed ? '완료' : '미시작';
+            dailyRecords.forEach(record => record.tasks.forEach(task => {
+                if (task.type === 'lecture' && task.refId === id) task.completed = completed;
+            }));
+            currentModalTasks.forEach(task => {
+                if (task.type === 'lecture' && task.refId === id) task.completed = completed;
             });
         }
 
@@ -786,57 +803,138 @@
             }
         };
 
-        function loadLocalData() {
-            try {
-                courses = JSON.parse(localStorage.getItem('courses')) || [];
-                lectures = JSON.parse(localStorage.getItem('lectures')) || [];
-                dailyRecords = JSON.parse(localStorage.getItem('dailyRecords')) || [];
-                ddays = JSON.parse(localStorage.getItem('ddays')) || [];
-            } catch (e) {
-                courses = []; lectures = []; dailyRecords = []; ddays = [];
-            }
-
-            normalizeData();
-
-            const activeSubjects = [...new Set(courses.map(c => c.subject))];
-            if (activeSubjects.length > 0 && !currentSubjectTab) currentSubjectTab = activeSubjects[0];
-            
-            renderAll();
+        function persistData(data, base = cloudBase, pending = pendingCloudSave, revision = cloudRevision) {
+            // Store data and unsent changes together so reloads cannot lose the outbox.
+            localStorage.setItem(LOCAL_DATA_KEY, JSON.stringify({ version: 2, data, base, pending, revision }));
         }
 
-        window.updateFromCloud = (data) => {
-            if(data) {
-                if(data.courses) courses = data.courses;
-                if(data.lectures) lectures = data.lectures;
-                if(data.dailyRecords) dailyRecords = data.dailyRecords;
-                if(data.ddays) ddays = data.ddays;
-                
-                normalizeData();
-                saveData(false); 
-                renderAll();
+        function loadLocalData() {
+            let loadError = false;
+            try {
+                const stored = localStorage.getItem(LOCAL_DATA_KEY);
+                if (stored) {
+                    const packet = JSON.parse(stored);
+                    const data = Core.normalizeData(packet.data);
+                    const base = packet.base ? Core.normalizeData(packet.base) : null;
+                    applyData(data);
+                    cloudBase = base;
+                    pendingCloudSave = packet.pending === true || (base !== null && !Core.equal(data, base));
+                    cloudRevision = Number.isSafeInteger(packet.revision) && packet.revision >= 0 ? packet.revision : 0;
+                } else {
+                    const data = Core.normalizeData(Object.fromEntries(['courses', 'lectures', 'dailyRecords', 'ddays'].map(key => [key, JSON.parse(localStorage.getItem(key)) || []])));
+                    applyData(data);
+                    pendingCloudSave = ['courses', 'lectures', 'dailyRecords', 'ddays'].some(key => data[key].length > 0);
+                }
+            } catch (error) {
+                console.warn('Unable to read saved dashboard data:', error);
+                applyData(Core.emptyData());
+                cloudBase = null;
+                pendingCloudSave = false;
+                loadError = true;
             }
-        };
+            const activeSubjects = [...new Set(courses.map(course => course.subject))];
+            if (activeSubjects.length > 0 && !currentSubjectTab) currentSubjectTab = activeSubjects[0];
+            renderAll();
+            if (loadError) showUndoToast('Saved data could not be read. Restore a valid JSON backup.', null);
+        }
 
-        window.getExportData = () => ({ courses, lectures, dailyRecords, ddays });
+        window.getExportData = () => ({ ...extraData, courses, lectures, dailyRecords, ddays });
+        window.hasPendingCloudChanges = () => pendingCloudSave;
+        window.getCloudSaveRequest = () => pendingCloudSave ? {
+            base: Core.clone(cloudBase || Core.emptyData()), data: Core.clone(window.getExportData())
+        } : null;
 
         let cloudSaveTimer = null;
-        function saveData(syncToCloud = true) {
-            normalizeData();
-            localStorage.setItem('courses', JSON.stringify(courses));
-            localStorage.setItem('lectures', JSON.stringify(lectures));
-            localStorage.setItem('dailyRecords', JSON.stringify(dailyRecords));
-            localStorage.setItem('ddays', JSON.stringify(ddays));
+        function scheduleCloudSave() {
+            clearTimeout(cloudSaveTimer);
+            cloudSaveTimer = setTimeout(() => {
+                if (typeof window.triggerCloudSave === 'function') window.triggerCloudSave();
+            }, 1000);
+        }
 
-            if (syncToCloud && typeof window.triggerCloudSave === 'function') {
-                clearTimeout(cloudSaveTimer);
-                cloudSaveTimer = setTimeout(() => {
-                    window.triggerCloudSave(window.getExportData());
-                }, 1000); 
+        window.updateFromCloud = (data, revision = 0) => {
+            if (revision < cloudRevision) return;
+            const remote = Core.normalizeData(data);
+            const merged = pendingCloudSave ? Core.mergeData(cloudBase || Core.emptyData(), window.getExportData(), remote) : remote;
+            const pending = !Core.equal(merged, remote);
+            persistData(merged, remote, pending, revision);
+            applyData(merged);
+            cloudBase = remote;
+            cloudRevision = revision;
+            pendingCloudSave = pending;
+            renderAll();
+            if (pending) scheduleCloudSave();
+        };
+
+        window.acknowledgeCloudSave = (request, committed) => {
+            if (committed.revision < cloudRevision) return;
+            const remote = Core.normalizeData(committed.data);
+            // Rebase edits made while the request was in flight onto the committed result.
+            const merged = Core.mergeData(request.data, window.getExportData(), remote);
+            const pending = !Core.equal(merged, remote);
+            persistData(merged, remote, pending, committed.revision);
+            applyData(merged);
+            cloudBase = remote;
+            cloudRevision = committed.revision;
+            pendingCloudSave = pending;
+            renderAll();
+        };
+
+        window.initializeEmptyCloud = () => {
+            const base = Core.emptyData();
+            const pending = !Core.equal(window.getExportData(), base);
+            persistData(window.getExportData(), base, pending, 0);
+            cloudBase = base;
+            cloudRevision = 0;
+            pendingCloudSave = pending;
+        };
+
+        function saveData(syncToCloud = true) {
+            try {
+                normalizeData();
+                const pending = syncToCloud || pendingCloudSave;
+                persistData(window.getExportData(), cloudBase, pending, cloudRevision);
+                pendingCloudSave = pending;
+                if (syncToCloud) scheduleCloudSave();
+                return true;
+            } catch (error) {
+                console.warn('Unable to save dashboard data:', error);
+                showUndoToast('Data could not be saved locally. Export a JSON backup and retry.', null);
+                return false;
             }
         }
 
+        window.addEventListener('storage', event => {
+            if (event.key !== LOCAL_DATA_KEY || !event.newValue) return;
+            try {
+                const packet = JSON.parse(event.newValue);
+                const incoming = Core.normalizeData(packet.data);
+                const incomingBase = packet.base ? Core.normalizeData(packet.base) : Core.emptyData();
+                const revision = Number.isSafeInteger(packet.revision) && packet.revision >= 0 ? packet.revision : 0;
+                let base = cloudBase;
+                let current = window.getExportData();
+                if (revision > cloudRevision) {
+                    current = pendingCloudSave ? Core.mergeData(cloudBase || Core.emptyData(), current, incomingBase) : incomingBase;
+                    base = incomingBase;
+                }
+                // A different tab's unsent changes are local changes, not a server acknowledgment.
+                const merged = Core.mergeData(incomingBase, incoming, current);
+                const pending = !Core.equal(merged, base || Core.emptyData());
+                if (Core.equal(merged, window.getExportData()) && Core.equal(base, cloudBase) && pending === pendingCloudSave) return;
+                persistData(merged, base, pending, Math.max(revision, cloudRevision));
+                applyData(merged);
+                cloudBase = base;
+                cloudRevision = Math.max(revision, cloudRevision);
+                pendingCloudSave = pending;
+                renderAll();
+                if (pending) scheduleCloudSave();
+            } catch (error) {
+                console.warn('Another tab supplied invalid dashboard data:', error);
+            }
+        });
+
         const getCourses = () => courses;
-        const getLectures = () => lectures;
+        const getLectures = () => [...lectures].sort(Core.compareLectures);
         const getDailyRecords = () => [...dailyRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
         const getLecturesByCourse = () => {
             const map = {}; const lecs = getLectures();
@@ -865,10 +963,10 @@
         }
 
         function getShortLectureName(lecture) {
-            const course = getCourses().find(c => c.id === lecture.courseId);
+            const course = getCourses().find(item => item.id === lecture.courseId);
             const subjChar = course && course.subject ? course.subject.charAt(0) : '';
-            const match = lecture.title.match(/(\d+강)/);
-            const lecPart = match ? match[1] : lecture.title.split(/[\s.]+/)[0];
+            const parsed = Core.parseLectureTitle(lecture.title);
+            const lecPart = parsed.number !== null ? Core.formatLectureTitle(parsed.number, parsed.endNumber, '') : lecture.title;
             return subjChar ? `[${subjChar}] ${lecPart}` : lecPart;
         }
 
@@ -1048,7 +1146,7 @@
                     if (lecture) {
                         let record = dailyRecords.find(d => d.date === targetDateStr);
                         const shortName = getShortLectureName(lecture);
-                        const newTask = { id: generateId('T'), type: 'lecture', title: shortName, completed: false, refId: lecture.id };
+                        const newTask = { id: generateId('T'), type: 'lecture', title: shortName, completed: lecture.status === '완료' || lecture.status === 'Completed', refId: lecture.id };
                         if (!record) {
                             record = { id: generateId('D'), date: targetDateStr, tasks: [] };
                             dailyRecords.push(record);
@@ -1276,7 +1374,7 @@
                                             ondragend="handleDragEnd(event)"
                                             class="draggable-item flex items-center justify-between p-2.5 border-2 border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-[1.5px_1.5px_0px_var(--card-border)] hover:translate-x-[1px] hover:translate-y-[1px] transition">
                                             <div class="flex items-center space-x-2 overflow-hidden flex-1 pointer-events-none">
-                                                <div data-action="toggleLecture" data-id="${l.id}" class="w-4 h-4 rounded-md border-2 border-[var(--card-border)] flex-shrink-0 hover:bg-[var(--text-main)] cursor-pointer pointer-events-auto flex items-center justify-center text-[9px]"></div>
+                                                <input type="checkbox" aria-label="${esc(l.title)} 완료" data-action="toggleLecture" data-id="${l.id}" class="custom-checkbox pointer-events-auto">
                                                 <span class="text-[var(--text-main)] font-bold truncate flex-1" title="${esc(l.title)}">${esc(l.title)}</span>
                                             </div>
                                         </li>
@@ -1546,7 +1644,7 @@
                     } else {
                         chartInstances.daily = new window.Chart(ctxDaily, {
                             type: 'doughnut',
-                            data: { labels: ['Completed', 'Pending / Unfinished'], datasets: [{ data: dailyData, backgroundColor: dailyBg, borderWidth: 2, borderColor: 'var(--card-border)', hoverOffset: 2 }] },
+                            data: { labels: ['Completed', 'Pending / Unfinished'], datasets: [{ data: dailyData, backgroundColor: dailyBg, borderWidth: 2, borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card-border').trim() || '#000000', hoverOffset: 2 }] },
                             options: { 
                                 responsive: true, 
                                 maintainAspectRatio: false, 
@@ -1588,7 +1686,7 @@
                             data: { 
                                 labels: weeklyLabels, 
                                 datasets: [
-                                    { label: 'Completed Lectures', data: dataWeeklyLecs, backgroundColor: '#2563eb', borderWidth: 2, borderColor: 'var(--card-border)', borderRadius: 4, barPercentage: 0.6 }
+                                    { label: 'Completed Lectures', data: dataWeeklyLecs, backgroundColor: '#2563eb', borderWidth: 2, borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card-border').trim() || '#000000', borderRadius: 4, barPercentage: 0.6 }
                                 ]
                             },
                             options: wOpts
@@ -1631,7 +1729,7 @@
                             data: { 
                                 labels: monthlyLabels, 
                                 datasets: [
-                                    { label: 'Monthly Lectures', data: cumulativeDataLecs, backgroundColor: 'var(--text-main)', borderWidth: 2, borderColor: 'var(--card-border)', borderRadius: 4, barPercentage: 0.6 }
+                                    { label: 'Monthly Lectures', data: cumulativeDataLecs, backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim() || '#000000', borderWidth: 2, borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card-border').trim() || '#000000', borderRadius: 4, barPercentage: 0.6 }
                                 ] 
                             },
                             options: mOpts
@@ -1922,7 +2020,7 @@
             DOM.modalTitle.innerText = title; 
             DOM.modalBody.innerHTML = bodyHTML; 
             DOM.modalOverlay.classList.remove('hidden');
-            DOM.modalSaveBtn.onclick = () => { onSave(); closeModal(); };
+            DOM.modalSaveBtn.onclick = () => { if (onSave() !== false) closeModal(); };
         }
         function closeModal() { DOM.modalOverlay.classList.add('hidden'); }
 
@@ -1962,7 +2060,7 @@
             updateSelectionUI();
 
             showUndoToast(`${deletedCount} tasks deleted from timetable.`, () => {
-                backup.forEach(item => {
+                backup.sort((a, b) => a.recId.localeCompare(b.recId) || a.idx - b.idx).forEach(item => {
                     const rec = dailyRecords.find(d => d.id === item.recId);
                     if (rec) {
                         rec.tasks.splice(Math.min(item.idx, rec.tasks.length), 0, item.task);
@@ -2079,6 +2177,7 @@
                     if (calendarViewMode === 'week') {
                         currentCalendarDate.setDate(currentCalendarDate.getDate() + (val * 7));
                     } else {
+                        currentCalendarDate.setDate(1);
                         currentCalendarDate.setMonth(currentCalendarDate.getMonth() + val);
                     }
                     renderCalendar();
@@ -2171,36 +2270,80 @@
                 case 'openLectureModal': {
                     const cId = target.dataset.courseId;
                     const lId = target.dataset.lecId;
-                    const lecture = lId ? getLectures().find(l => l.id === lId) : { title: '', status: '미시작' };
+                    const lecture = lId ? getLectures().find(item => item.id === lId) : { title: '', status: '미시작' };
+                    if (!lecture || !courses.some(course => course.id === cId)) return;
+                    const parsed = Core.parseLectureTitle(lecture.title);
+                    const courseNumbers = getLectures().filter(item => item.courseId === cId).map(item => Core.parseLectureTitle(item.title)).filter(item => item.number !== null);
+                    const nextNumber = courseNumbers.length ? Math.max(...courseNumbers.map(item => item.endNumber ?? item.number)) + 1 : 1;
+                    const number = parsed.number ?? nextNumber;
                     const isCompleted = lecture.status === '완료' || lecture.status === 'Completed';
-                    const statusOptions = `
-                        <option value="미시작" ${!isCompleted ? 'selected' : ''}>TODO / UNWATCHED</option>
-                        <option value="완료" ${isCompleted ? 'selected' : ''}>COMPLETED</option>
-                    `;
-                    const cName = getCourseName(cId);
                     const html = `
                         <div class="space-y-4 font-mono-num text-xs font-bold">
                             <div class="border-2 border-[var(--card-border)] rounded-xl p-3 bg-[var(--table-header)] text-xs text-[var(--text-muted)]">
-                                PARENT COURSE: <span class="text-[var(--text-main)] font-extrabold">${esc(cName)}</span>
+                                PARENT COURSE: <span class="text-[var(--text-main)] font-extrabold">${esc(getCourseName(cId))}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label for="input-lnumber" class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1">강의 번호</label>
+                                    <input type="number" id="input-lnumber" class="input-dark" min="0" step="1" required value="${number}">
+                                </div>
+                                <div>
+                                    <label for="input-lend" class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1">끝 번호 (묶음 강의)</label>
+                                    <input type="number" id="input-lend" class="input-dark" min="0" step="1" value="${parsed.endNumber ?? ''}" placeholder="선택">
+                                </div>
                             </div>
                             <div>
-                                <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1 tracking-wider">LECTURE TITLE</label>
-                                <input type="text" id="input-ltitle" class="input-dark font-sans" value="${esc(lecture.title)}" placeholder="Enter lecture title (e.g. Lecture 01 - Differential Equations)">
+                                <label for="input-ltitle" class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1">강의 제목</label>
+                                <input type="text" id="input-ltitle" class="input-dark font-sans" value="${esc(parsed.description)}" placeholder="예: 미분법 (번호는 위에 입력)">
+                                <p class="mt-2 text-[var(--text-muted)]">표시 형식: 1강 미분법 / 1-3강 미분법 · OT는 0강</p>
                             </div>
                             <div>
-                                <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1 tracking-wider">STATUS</label>
-                                <select id="input-lstatus" class="input-dark">${statusOptions}</select>
+                                <label for="input-lduration" class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1">수강 시간 (분, 선택)</label>
+                                <input type="number" id="input-lduration" class="input-dark" min="0" step="1" value="${lecture.duration ?? ''}" placeholder="예: 45">
+                            </div>
+                            <div>
+                                <label for="input-lstatus" class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1">STATUS</label>
+                                <select id="input-lstatus" class="input-dark">
+                                    <option value="미시작" ${!isCompleted ? 'selected' : ''}>TODO / UNWATCHED</option>
+                                    <option value="완료" ${isCompleted ? 'selected' : ''}>COMPLETED</option>
+                                </select>
                             </div>
                         </div>
                     `;
                     openModal(lId ? 'EDIT LECTURE' : 'ADD NEW LECTURE', html, () => {
-                        const tit = document.getElementById('input-ltitle').value || 'Untitled Lecture';
-                        const stat = document.getElementById('input-lstatus').value;
-                        if (lId) { 
-                            const idx = lectures.findIndex(l => l.id === lId); 
-                            if(idx > -1) lectures[idx] = { ...lectures[idx], title: tit, status: stat }; 
-                        } else { lectures.push({ id: generateId('L'), courseId: cId, title: tit, status: stat }); }
-                        saveData(); renderAll();
+                        const numberEl = document.getElementById('input-lnumber');
+                        const endEl = document.getElementById('input-lend');
+                        const durationEl = document.getElementById('input-lduration');
+                        for (const input of [numberEl, endEl, durationEl]) {
+                            if (!input.reportValidity()) return false;
+                        }
+                        const start = Number(numberEl.value);
+                        const end = endEl.value.trim() === '' ? null : Number(endEl.value);
+                        const duration = durationEl.value.trim() === '' ? null : Number(durationEl.value);
+                        if (!Number.isSafeInteger(start) || start < 0 || (end !== null && (!Number.isSafeInteger(end) || end < start)) || (duration !== null && (!Number.isSafeInteger(duration) || duration < 0))) {
+                            showUndoToast('강의 번호와 시간은 0 이상의 정수이며, 끝 번호는 시작 번호 이상이어야 합니다.', null);
+                            return false;
+                        }
+                        const description = document.getElementById('input-ltitle').value.trim();
+                        const title = Core.formatLectureTitle(start, end, description);
+                        const status = document.getElementById('input-lstatus').value;
+                        const id = lId || generateId('L');
+                        if (lId) {
+                            const idx = lectures.findIndex(item => item.id === lId);
+                            if (idx < 0) return false;
+                            lectures[idx] = { ...lectures[idx], title, status };
+                            if (duration === null) delete lectures[idx].duration;
+                            else lectures[idx].duration = duration;
+                        } else {
+                            lectures.push({ id, courseId: cId, title, status, ...(duration === null ? {} : { duration }) });
+                        }
+                        setLectureCompletion(id, status === '완료');
+                        const updatedLecture = lectures.find(item => item.id === id);
+                        dailyRecords.forEach(record => record.tasks.forEach(task => {
+                            if (task.type === 'lecture' && task.refId === id) task.title = getShortLectureName(updatedLecture);
+                        }));
+                        if (!saveData()) return false;
+                        renderAll();
                     });
                     break;
                 }
@@ -2269,7 +2412,9 @@
                     const dateStr = target.dataset.date;
                     currentModalDate = dateStr;
                     const record = getDailyRecords().find(d => d.date === dateStr);
-                    currentModalTasks = record ? JSON.parse(JSON.stringify(record.tasks)) : []; 
+                    currentModalBaseData = Core.clone(window.getExportData());
+                    currentModalTasks = record ? Core.clone(record.tasks) : [];
+                    currentModalOriginalTasks = Core.clone(currentModalTasks);
 
                     const html = `
                         <div class="space-y-4 font-mono-num text-xs font-bold">
@@ -2334,17 +2479,28 @@
                         </div>
                     `;
                     openModal(`DAILY STUDY LOG`, html, () => {
-                        const idx = dailyRecords.findIndex(d => d.date === currentModalDate);
-                        if(idx > -1) dailyRecords[idx].tasks = currentModalTasks;
-                        else dailyRecords.push({ id: generateId('D'), date: currentModalDate, tasks: currentModalTasks }); 
-                        
-                        currentModalTasks.forEach(t => {
-                            if (t.type === 'lecture' && t.refId) {
-                                const originalLecture = lectures.find(l => l.id === t.refId);
-                                if (originalLecture) originalLecture.status = t.completed ? '완료' : '미시작';
+                        const draft = Core.clone(currentModalBaseData);
+                        let draftRecord = draft.dailyRecords.find(item => item.date === currentModalDate);
+                        if (draftRecord) draftRecord.tasks = Core.clone(currentModalTasks);
+                        else {
+                            draftRecord = { id: generateId('D'), date: currentModalDate, tasks: Core.clone(currentModalTasks) };
+                            draft.dailyRecords.push(draftRecord);
+                        }
+                        currentModalTasks.forEach(task => {
+                            const original = currentModalOriginalTasks.find(item => item.id === task.id);
+                            if (task.type === 'lecture' && task.refId && (!original || original.completed !== task.completed)) {
+                                const lecture = draft.lectures.find(item => item.id === task.refId);
+                                if (lecture) {
+                                    lecture.status = task.completed ? '완료' : '미시작';
+                                    draft.dailyRecords.forEach(item => item.tasks.forEach(linked => {
+                                        if (linked.type === 'lecture' && linked.refId === task.refId) linked.completed = task.completed;
+                                    }));
+                                }
                             }
                         });
-                        saveData(); renderAll();
+                        applyData(Core.mergeData(currentModalBaseData, draft, window.getExportData()));
+                        if (!saveData()) return false;
+                        renderAll();
                     });
                     setupModalCurriculumCascade();
                     renderModalTaskList();
@@ -2355,7 +2511,7 @@
                     if(!sel || !sel.value) return;
                     const lec = getLectures().find(l => l.id === sel.value);
                     if(lec) {
-                        currentModalTasks.push({ id: generateId('T'), type: 'lecture', title: getShortLectureName(lec), completed: false, refId: lec.id });
+                        currentModalTasks.push({ id: generateId('T'), type: 'lecture', title: getShortLectureName(lec), completed: lec.status === '완료' || lec.status === 'Completed', refId: lec.id });
                         renderModalTaskList();
                     }
                     break;
@@ -2383,18 +2539,24 @@
                 }
                 case 'toggleModalTask': {
                     const task = currentModalTasks.find(t => t.id === target.dataset.id);
-                    if(task) { task.completed = !task.completed; renderModalTaskList(); }
+                    if (task) {
+                        const completed = !task.completed;
+                        currentModalTasks.forEach(item => {
+                            if (item.id === task.id || (task.type === 'lecture' && task.refId && item.refId === task.refId)) item.completed = completed;
+                        });
+                        renderModalTaskList();
+                    }
                     break;
                 }
                 case 'toggleTask': {
+                    if (e.ctrlKey || e.metaKey || e.shiftKey || justFinishedLasso) return;
                     const record = dailyRecords.find(d => d.id === target.dataset.recId);
                     if(record && record.tasks) {
                         const task = record.tasks.find(t => t.id === target.dataset.taskId);
                         if(task) { 
                             task.completed = !task.completed; 
                             if (task.type === 'lecture' && task.refId) {
-                                const originalLecture = lectures.find(l => l.id === task.refId);
-                                if (originalLecture) originalLecture.status = task.completed ? '완료' : '미시작';
+                                setLectureCompletion(task.refId, task.completed);
                             }
                             saveData(); renderAll();
                         }
@@ -2416,7 +2578,7 @@
                     break;
                 }
                 case 'exportData': {
-                    const data = { courses, lectures, dailyRecords, ddays };
+                    const data = window.getExportData();
                     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -2439,7 +2601,7 @@
                     const idx = lectures.findIndex(l => l.id === target.dataset.id);
                     if(idx > -1) { 
                         const isDone = lectures[idx].status === '완료' || lectures[idx].status === 'Completed';
-                        lectures[idx].status = isDone ? '미시작' : '완료'; 
+                        setLectureCompletion(lectures[idx].id, !isDone);
                         saveData(); renderAll();
                     }
                     break;
@@ -2451,8 +2613,7 @@
                         record.tasks.forEach(t => {
                             t.completed = targetStatus;
                             if (t.type === 'lecture' && t.refId) {
-                                const originalLecture = lectures.find(l => l.id === t.refId);
-                                if (originalLecture) originalLecture.status = t.completed ? '완료' : '미시작';
+                                setLectureCompletion(t.refId, t.completed);
                             }
                         }); 
                         saveData(); renderAll();
@@ -2465,16 +2626,21 @@
                     const reader = new FileReader();
                     reader.onload = (ev) => {
                         try {
-                            const data = JSON.parse(ev.target.result);
-                            if (data.courses && data.lectures && data.dailyRecords) {
-                                courses = data.courses; lectures = data.lectures; dailyRecords = data.dailyRecords;
-                                if(data.ddays) ddays = data.ddays;
-                                normalizeData();
-                                saveData(); renderAll();
-                                showUndoToast('Data restored successfully.', null);
-                            } else { showUndoToast('Invalid backup file format.', null); }
-                        } catch(err) { showUndoToast('Error reading backup file.', null); }
+                            const data = Core.normalizeData(JSON.parse(ev.target.result));
+                            // Validate and persist before changing live state.
+                            localStorage.setItem('daon-dashboard-restore-backup', JSON.stringify(window.getExportData()));
+                            persistData(data, cloudBase, true, cloudRevision);
+                            applyData(data);
+                            pendingCloudSave = true;
+                            scheduleCloudSave();
+                            renderAll();
+                            showUndoToast('Data restored successfully.', null);
+                        } catch (error) {
+                            console.warn('Backup restore failed:', error);
+                            showUndoToast('복원하지 못했습니다. 올바른 JSON 데이터인지 확인해주세요. 기존 데이터는 유지됩니다.', null);
+                        }
                     };
+                    reader.onerror = () => showUndoToast('백업 파일을 읽지 못했습니다.', null);
                     reader.readAsText(file);
                     target.value = ''; 
                     break;
@@ -2650,7 +2816,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+        import { getFirestore, doc, runTransaction, onSnapshot } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBtAWUPk1RBU2ONxd7XubQ9XBjY8YYecGo",
@@ -2662,39 +2828,90 @@
             measurementId: "G-MQ0KWQQLS6"
         };
 
-        if (Object.keys(firebaseConfig).length > 0) {
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
-            const docRef = doc(db, 'dashboards', 'shared_dashboard_room');
-            let isRemoteUpdate = false;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const docRef = doc(db, 'dashboards', 'shared_dashboard_room');
+        let cloudReady = false, saving = false, retryTimer = null, retryDelay = 1000;
 
-            function startRealtime() {
-                window.showSyncIndicator(true);
-                onSnapshot(docRef, (snapshot) => {
-                    if (snapshot.exists()) {
-                        try {
-                            const parsed = JSON.parse(snapshot.data().payload);
-                            isRemoteUpdate = true;
-                            if(window.updateFromCloud) window.updateFromCloud(parsed);
-                            isRemoteUpdate = false;
-                        } catch(e) {}
-                    }
-                    window.showSyncIndicator(false);
-                }, () => window.showSyncIndicator(false, true));
+        window.triggerCloudSave = async () => {
+            if (!cloudReady || saving || !auth.currentUser || !window.hasPendingCloudChanges()) return;
+            saving = true;
+            clearTimeout(retryTimer);
+            window.showSyncIndicator(true);
+            try {
+                while (window.hasPendingCloudChanges()) {
+                    const request = window.getCloudSaveRequest();
+                    const committed = await runTransaction(db, async transaction => {
+                        const snapshot = await transaction.get(docRef);
+                        const stored = snapshot.exists() ? snapshot.data() : null;
+                        const remote = stored ? DashboardCore.normalizeData(JSON.parse(stored.payload)) : DashboardCore.emptyData();
+                        const data = DashboardCore.mergeData(request.base, request.data, remote);
+                        const revision = (Number.isSafeInteger(stored?.revision) && stored.revision >= 0 ? stored.revision : 0) + 1;
+                        transaction.set(docRef, { payload: JSON.stringify(data), updatedAt: Date.now(), revision });
+                        return { data, revision };
+                    });
+                    window.acknowledgeCloudSave(request, committed);
+                }
+                retryDelay = 1000;
+                window.showSyncIndicator(false);
+            } catch (error) {
+                console.warn('Cloud sync failed; local changes remain queued:', error);
+                window.showSyncIndicator(false, true);
+                retryTimer = setTimeout(() => window.triggerCloudSave(), retryDelay);
+                retryDelay = Math.min(retryDelay * 2, 30000);
+            } finally {
+                saving = false;
             }
+        };
 
-            signInAnonymously(auth).then(startRealtime).catch(() => window.showSyncIndicator(false, true));
-
-            window.triggerCloudSave = async (dataObj) => {
-                if(isRemoteUpdate || !auth.currentUser) return; 
-                window.showSyncIndicator(true);
+        async function startRealtime() {
+            if (document.readyState === 'loading') await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve, { once: true }));
+            window.showSyncIndicator(true);
+            onSnapshot(docRef, { includeMetadataChanges: true }, snapshot => {
+                // Wait for server data before rebasing or sending the durable local outbox.
+                if (snapshot.metadata.hasPendingWrites || snapshot.metadata.fromCache) return;
                 try {
-                    await setDoc(docRef, { payload: JSON.stringify(dataObj), updatedAt: Date.now() });
-                    window.showSyncIndicator(false);
-                } catch(e) { window.showSyncIndicator(false, true); }
-            };
+                    if (snapshot.exists()) {
+                        const stored = snapshot.data();
+                        const revision = Number.isSafeInteger(stored.revision) && stored.revision >= 0 ? stored.revision : 0;
+                        window.updateFromCloud(JSON.parse(stored.payload), revision);
+                    } else {
+                        window.initializeEmptyCloud();
+                    }
+                    cloudReady = true;
+                    if (window.hasPendingCloudChanges()) window.triggerCloudSave();
+                    else window.showSyncIndicator(false);
+                } catch (error) {
+                    console.warn('Cloud data could not be applied:', error);
+                    window.showSyncIndicator(false, true);
+                }
+            }, error => {
+                console.warn('Realtime connection failed:', error);
+                cloudReady = false;
+                window.showSyncIndicator(false, true);
+            });
         }
+
+        let authenticating = false;
+        async function connectCloud() {
+            if (authenticating) return;
+            authenticating = true;
+            try {
+                await signInAnonymously(auth);
+                await startRealtime();
+            } catch (error) {
+                console.warn('Cloud authentication failed:', error);
+                window.showSyncIndicator(false, true);
+            } finally {
+                authenticating = false;
+            }
+        }
+        window.addEventListener('online', () => {
+            if (!auth.currentUser) connectCloud();
+            else window.triggerCloudSave();
+        });
+        connectCloud();
     </script>
 </body>
 </html>
