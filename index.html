@@ -151,6 +151,56 @@
             transform: translate(-1px, -1px);
         }
 
+        /* Only the D-day docket: constrain native date controls and shrinking children. */
+        .dday-modal .modal-card { min-width: 0; box-sizing: border-box; }
+        .dday-modal #modal-body,
+        .dday-modal .dday-fields,
+        .dday-modal .dday-field {
+            min-width: 0;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        .dday-modal .modal-header { min-width: 0; flex-wrap: wrap; gap: 0.5rem; }
+        .dday-modal #modal-title {
+            font-size: clamp(1.125rem, 4.5vw, 1.5rem);
+            overflow-wrap: anywhere;
+        }
+        .dday-modal .input-dark {
+            display: block;
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            min-height: 44px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .dday-modal input[type="date"] {
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .dday-modal input[type="date"]::-webkit-date-and-time-value {
+            min-width: 0;
+            min-height: 1.4em;
+            text-align: left;
+        }
+        .dday-modal input[type="date"]::-webkit-datetime-edit { min-width: 0; padding: 0; }
+        .dday-modal .modal-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.625rem;
+        }
+        .dday-modal .modal-actions > button:not([hidden]) {
+            margin: 0;
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            min-height: 44px;
+            box-sizing: border-box;
+            padding: 0.65rem 0.5rem;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
         .custom-checkbox {
             appearance: none;
             width: 1.25rem;
@@ -658,14 +708,14 @@
     <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 font-mono-num"></div>
 
     <div id="modal-overlay" class="hidden fixed inset-0 bg-black/60 z-[100] flex justify-center items-center p-4">
-        <div class="bg-[var(--card-bg)] border-[3px] border-[var(--card-border)] p-6 sm:p-7 w-full max-w-lg shadow-[8px_8px_0px_var(--card-border)] rounded-2xl relative max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b-2 border-[var(--card-border)] pb-3 mb-5">
+        <div class="modal-card bg-[var(--card-bg)] border-[3px] border-[var(--card-border)] p-6 sm:p-7 w-full max-w-lg shadow-[8px_8px_0px_var(--card-border)] rounded-2xl relative max-h-[90vh] overflow-y-auto">
+            <div class="modal-header flex items-center justify-between border-b-2 border-[var(--card-border)] pb-3 mb-5">
                 <span class="text-[11px] font-extrabold uppercase tracking-widest text-[var(--text-muted)]">ENTRY DOCKET</span>
                 <button data-action="closeModal" class="text-xs font-mono-num font-extrabold text-[var(--text-main)] hover:underline">[ESC / CLOSE]</button>
             </div>
             <h2 id="modal-title" class="text-2xl font-extrabold text-[var(--text-main)] mb-6 tracking-tight uppercase">Title</h2>
             <div id="modal-body" class="space-y-4"></div>
-            <div class="mt-8 flex justify-end space-x-2.5 pt-4 border-t-2 border-[var(--card-border)] font-mono-num text-xs">
+            <div class="modal-actions mt-8 flex justify-end space-x-2.5 pt-4 border-t-2 border-[var(--card-border)] font-mono-num text-xs">
                 <button data-action="closeModal" class="nb-btn px-4 py-2 text-[var(--text-muted)]">CANCEL</button>
                 <button id="modal-save-btn" class="nb-btn-solid px-5 py-2">SAVE RECORD</button>
             </div>
@@ -773,8 +823,8 @@
             extraData = Object.fromEntries(Object.entries(data).filter(([key]) => !['courses', 'lectures', 'dailyRecords', 'ddays'].includes(key)));
         }
 
-        function normalizeData() {
-            applyData(Core.normalizeData(window.getExportData()));
+        function normalizeData(data = window.getExportData()) {
+            return Core.normalizeData(data);
         }
 
         function setLectureCompletion(id, completed) {
@@ -855,7 +905,7 @@
         window.updateFromCloud = (data, revision = 0) => {
             if (revision < cloudRevision) return;
             const remote = Core.normalizeData(data);
-            const merged = pendingCloudSave ? Core.mergeData(cloudBase || Core.emptyData(), window.getExportData(), remote) : remote;
+            const merged = pendingCloudSave || cloudBase ? Core.mergeData(cloudBase || Core.emptyData(), window.getExportData(), remote) : remote;
             const pending = !Core.equal(merged, remote);
             persistData(merged, remote, pending, revision);
             applyData(merged);
@@ -889,11 +939,12 @@
             pendingCloudSave = pending;
         };
 
-        function saveData(syncToCloud = true) {
+        function saveData(syncToCloud = true, data = window.getExportData()) {
             try {
-                normalizeData();
+                const normalized = normalizeData(data);
                 const pending = syncToCloud || pendingCloudSave;
-                persistData(window.getExportData(), cloudBase, pending, cloudRevision);
+                persistData(normalized, cloudBase, pending, cloudRevision);
+                applyData(normalized);
                 pendingCloudSave = pending;
                 if (syncToCloud) scheduleCloudSave();
                 return true;
@@ -914,7 +965,7 @@
                 let base = cloudBase;
                 let current = window.getExportData();
                 if (revision > cloudRevision) {
-                    current = pendingCloudSave ? Core.mergeData(cloudBase || Core.emptyData(), current, incomingBase) : incomingBase;
+                    current = pendingCloudSave || cloudBase ? Core.mergeData(cloudBase || Core.emptyData(), current, incomingBase) : incomingBase;
                     base = incomingBase;
                 }
                 // A different tab's unsent changes are local changes, not a server acknowledgment.
@@ -2017,6 +2068,7 @@
         }
 
         function openModal(title, bodyHTML, onSave) {
+            DOM.modalOverlay.classList.remove('dday-modal');
             DOM.modalTitle.innerText = title; 
             DOM.modalBody.innerHTML = bodyHTML; 
             DOM.modalOverlay.classList.remove('hidden');
@@ -2201,31 +2253,46 @@
                 }
                 case 'openDdayModal': {
                     const html = `
-                        <div class="space-y-4 font-mono-num text-xs font-bold">
-                            <div>
-                                <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1 tracking-wider">EVENT / EXAM TITLE</label>
+                        <div class="dday-fields space-y-4 font-mono-num text-xs font-bold">
+                            <div class="dday-field">
+                                <label for="input-dday-title" class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1 tracking-wider">EVENT / EXAM TITLE</label>
                                 <input type="text" id="input-dday-title" class="input-dark font-sans" placeholder="e.g. 편입 시험, TOEIC, Finals">
                             </div>
-                            <div>
-                                <label class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1 tracking-wider">TARGET DATE</label>
-                                <input type="date" id="input-dday-date" class="input-dark" value="${TODAY}">
+                            <div class="dday-field">
+                                <label for="input-dday-date" class="block text-[11px] uppercase text-[var(--text-muted)] font-extrabold mb-1 tracking-wider">TARGET DATE</label>
+                                <input type="date" id="input-dday-date" class="input-dark" value="${TODAY}" required max="9999-12-31" aria-describedby="dday-save-error">
                             </div>
+                            <p id="dday-save-error" role="alert" aria-live="polite" class="hidden text-rose-600 font-sans text-sm"></p>
                         </div>
                     `;
                     openModal('ADD D-DAY DEADLINE', html, () => {
                         const title = document.getElementById('input-dday-title').value.trim() || 'Target Deadline';
                         const dateVal = document.getElementById('input-dday-date').value;
-                        if(dateVal) {
-                            ddays.push({ id: generateId('DD'), title, targetDate: dateVal });
-                            ddays.sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate));
-                            saveData(); renderDdays();
-                        }
+                        const error = document.getElementById('dday-save-error');
+                        const fail = message => {
+                            error.textContent = message;
+                            error.classList.remove('hidden');
+                            return false;
+                        };
+                        if (!Core.validDate(dateVal)) return fail('올바른 날짜를 입력해주세요.');
+                        // Persist the draft before publishing it to live state. A retry adds it once.
+                        const draft = { ...window.getExportData(), ddays: [...ddays, { id: generateId('DD'), title, targetDate: dateVal }] };
+                        if (!saveData(true, draft)) return fail('D-day를 저장하지 못했습니다. 입력값을 유지했으니 다시 시도해주세요.');
+                        renderDdays();
+                        return true;
                     });
+                    DOM.modalOverlay.classList.add('dday-modal');
                     break;
                 }
                 case 'deleteDday': {
-                    ddays = ddays.filter(d => d.id !== target.dataset.id);
-                    saveData(); renderDdays();
+                    const id = target.dataset.id;
+                    if (!ddays.some(dday => dday.id === id)) break;
+                    const draft = {
+                        ...window.getExportData(),
+                        ddays: ddays.filter(dday => dday.id !== id),
+                        _deletedDdayIds: [...new Set([...(extraData._deletedDdayIds || []), id])]
+                    };
+                    if (saveData(true, draft)) renderDdays();
                     break;
                 }
                 case 'openCourseModal': {

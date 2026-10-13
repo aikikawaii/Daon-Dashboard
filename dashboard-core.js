@@ -28,6 +28,8 @@
         assert(isObject(input), 'Dashboard data must be an object.');
         for (const key of ['courses', 'lectures', 'dailyRecords']) assert(Array.isArray(input[key]), key + ' must be an array.');
         assert(input.ddays === undefined || Array.isArray(input.ddays), 'ddays must be an array.');
+        // Optional sync metadata; old JSON backups need no migration.
+        assert(input._deletedDdayIds === undefined || (Array.isArray(input._deletedDdayIds) && input._deletedDdayIds.every(validId)), 'Invalid D-day deletion IDs.');
         const ids = new Set(), taskIds = new Set(), dates = new Set();
         function entity(item, label) {
             assert(isObject(item) && validId(item.id), label + ' must have a safe, nonempty ID.');
@@ -115,6 +117,12 @@
             if (lecture) task.completed = lecture.status === '완료';
         }));
         data.dailyRecords.sort((a, b) => a.date.localeCompare(b.date));
+        if (data._deletedDdayIds !== undefined) {
+            data._deletedDdayIds = [...new Set(data._deletedDdayIds)].sort();
+            const deleted = new Set(data._deletedDdayIds);
+            data.ddays = data.ddays.filter(dday => !deleted.has(dday.id));
+        }
+        data.ddays.sort((a, b) => a.targetDate.localeCompare(b.targetDate) || a.id.localeCompare(b.id));
         return data;
     }
     function mergeValue(base, local, remote) {
@@ -155,9 +163,15 @@
     }
     function mergeData(baseInput, localInput, remoteInput) {
         const base = normalizeData(baseInput), local = normalizeData(localInput), remote = normalizeData(remoteInput);
-        if (equal(local, base)) return remote;
-        if (equal(remote, base) || equal(local, remote)) return local;
-        const extras = data => Object.fromEntries(Object.entries(data).filter(([key]) => !collections.includes(key)));
+        // Retain deletions even after an acknowledgment or a stale client's new snapshot.
+        // D-day IDs are never reused; these tombstones stay in the same data/backup/outbox.
+        const deleted = new Set([...(base._deletedDdayIds || []), ...(local._deletedDdayIds || []), ...(remote._deletedDdayIds || [])]);
+        const localIds = new Set(local.ddays.map(item => item.id)), remoteIds = new Set(remote.ddays.map(item => item.id));
+        base.ddays.forEach(item => { if (!localIds.has(item.id) || !remoteIds.has(item.id)) deleted.add(item.id); });
+        const finish = data => normalizeData(deleted.size ? { ...data, _deletedDdayIds: [...deleted] } : data);
+        if (equal(local, base)) return finish(remote);
+        if (equal(remote, base) || equal(local, remote)) return finish(local);
+        const extras = data => Object.fromEntries(Object.entries(data).filter(([key]) => !collections.includes(key) && key !== '_deletedDdayIds'));
         const merged = { ...mergeValue(extras(base), extras(local), extras(remote)),
             courses: mergeEntities(base.courses, local.courses, remote.courses, 'id'),
             lectures: mergeEntities(base.lectures, local.lectures, remote.lectures, 'id'),
@@ -181,7 +195,7 @@
                 courseIds.add(lecture.courseId);
             }
         });
-        return normalizeData(merged);
+        return finish(merged);
     }
     return { emptyData, clone, equal, validDate, validateData, normalizeData, parseLectureTitle, formatLectureTitle, compareLectures, mergeData };
 });

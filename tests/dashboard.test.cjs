@@ -199,7 +199,7 @@ test('deleting selected tasks in reverse selection order and undoing restores or
 const moduleSource = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)].find(match => match[1].includes('module'))[2].replace(/^\s*import .*;\s*$/gm, '');
 const tick = () => new Promise(resolve => setImmediate(resolve));
 async function connectMockCloud(app, behavior = {}) {
-    let server = { payload: JSON.stringify(Core.normalizeData(fixture())), revision: 1 }, observer, calls = 0;
+    let server = { payload: JSON.stringify(Core.normalizeData(behavior.initialData || fixture())), revision: 1 }, observer, calls = 0;
     const snapshot = (metadata = { fromCache: false, hasPendingWrites: false }) => ({ exists: () => true, data: () => server, metadata });
     const transaction = () => { let written; return { api: { get: async () => snapshot(), set: (ref, data) => { written = data; } }, commit: () => { server = written; } }; };
     Object.assign(app.sandbox, {
@@ -240,4 +240,186 @@ test('concurrent course deletion cannot hide a lecture that another client just 
     assert(merged.lectures.some(lecture => lecture.id === 'L_new'));
     assert(merged.courses.some(course => course.id === 'C1'));
     const invalid = fixture(); invalid.lectures[0].courseId = 'C_missing'; assert.throws(() => Core.normalizeData(invalid));
+});
+
+
+test('D-day normalization preserves collections, extras, item fields and legacy JSON', () => {
+    const source = fixture();
+    source.memos = [{ title: 'keep' }]; source.preferences = { theme: 'light' };
+    source.ddays = [{ id: 'DD_A', title: '시험', targetDate: '2026-12-01', note: 'keep' }];
+    const before = json(source), normalized = Core.normalizeData(source);
+    assert.deepEqual(normalized.ddays, source.ddays);
+    assert.deepEqual(normalized.memos, source.memos); assert.deepEqual(normalized.preferences, source.preferences);
+    assert.deepEqual(source, before); assert.deepEqual(Core.emptyData().ddays, []);
+    const legacy = json(source); delete legacy.ddays;
+    assert.deepEqual(Core.normalizeData(legacy).ddays, []);
+    assert.deepEqual(Core.normalizeData(JSON.parse(JSON.stringify(normalized))), normalized);
+    const deleted = { ...source, _deletedDdayIds: ['DD_A', 'DD_A'] };
+    assert.deepEqual(Core.normalizeData(deleted).ddays, []);
+    assert.deepEqual(Core.normalizeData(deleted)._deletedDdayIds, ['DD_A']);
+    for (const value of ['DD_A', [null], ["bad'id"]]) {
+        assert.throws(() => Core.normalizeData({ ...source, _deletedDdayIds: value }));
+    }
+});
+
+test('concurrent D-day additions survive merge in both directions without losing other data', () => {
+    const base = fixture(), local = json(base), remote = json(base);
+    base.memos = local.memos = remote.memos = [{ text: 'keep' }];
+    local.ddays.push({ id: 'DD_A', title: 'Local', targetDate: '2026-12-01' });
+    remote.ddays.push({ id: 'DD_B', title: 'Remote', targetDate: '2026-12-02' });
+    for (const result of [Core.mergeData(base, local, remote), Core.mergeData(base, remote, local)]) {
+        assert.deepEqual(result.ddays.map(d => d.id).sort(), ['DD_A', 'DD_B']);
+        assert.deepEqual(result.courses, Core.normalizeData(base).courses);
+        assert.deepEqual(result.lectures, Core.normalizeData(base).lectures);
+        assert.deepEqual(result.dailyRecords, Core.normalizeData(base).dailyRecords);
+        assert.deepEqual(result.memos, base.memos);
+    }
+});
+
+test('D-day deletion wins over same-item edits and keeps edits to separate items', () => {
+    const base = fixture();
+    base.ddays = [{ id: 'DD_A', title: 'A', targetDate: '2026-12-01' }, { id: 'DD_B', title: 'B', targetDate: '2026-12-02' }];
+    const local = json(base), remote = json(base);
+    local.ddays = local.ddays.filter(d => d.id !== 'DD_A');
+    remote.ddays[0].title = 'Stale edit'; remote.ddays[1].title = 'Separate edit';
+    remote.courses[0].title = 'Separate course edit';
+    for (const merged of [Core.mergeData(base, local, remote), Core.mergeData(base, remote, local)]) {
+        assert.deepEqual(merged.ddays.map(d => d.id), ['DD_B']);
+        assert.equal(merged.ddays[0].title, 'Separate edit');
+        assert.equal(merged.courses[0].title, 'Separate course edit');
+        assert(merged._deletedDdayIds.includes('DD_A'));
+    }
+});
+
+test('durable D-day deletion IDs combine across clients and block stale additions without a shared base', () => {
+    const base = Core.emptyData();
+    const local = { ...Core.emptyData(), _deletedDdayIds: ['DD_A'], preferences: { font: 'large' } };
+    const remote = { ...Core.emptyData(), _deletedDdayIds: ['DD_B'], ddays: [{ id: 'DD_A', title: 'Old request', targetDate: '2026-12-01' }], memos: ['keep'] };
+    const merged = Core.mergeData(base, local, remote);
+    assert.deepEqual(merged.ddays, []); assert.deepEqual(merged._deletedDdayIds, ['DD_A', 'DD_B']);
+    assert.deepEqual(merged.preferences, local.preferences); assert.deepEqual(merged.memos, remote.memos);
+    const stale = { ...base, ddays: [{ id: 'DD_B', title: 'Stale client', targetDate: '2026-12-02' }] };
+    assert.deepEqual(Core.mergeData(base, stale, merged).ddays, []);
+    // Even an unchanged client/base must keep deletion metadata when a legacy snapshot omits it.
+    assert.deepEqual(Core.mergeData(merged, merged, stale).ddays, []);
+});
+
+function addDday(app, title = '시험', date = '2026-12-01') {
+    app.click('openDdayModal');
+    app.elements.get('input-dday-title').value = title; app.elements.get('input-dday-date').value = date;
+    app.elements.get('modal-save-btn').onclick();
+}
+
+test('D-day UI add/save/reload/delete/reload uses the single durable packet', () => {
+    const app = environment(); addDday(app);
+    assert.equal(app.data().ddays.length, 1);
+    assert(app.elements.get('modal-overlay').classList.contains('hidden'));
+    const saved = JSON.parse(app.sharedStorage.get('daon-dashboard-v2'));
+    assert.deepEqual(saved.data.ddays, app.data().ddays); assert.equal(saved.pending, true);
+    const reloaded = environment(null, app.sharedStorage);
+    assert.deepEqual(reloaded.data().ddays, app.data().ddays);
+    const id = reloaded.data().ddays[0].id; reloaded.click('deleteDday', { id });
+    const deleted = environment(null, app.sharedStorage);
+    assert.deepEqual(deleted.data().ddays, []);
+    assert(deleted.data()._deletedDdayIds.includes(id)); assert(deleted.window.hasPendingCloudChanges());
+    assert.equal(app.sharedStorage.has('ddays'), false);
+});
+
+test('failed D-day save keeps input and modal, makes no live/durable change, and retries once', () => {
+    const app = environment(), before = app.data(), saved = app.sharedStorage.get('daon-dashboard-v2');
+    const setItem = app.sandbox.localStorage.setItem;
+    app.sandbox.localStorage.setItem = () => { throw new Error('QuotaExceededError'); };
+    addDday(app, 'Keep this input');
+    assert(!app.elements.get('modal-overlay').classList.contains('hidden'));
+    assert.equal(app.elements.get('input-dday-title').value, 'Keep this input');
+    assert.equal(app.elements.get('input-dday-date').value, '2026-12-01');
+    assert(app.elements.get('dday-save-error').textContent);
+    assert.deepEqual(app.data(), before); assert.equal(app.sharedStorage.get('daon-dashboard-v2'), saved);
+    assert.equal(app.window.hasPendingCloudChanges(), false);
+    app.sandbox.localStorage.setItem = setItem; app.elements.get('modal-save-btn').onclick();
+    assert.equal(app.data().ddays.length, 1); assert(app.elements.get('modal-overlay').classList.contains('hidden'));
+});
+
+test('invalid D-day dates keep the modal open and failed deletes retain the saved item', () => {
+    const app = environment();
+    for (const date of ['', '2026-02-31']) {
+        addDday(app, 'Input', date);
+        assert.deepEqual(app.data().ddays, []); assert(!app.elements.get('modal-overlay').classList.contains('hidden'));
+        assert(app.elements.get('dday-save-error').textContent);
+    }
+    addDday(app); const before = app.data(), saved = app.sharedStorage.get('daon-dashboard-v2');
+    app.sandbox.localStorage.setItem = () => { throw new Error('Storage unavailable'); };
+    app.click('deleteDday', { id: before.ddays[0].id });
+    assert.deepEqual(app.data(), before); assert.equal(app.sharedStorage.get('daon-dashboard-v2'), saved);
+});
+
+test('D-day JSON export/restore keeps extras, deletion IDs and existing legacy data', () => {
+    const source = fixture(); source.memos = [{ text: 'keep' }]; source.preferences = { size: 16 };
+    source.ddays = [{ id: 'DD_A', title: 'A', targetDate: '2026-12-01' }, { id: 'DD_B', title: 'B', targetDate: '2026-12-02' }];
+    const app = environment(source); app.click('deleteDday', { id: 'DD_A' });
+    let backup;
+    app.sandbox.Blob = class { constructor(parts) { backup = parts.join(''); } };
+    app.sandbox.URL = { createObjectURL: () => 'blob:test', revokeObjectURL() {} };
+    app.sandbox.document.createElement = () => ({ click() {} });
+    app.click('exportData');
+    assert.deepEqual(JSON.parse(backup), app.data());
+    const restored = environment();
+    restored.change('importData', {}, { files: [{ content: backup }] });
+    assert.deepEqual(restored.data(), app.data());
+    assert.deepEqual(environment(null, restored.sharedStorage).data(), app.data());
+    const legacy = new Map(['courses', 'lectures', 'dailyRecords', 'ddays'].map(key => [key, JSON.stringify(source[key])]));
+    assert.deepEqual(environment(null, legacy).data().ddays, source.ddays);
+});
+
+test('D-day removal while a cloud request is in flight survives snapshot, ack and reload', () => {
+    const app = environment(); addDday(app);
+    const request = json(app.window.getCloudSaveRequest()), id = app.data().ddays[0].id;
+    app.click('deleteDday', { id });
+    app.window.updateFromCloud(request.data, 2);
+    assert.deepEqual(app.data().ddays, []);
+    app.window.acknowledgeCloudSave(request, { data: request.data, revision: 2 });
+    assert.deepEqual(app.data().ddays, []); assert(app.window.hasPendingCloudChanges());
+    const reloaded = environment(null, app.sharedStorage), next = json(reloaded.window.getCloudSaveRequest());
+    const committed = Core.mergeData(next.base, next.data, request.data);
+    reloaded.window.acknowledgeCloudSave(next, { data: committed, revision: 3 });
+    assert.deepEqual(reloaded.data().ddays, []); assert(!reloaded.window.hasPendingCloudChanges());
+    reloaded.window.updateFromCloud(request.data, 4);
+    assert.deepEqual(reloaded.data().ddays, []); assert(reloaded.window.hasPendingCloudChanges());
+});
+
+test('D-day storage events combine additions and retain deletions against stale edits', () => {
+    const source = fixture(); source.ddays = [{ id: 'DD_A', title: 'A', targetDate: '2026-12-01' }];
+    const app = environment(source); app.click('deleteDday', { id: 'DD_A' });
+    const base = Core.normalizeData(source), incoming = json(base);
+    incoming.ddays[0].title = 'Stale edit'; incoming.ddays.push({ id: 'DD_B', title: 'New', targetDate: '2026-12-02' });
+    incoming.courses[0].title = 'Tab B edit';
+    app.emitWindow('storage', { key: 'daon-dashboard-v2', newValue: JSON.stringify({ data: incoming, base, pending: true, revision: 1 }) });
+    assert.deepEqual(app.data().ddays.map(d => d.id), ['DD_B']); assert.equal(app.data().courses[0].title, 'Tab B edit');
+    assert.deepEqual(environment(null, app.sharedStorage).data().ddays, app.data().ddays);
+    const newBase = fixture(), another = json(newBase), additions = environment(newBase);
+    addDday(additions); another.ddays.push({ id: 'DD_OTHER', title: 'Other tab', targetDate: '2026-12-02' });
+    additions.emitWindow('storage', { key: 'daon-dashboard-v2', newValue: JSON.stringify({ data: another, base: newBase, pending: true, revision: 1 }) });
+    assert.equal(additions.data().ddays.length, 2);
+});
+
+test('offline D-day additions and deletions survive mock Firebase retry, transaction rebase and reload', async () => {
+    const source = fixture(); source.ddays = [{ id: 'DD_OLD', title: 'Old', targetDate: '2026-11-01' }];
+    const app = environment(source); app.click('deleteDday', { id: 'DD_OLD' }); addDday(app, 'Offline new');
+    const reloaded = environment(null, app.sharedStorage);
+    const cloud = await connectMockCloud(reloaded, { failFirst: true, retryFirst: true, initialData: source });
+    cloud.emit({ fromCache: true, hasPendingWrites: false }); await tick(); assert.equal(cloud.calls(), 0);
+    cloud.emit({ fromCache: false, hasPendingWrites: false }); await tick(); assert(reloaded.window.hasPendingCloudChanges());
+    await reloaded.window.triggerCloudSave();
+    assert.deepEqual(cloud.data().ddays.map(d => d.title), ['Offline new']);
+    assert(cloud.data()._deletedDdayIds.includes('DD_OLD'));
+    assert(!reloaded.window.hasPendingCloudChanges());
+    assert.deepEqual(environment(null, app.sharedStorage).data().ddays, cloud.data().ddays);
+});
+
+test('mock Firebase transaction retry preserves two concurrent D-day additions', async () => {
+    const app = environment(); addDday(app, 'Local transaction');
+    const cloud = await connectMockCloud(app, { retryFirst: true });
+    cloud.emit({ fromCache: false, hasPendingWrites: false }); await tick();
+    assert.deepEqual(cloud.data().ddays.map(d => d.title), ['Local transaction', 'Another client']);
+    assert(!app.window.hasPendingCloudChanges());
 });
